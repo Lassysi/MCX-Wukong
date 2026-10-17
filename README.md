@@ -4,7 +4,7 @@ English | [简体中文](README.zh-CN.md)
 
 Use Minecraft swords, bows, guns, TNT and blocks in **Black Myth: Wukong**. Both games run on the same PC.
 
-**v0.1.0-beta.1 — first public beta.** Fresh installs, chapter transitions and manual cutscene skipping still need live acceptance testing.
+**v0.1.0-beta.1 — first public beta.** First install and a full playthrough are not fully tested yet; some cutscenes may still be unskippable.
 
 ## Gameplay
 
@@ -37,7 +37,7 @@ Local single-player only. Bedrock Edition and multiplayer are unsupported. Other
 
 ## Install
 
-1. Download the **Players ZIP** from this repository's **Releases** and extract it into a new folder.
+1. Download the **Players ZIP** from this repository's [Releases](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.1.0-beta.1) and extract it into a new folder.
 2. Install [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) into Black Myth's `b1/Binaries/Win64` folder.
 3. Import the included `.mrpack` into [Prism Launcher](https://prismlauncher.org/) and sign in with your own Minecraft Java account. Launch to Minecraft's main menu once to download the client, then exit normally.
 4. Close both games. Run `MCX-Wukong-Setup.exe` and select your Black Myth folder and Minecraft instance game folder. Select the vanilla Minecraft 1.21.4 client JAR if it is not found automatically.

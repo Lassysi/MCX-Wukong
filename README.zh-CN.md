@@ -4,7 +4,7 @@
 
 用 MC 的剑、弓、枪械、TNT 和方块打《黑神话：悟空》。两个游戏在同一台电脑上同时运行。
 
-当前版本：**v0.1.0-beta.1**。这是首个公开测试版，首次安装、跨章节和长按 E 跳过剧情仍需实机验收。
+当前版本：**v0.1.0-beta.1**。这是首个公开测试版；首次安装和完整通关尚未测完，部分剧情仍可能无法跳过。
 
 ## 能玩什么
 
@@ -37,7 +37,7 @@
 
 ## 安装
 
-1. 到本仓库 **Releases** 下载玩家 ZIP，解压到新文件夹。
+1. 到本仓库 [Releases](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.1.0-beta.1) 下载玩家 ZIP，解压到新文件夹。
 2. 安装 [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664)，放进黑神话的 `b1/Binaries/Win64`。
 3. 用 [Prism Launcher](https://prismlauncher.org/) 导入随包 `.mrpack`，登录自己的 MC Java 账号。先启动到 MC 主菜单一次，让启动器下载客户端，然后正常退出。
 4. 关闭两个游戏，打开 `MCX-Wukong-Setup.exe`，选择黑神话目录和 MC 实例的游戏文件夹。客户端 JAR 会尝试自动寻找，找不到时手动选择原版 MC 1.21.4 客户端 JAR。
