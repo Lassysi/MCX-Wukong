@@ -1,1 +1,1 @@
-用 MC 的剑、枪械、TNT 和方块打黑神话。需要双开 Minecraft Java 1.21.4 与黑神话。
+将 Minecraft 的装备与方块系统接入《黑神话：悟空》。需在同一台 Windows 电脑上双开 MC Java 1.21.4 和黑神话。

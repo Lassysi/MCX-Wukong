@@ -2,9 +2,11 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Use Minecraft swords, bows, guns, TNT and blocks in **Black Myth: Wukong**. Both games run on the same PC.
+Integrates Minecraft movement, camera, equipment and blocks with **Black Myth: Wukong**, retaining its maps, enemies, bosses and story progression. Both games must run on the same PC.
 
-**v0.1.0-beta.1 — first public beta.** First install and a full playthrough are not fully tested yet; some cutscenes may still be unskippable.
+**[Download the player package](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.1.0-beta.1/MCX-Wukong-v0.1.0-beta.1-Players.zip)** · [Release page](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.1.0-beta.1) · [Installation guide](docs/INSTALL.md)
+
+**v0.1.0-beta.1 — first public beta.** Fresh installations, some story scenes and chapter transitions require further in-game testing. See [known issues](docs/KNOWN-ISSUES.md).
 
 ## Gameplay
 
@@ -13,8 +15,11 @@ Use Minecraft swords, bows, guns, TNT and blocks in **Black Myth: Wukong**. Both
 - Ordinary building blocks need support and fall when support below them is removed.
 - Attack enemies with swords, axes, bows, crossbows, guns, TNT, lava and harming potions. Use spawn eggs to summon allies.
 - Shields block attacks from the front. Attacks from the sides and rear still hit. Minecraft food and healing effects restore health.
+- Weapon and armor attributes affect damage and damage reduction. Some combat rules are adjusted for the bridge.
 - Keep native shrine, travel, gathering and chest interactions. Ender pearls and elytra are supported.
-- New saves skip the entire prologue by default. Hold E to try skipping later real-time cutscenes; some scenes still have compatibility issues.
+- Use Minecraft commands, including creative mode for obtaining items and building.
+- Import a custom skin for both games. See [skin setup](docs/SKINS.md).
+- New saves skip the entire prologue, including combat, by default. Hold E to try skipping later real-time cutscenes; some scenes still have compatibility issues.
 
 Not every chapter, boss or item has been tested.
 
@@ -37,13 +42,15 @@ Local single-player only. Bedrock Edition and multiplayer are unsupported. Other
 
 ## Install
 
-1. Download the **Players ZIP** from this repository's [Releases](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.1.0-beta.1) and extract it into a new folder.
+1. Download the **player package** linked above and extract it into a new folder. GitHub's `Source code` archive is not an installer.
 2. Install [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) into Black Myth's `b1/Binaries/Win64` folder.
 3. Import the included `.mrpack` into [Prism Launcher](https://prismlauncher.org/) and sign in with your own Minecraft Java account. Launch to Minecraft's main menu once to download the client, then exit normally.
 4. Close both games. Run `MCX-Wukong-Setup.exe` and select your Black Myth folder and Minecraft instance game folder. Select the vanilla Minecraft 1.21.4 client JAR if it is not found automatically.
-5. Click **Install / 安装**. Python, a JDK and the .NET SDK are not needed for players.
+5. Optionally select a 64×64 PNG with classic four-pixel arms in the fourth field, **Custom skin PNG**. Leave it blank for the project skin. Click **Install / 安装**. Python, a JDK and the .NET SDK are not needed for players.
 
 See the [first-time installation guide](docs/INSTALL.md) for folder examples, Java settings and startup steps. The installer has English and Chinese labels and messages. CSharpLoader is a separate download; block textures are generated from your local Minecraft client.
+
+The Minecraft mods are required. The player package includes the MCX bridge JAR; importing the `.mrpack` downloads the other eight pinned mods through the launcher. Initial installation requires internet access. Unmodded Minecraft cannot run this project.
 
 ## Play
 
@@ -72,6 +79,7 @@ Close both games, run the setup tool with the same two folders, and click **Unin
 ## More
 
 - [FAQ](docs/FAQ.md)
+- [Custom skins](docs/SKINS.md)
 - [Known issues](docs/KNOWN-ISSUES.md)
 - [Build instructions](docs/BUILD.md)
 - [Third-party notices](THIRD-PARTY-NOTICES.md)

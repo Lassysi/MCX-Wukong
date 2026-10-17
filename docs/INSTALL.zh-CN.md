@@ -28,7 +28,7 @@ MC 基岩版无法使用本包。已有其他版本的 MC 也需要另外建一�
 
 ## 2. 下载玩家包
 
-在 GitHub 的 **Releases** 下载 `MCX-Wukong-v0.1.0-beta.1-Players.zip`，解压到单独文件夹。
+下载 [MCX-Wukong-v0.1.0-beta.1-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.1.0-beta.1/MCX-Wukong-v0.1.0-beta.1-Players.zip)，解压到单独文件夹。
 
 玩家用这个 ZIP。GitHub 自动生成的 `Source code` 是源码，不是安装包。
 
@@ -67,6 +67,8 @@ BlackMythWukong/
 
 随包需要的 8 个第三方模组会由启动器下载：Better Combat、Cloth Config、Fabric API、Gun Core、Modern Guns、Mod Menu、Placeholder API、Player Animation Library。另有本项目的联动 JAR。不要自行更新版本或添加模组。
 
+首次导入和启动需要联网。联动 JAR 已随 `.mrpack` 提供，其余模组按包内链接下载，无需逐个手动查找。原版 MC 或缺少指定模组的实例无法使用本项目。
+
 ## 5. 运行安装工具
 
 确认两个游戏已退出，打开解压目录中的 `MCX-Wukong-Setup.exe`。
@@ -77,6 +79,8 @@ BlackMythWukong/
 | MC 整合包游戏文件夹 | 上一步打开的实例游戏目录，里面有 `mods` |
 | 原版 MC 1.21.4 客户端 JAR | 优先使用自动找到的文件；手动选择方法见下方 |
 | 自选皮肤 PNG | 留空使用项目自绘皮肤；自选时用 64×64、经典四像素手臂 PNG |
+
+皮肤 PNG 可保存在任意文件夹，通过第四项右侧的“Browse / 选择”导入，无需放入游戏目录。已安装后更换皮肤的步骤见[自定义皮肤](SKINS.zh-CN.md)。
 
 客户端 JAR 常在启动器数据目录的以下位置，具体文件名可能不同：
 
@@ -116,4 +120,4 @@ libraries/com/mojang/minecraft/1.21.4/某个客户端.jar
 
 安装前的原文件和黑神话存档备份保存在 `b1/Binaries/Win64/MCX-Wukong-backups`。卸载只还原程序文件，不会把你后来玩的进度退回旧存档。
 
-这是预览版。首次启动、自绘皮肤、长剧情和跨章节仍需实机测试。遇到问题先看[常见问题](FAQ.zh-CN.md)和[已知问题](KNOWN-ISSUES.zh-CN.md)。
+这是公开测试版。全新环境安装、皮肤显示、长剧情和章节切换仍需进一步实机测试。遇到问题请先查看[常见问题](FAQ.zh-CN.md)和[已知问题](KNOWN-ISSUES.zh-CN.md)。

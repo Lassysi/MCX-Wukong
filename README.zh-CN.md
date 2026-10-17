@@ -2,19 +2,24 @@
 
 [English](README.md) | 简体中文
 
-用 MC 的剑、弓、枪械、TNT 和方块打《黑神话：悟空》。两个游戏在同一台电脑上同时运行。
+将 Minecraft 的移动、视角、装备与方块系统接入《黑神话：悟空》，保留黑神话的地图、敌人、Boss 和主线流程。需要在同一台电脑上同时运行两个游戏。
 
-当前版本：**v0.1.0-beta.1**。这是首个公开测试版；首次安装和完整通关尚未测完，部分剧情仍可能无法跳过。
+**[下载玩家包](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.1.0-beta.1/MCX-Wukong-v0.1.0-beta.1-Players.zip)** · [版本发布页](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.1.0-beta.1) · [安装说明](docs/INSTALL.zh-CN.md)
 
-## 能玩什么
+当前版本：**v0.1.0-beta.1**，首个公开测试版。全新环境安装、部分剧情和章节切换仍需进一步实机验证，详见[已知问题](docs/KNOWN-ISSUES.zh-CN.md)。
+
+## 功能介绍
 
 - 使用 MC 的移动、视角、背包和装备，保留黑神话的地图、怪物、Boss 和主线流程。
 - 放置、拆除方块，搭建掩体和平台。怪物会破坏方块，累计攻击约三次后破坏。
 - 普通建筑方块需要支撑，下方失去支撑后会下坠。
 - 剑斧、弓弩、枪械、TNT、岩浆和伤害药水可攻击黑神话怪物；刷怪蛋可召出生物助战。
 - 盾牌抵挡正面攻击，侧面和背后不受保护。MC 食物和恢复效果可以回血。
+- 武器和护甲属性参与伤害与减伤计算，不同装备会影响战斗表现；部分伤害规则经过联动调整。
 - 保留土地庙、传送、采集、开箱等原生交互，支持末影珍珠和鞘翅。
-- 新存档默认跳过整个序章。后续实机 CG 可长按 E 尝试跳过，部分场景仍有兼容问题。
+- 支持 MC 指令，可切换创造模式获取物品或建造。
+- 支持导入自定义皮肤，MC 与黑神话端使用同一张皮肤，见[皮肤设置](docs/SKINS.zh-CN.md)。
+- 新存档默认跳过整个序章，包括序章战斗。后续实机 CG 可长按 E 尝试跳过，部分场景仍有兼容问题。
 
 以上为当前机制，尚未完成所有章节、Boss 和物品的兼容测试。
 
@@ -37,13 +42,15 @@
 
 ## 安装
 
-1. 到本仓库 [Releases](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.1.0-beta.1) 下载玩家 ZIP，解压到新文件夹。
+1. 下载上方的**玩家包**，解压到新文件夹。不要下载 `Source code` 作为安装包。
 2. 安装 [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664)，放进黑神话的 `b1/Binaries/Win64`。
 3. 用 [Prism Launcher](https://prismlauncher.org/) 导入随包 `.mrpack`，登录自己的 MC Java 账号。先启动到 MC 主菜单一次，让启动器下载客户端，然后正常退出。
 4. 关闭两个游戏，打开 `MCX-Wukong-Setup.exe`，选择黑神话目录和 MC 实例的游戏文件夹。客户端 JAR 会尝试自动寻找，找不到时手动选择原版 MC 1.21.4 客户端 JAR。
-5. 点击“安装”。不需要安装 Python、Java 开发工具或 .NET SDK。
+5. 如需自定义皮肤，在第四项“自选皮肤 PNG”选择 64×64、经典四像素手臂的 PNG；留空使用项目自绘皮肤。点击“安装”。玩家不需要安装 Python、Java 开发工具或 .NET SDK。
 
 [第一次安装的完整步骤](docs/INSTALL.zh-CN.md)包含下载内容、目录示例、Java 设置和双开方法。CSharpLoader 不随包转传；方块材质从你本机的 MC 客户端生成。
+
+联动需要随包的 MC 模组。玩家包已包含本项目的联动 JAR，导入 `.mrpack` 后由启动器下载其余 8 个指定版本的模组，首次安装需要联网。原版 MC 无法直接使用本项目。
 
 ## 启动
 
@@ -74,6 +81,7 @@
 ## 其他
 
 - [常见问题](docs/FAQ.zh-CN.md)
+- [自定义皮肤](docs/SKINS.zh-CN.md)
 - [已知问题](docs/KNOWN-ISSUES.zh-CN.md)
 - [编译源码](docs/BUILD.zh-CN.md)
 - [依赖和许可](THIRD-PARTY-NOTICES.zh-CN.md)

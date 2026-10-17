@@ -19,13 +19,13 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 681,
-      "sha256": "8f98153b48d4344379884eecd00770ee59d1dfd69610e96f2f7270b5c9fc42aa"
+      "bytes": 660,
+      "sha256": "6a62e992a2d58fd96cc8c2d5ef8b950fac903cf6643c75cb5cbb0680a0d9b3f5"
     },
     {
       "path": "CHANGELOG.zh-CN.md",
-      "bytes": 614,
-      "sha256": "08e543a0ae79e9c3f6b0bdb7fc5109830d8cf73a877036910733c440cc94618f"
+      "bytes": 608,
+      "sha256": "94527a9b2f17e2617ea779e36f02725a907caaa63f2e7e340337809cfd134ead"
     },
     {
       "path": "GITHUB-DESCRIPTION.txt",
@@ -34,8 +34,8 @@
     },
     {
       "path": "GITHUB-DESCRIPTION.zh-CN.txt",
-      "bytes": 104,
-      "sha256": "9169a2790dd429b4234eb6fb370e3bde5a4d63b978af5ab14395fb925085ead6"
+      "bytes": 142,
+      "sha256": "e17774a01bd5b35f84094d9f3d7a3579a79bac49d422d2b45aa0a42c22b34018"
     },
     {
       "path": "LICENSE",
@@ -46,6 +46,11 @@
       "path": "LICENSES/Gradle-Apache-2.0.txt",
       "bytes": 10174,
       "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "path": "LICENSES/Java-WebSocket-MIT.txt",
+      "bytes": 1082,
+      "sha256": "15101a7cbdaa7f1c161424b760e907e7832e4a1e7f05d03373ca91fbffdb95ee"
     },
     {
       "path": "LICENSES/Python-PSF.txt",
@@ -114,23 +119,23 @@
     },
     {
       "path": "README.md",
-      "bytes": 4728,
-      "sha256": "7fcd09e2c63c816dee85cad6aaf2450ff6fe2fb5b6b34ebf59f218886e153d3c"
+      "bytes": 5858,
+      "sha256": "b89dc3ddfcf4dead159aed10efdb84d9bdef7deb532dd18483983568d4b3c141"
     },
     {
       "path": "README.zh-CN.md",
-      "bytes": 4340,
-      "sha256": "9b2a4748718c7e72525e625fa09066d4c0549624a29d740ad4e8733e9e5742f4"
+      "bytes": 5502,
+      "sha256": "335bfb611bd51477d452ed2b436c08c2e32983a978bb7e1346c6d9ab02857f67"
     },
     {
       "path": "THIRD-PARTY-NOTICES.md",
-      "bytes": 1481,
-      "sha256": "398a5e3cc0daa4a49365cc550203ff604ac532668c2b075151b58a64bf7089ac"
+      "bytes": 1692,
+      "sha256": "8da1fb8f92ffa3d02e746f444b9c290265afe8e0ef20150c714c5e005336e546"
     },
     {
       "path": "THIRD-PARTY-NOTICES.zh-CN.md",
-      "bytes": 1364,
-      "sha256": "73d52f392d54ac9dd247d656d66847d3cf2f2ff6c954b8a2ac253ab14b4b3970"
+      "bytes": 1567,
+      "sha256": "55f62d2f5a8b0411b8ac1cf8d5594307c6641a09d56ec6919a89781eb00544cf"
     },
     {
       "path": "assets/README.md",
@@ -864,33 +869,43 @@
     },
     {
       "path": "docs/FAQ.md",
-      "bytes": 2181,
-      "sha256": "891907efa9229d9f069f0a24397d8abbe7ded6407c07240d1b23e385f7d9e369"
+      "bytes": 3299,
+      "sha256": "836a10db63b5ecfe8ab347aa9d3f90806d08a80bdbf728fc30b51fb402fe4ccd"
     },
     {
       "path": "docs/FAQ.zh-CN.md",
-      "bytes": 2180,
-      "sha256": "8b0efda97ed2cf80276ea1c5be9dada748f21600747c6112a37f86dbaeb2882a"
+      "bytes": 3247,
+      "sha256": "1243227ae1f60b14dbe02b987e44f8a6655c02c6155eb0d699e6e7e0ce455286"
     },
     {
       "path": "docs/INSTALL.md",
-      "bytes": 6817,
-      "sha256": "810b2729dfea5aa05e34ca1d6319bbc45dfcc6491a173ef8af5e16979d047f07"
+      "bytes": 7403,
+      "sha256": "72f28e006e89313b158fb158f8fa8a2afa9548a09662f54e78e7279b12465968"
     },
     {
       "path": "docs/INSTALL.zh-CN.md",
-      "bytes": 6795,
-      "sha256": "283e058a68ee65fbfa866984fce7fc7969e0c8833d8eee646826f0465cbb4026"
+      "bytes": 7303,
+      "sha256": "369a2ecd0b195a11140a84afc4678bdcdcabd81d8e0bd8a818dd15bf4d017675"
     },
     {
       "path": "docs/KNOWN-ISSUES.md",
-      "bytes": 806,
-      "sha256": "4f6c0bb37d91f4655a8dbe99c9dd779b43a596765ec8998ab2f9fe48f4f5ea30"
+      "bytes": 790,
+      "sha256": "ede2e9a5a89de35fb57587cc383d0c0d1815431e0913e70f2aa2c4b968eab7d9"
     },
     {
       "path": "docs/KNOWN-ISSUES.zh-CN.md",
-      "bytes": 690,
-      "sha256": "aa1b4d628dc5a5ffd067a05afd786d58dfe4cbd4cf6e4ea734068fd9c27bd110"
+      "bytes": 688,
+      "sha256": "490fea8061e32315f20b9acd1b325ee5a904af09e4b0385ce78f2dadc4423693"
+    },
+    {
+      "path": "docs/SKINS.md",
+      "bytes": 2505,
+      "sha256": "0dd93913f175647a3428f427264b0742fd91653bd30c471414d66597114279c0"
+    },
+    {
+      "path": "docs/SKINS.zh-CN.md",
+      "bytes": 2362,
+      "sha256": "efc52ab3355ad7835c734b3512937b4821838fc38a51dbe5def7aa83b802d5ff"
     },
     {
       "path": "pack/dependencies.lock.json",
@@ -1259,8 +1274,8 @@
     },
     {
       "path": "tools/package_release.py",
-      "bytes": 7464,
-      "sha256": "d604ccc4843901ee6280a4465a0dd5b9c074a88909b960e36598cb7d33bdceb5"
+      "bytes": 7472,
+      "sha256": "4cbf3bb0a1f5cd18582f73eaf156cce6d2d59c67d1e4a65a52d8ab425f8fb119"
     },
     {
       "path": "tools/player_setup.py",

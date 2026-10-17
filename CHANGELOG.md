@@ -12,4 +12,4 @@ First public beta.
 - Project-drawn skin and support for custom classic 64x64 skin PNGs.
 - Backups before installation; game progress and Minecraft worlds kept on uninstall.
 
-Build, loader and offline checks passed. First install and a full playthrough are not fully tested yet; some cutscenes may still be unskippable.
+Build, loader and offline checks passed. Fresh installations, skin appearance, story skipping and chapter transitions require further in-game testing.

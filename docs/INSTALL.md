@@ -24,7 +24,7 @@ Exit both games normally before installing or uninstalling.
 
 ## 2. Get the player package
 
-From **Releases**, download `MCX-Wukong-v0.1.0-beta.1-Players.zip` and extract it into a separate folder.
+Download [MCX-Wukong-v0.1.0-beta.1-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.1.0-beta.1/MCX-Wukong-v0.1.0-beta.1-Players.zip) and extract it into a separate folder.
 
 Players need the **Players ZIP**. GitHub's automatic **Source code** downloads are for developers.
 
@@ -63,6 +63,8 @@ These steps use [Prism Launcher](https://prismlauncher.org/). Other launchers mu
 
 The launcher downloads eight third-party mods: Better Combat, Cloth Config, Fabric API, Gun Core, Modern Guns, Mod Menu, Placeholder API and Player Animation Library. The pack also includes the MCX bridge JAR. Keep the pinned versions and use this instance without extra mods.
 
+Initial import and startup require internet access. The MCX bridge JAR is included in the `.mrpack`; the launcher downloads the remaining mods from its pinned links. No individual mod search is required. Unmodded Minecraft or an instance missing the required mods cannot run the bridge.
+
 ## 5. Run setup
 
 With both games closed, run `MCX-Wukong-Setup.exe` from the extracted package. All fields and messages have English and Chinese text.
@@ -73,6 +75,8 @@ With both games closed, run `MCX-Wukong-Setup.exe` from the extracted package. A
 | Minecraft instance game folder | The imported instance folder containing `mods` |
 | Vanilla Minecraft 1.21.4 client JAR | Use the automatically found file, or locate it as described below |
 | Custom skin PNG | Leave blank for the project skin, or choose a 64x64 PNG with classic four-pixel arms |
+
+The PNG can be stored in any folder. Use **Browse / 选择** beside the fourth field; there is no skin folder to copy it into. For changing an existing installation, see [custom skins](SKINS.md).
 
 The client JAR is usually in the launcher's data folder. Example locations:
 
@@ -111,4 +115,4 @@ Native story transformations such as the cicada stay under Black Myth's control.
 
 Original-file and Black Myth save backups are under `b1/Binaries/Win64/MCX-Wukong-backups`.
 
-This is a beta. Fresh setup, skin appearance, long story scenes and chapter transitions still need live acceptance testing. See the [FAQ](FAQ.md) and [known issues](KNOWN-ISSUES.md).
+This is a public beta. Fresh installations, skin appearance, long story scenes and chapter transitions require further in-game testing. See the [FAQ](FAQ.md) and [known issues](KNOWN-ISSUES.md).
