@@ -1,0 +1,13 @@
+{
+  "game": "Black Myth: Wukong",
+  "platform": "Windows x64 / Steam",
+  "steamBuild": "21393610",
+  "exeSha256": "cba6127df85fe6aedf5a71b398f268c8a963c7b19582c3cac087462518358e9a",
+  "loaderBaseSha256": "f057030a3b3dc4ef4c8b38fa947ffa92b2e7652b8efd07b7b94605c504a31732",
+  "minecraft": "1.21.4",
+  "clientSha256": "c17c450c6e72cc51297daa57ce38f800aa01cf022b743daa21a0512d326d894e",
+  "loaderDownload": "https://www.nexusmods.com/blackmythwukong/mods/664",
+  "loaderVersion": "0.1.0",
+  "reshadeVersion": "6.8.0",
+  "reshadeApi": 20
+}

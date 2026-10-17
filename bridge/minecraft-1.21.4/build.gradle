@@ -1,0 +1,27 @@
+plugins { id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" }
+repositories { mavenCentral() }
+loom { splitEnvironmentSourceSets() }
+loom {
+    mods { dqjmcbridge { sourceSet sourceSets.main; sourceSet sourceSets.client } }
+    runs { client { programArgs '--width', '1280', '--height', '720' } }
+}
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation 'io.github.llamalad7:mixinextras-fabric:0.5.5'
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    implementation 'net.java.dev.jna:jna:5.15.0'
+    implementation 'org.java-websocket:Java-WebSocket:1.6.0'
+    include 'org.java-websocket:Java-WebSocket:1.6.0'
+}
+def bridgeVersion = project.version.toString()
+processResources {
+    inputs.property 'version', bridgeVersion
+    filesMatching('fabric.mod.json') { expand version: bridgeVersion }
+}
+tasks.withType(JavaCompile).configureEach { it.options.release = 21 }
+java { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaVersion.VERSION_21 }
+base { archivesName='MCX-Wukong-Bridge' }
+
+jar { from("../../LICENSES/universal-modder-MIT.txt") { rename { "LICENSE-upstream.txt" } }; from("../../LICENSE") }

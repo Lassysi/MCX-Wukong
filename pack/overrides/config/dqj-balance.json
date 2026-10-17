@@ -1,0 +1,44 @@
+{
+  "gunShotDamage": {
+    "ak47": 4.0,
+    "winchester_model_70": 24.0,
+    "beretta_486": 4.0,
+    "m4_carbine": 4.0,
+    "p90": 0.9,
+    "spas_12": 4.5,
+    "austeyr_ef88": 1.0,
+    "m79": 4.0,
+    "luger_p08": 3.0,
+    "smith_and_wesson_model_29": 5.0,
+    "mp5": 0.8,
+    "desert_eagle": 6.0,
+    "thompson_machine_gun": 0.75,
+    "barrett_m82": 40.0,
+    "colt_python": 6.5,
+    "fn_scar": 4.5,
+    "glock_17": 3.5,
+    "m134_minigun": 1.4,
+    "remington_870": 4.0,
+    "rpg_7": 6.0,
+    "gl06": 4.0,
+    "m1a": 16.0,
+    "milkor_mgl": 4.0
+  },
+  "armor": {
+    "perPoint": 0.0275,
+    "perToughness": 0.01,
+    "max": 0.75
+  },
+  "explosion": {
+    "tntCap": 55.0,
+    "creeperCap": 30.0,
+    "rocketScale": 1.5,
+    "rocketCap": 65.0,
+    "grenadeScale": 1.2,
+    "grenadeCap": 45.0
+  },
+  "boss": {
+    "gunAndExplosionScale": 0.6,
+    "minProxyHealth": 400.0
+  }
+}

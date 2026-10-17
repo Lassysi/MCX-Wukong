@@ -1,0 +1,170 @@
+[
+  {
+    "path": "mods/bettercombat-fabric-2.3.0+1.21.4.jar",
+    "hashes": {
+      "sha1": "890883d6b66fd11e1459e4b8ff7ec0faee22d963",
+      "sha512": "29d0274111b5940d03f6a52d9c4ab14bf8776f2d86a515505b0f1c1abab827ad9dd1c0c03d5d3981305f8feb7dfea5083d672e9fa252f5f4063d406dc8a25607",
+      "sha256": "cdf6bb75d52d9772d43e648cf12fcbca88ce625d71f303fca8826966278d8d9f"
+    },
+    "fileSize": 915710,
+    "downloads": [
+      "https://cdn.modrinth.com/data/5sy6g3kz/versions/X8KCy71b/bettercombat-fabric-2.3.0%2B1.21.4.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "5sy6g3kz",
+    "versionId": "X8KCy71b",
+    "name": "Better Combat",
+    "license": "All Rights Reserved",
+    "homepage": "https://github.com/ZsoltMolnarrr/BetterCombat"
+  },
+  {
+    "path": "mods/cloth-config-17.0.144-fabric.jar",
+    "hashes": {
+      "sha1": "63a1a3b25c642f5a745dfcc9bdc0841660f560af",
+      "sha512": "ecc59da51149250284b0752475c7b328e0b0325888948391597afc638d6e67fa436297af12d2067376de0098ffa6ca86aa3b8d6011356c179222404c701c6345",
+      "sha256": "1fda0c4a89d4f075e51b3eb5570a4912870656d252d806ea3091d2bbc06781ea"
+    },
+    "fileSize": 1152857,
+    "downloads": [
+      "https://cdn.modrinth.com/data/9s6osm5g/versions/TJ6o2sr4/cloth-config-17.0.144-fabric.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "9s6osm5g",
+    "versionId": "TJ6o2sr4",
+    "name": "Cloth Config v17",
+    "license": "GNU LGPLv3",
+    "homepage": "https://minecraft.curseforge.com/projects/cloth-config"
+  },
+  {
+    "path": "mods/fabric-api-0.119.4+1.21.4.jar",
+    "hashes": {
+      "sha1": "1c7871b6af04edc8b8f0dbad12606d67f6118a11",
+      "sha512": "16b679f6a42549ca3b6bc147de710b2c8ba2d5e4661ed88df22782c05a4a5f6c1163d7b13867687ed91acde0fdfe5a5037d05662431c946865b58396284e7ee7",
+      "sha256": "d183bacb845167f09264c2f90322b7ecffe8826debda6f60e597889264bef4af"
+    },
+    "fileSize": 2149128,
+    "downloads": [
+      "https://cdn.modrinth.com/data/P7dR8mSH/versions/p96k10UR/fabric-api-0.119.4%2B1.21.4.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "P7dR8mSH",
+    "versionId": "p96k10UR",
+    "name": "Fabric API",
+    "license": "Apache-2.0",
+    "homepage": "https://fabricmc.net"
+  },
+  {
+    "path": "mods/gun-core-V1.0-data+resource.jar",
+    "hashes": {
+      "sha1": "a4561b60330a104ddf9277e9a471fc43fd72df0a",
+      "sha512": "10bb60ec43307c5a2766ed9e11c3c2f0d80a40ea13db6024a359f561cd3d3f21a2d5a95c9465845102be119a84de708e196be5cc00899f90a190a57dc6d14e73",
+      "sha256": "e0acee1e7f56e88d521a43c6b1693f38018baf902598c626ea897b493bd651f9"
+    },
+    "fileSize": 773914,
+    "downloads": [
+      "https://cdn.modrinth.com/data/Ti7LgRXJ/versions/tjGATFtl/gun-core-V1.0-data%2Bresource.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "Ti7LgRXJ",
+    "versionId": "tjGATFtl",
+    "name": "Gun Core",
+    "license": "MIT",
+    "homepage": "https://modrinth.com/datapack/gun-core"
+  },
+  {
+    "path": "mods/modern-guns-V1.5-data.jar",
+    "hashes": {
+      "sha1": "e4af734c09a778dacaef2ea2283bc2f26f823723",
+      "sha512": "8b465721cee77d81b1cee72e1db9dc5eb4df407d880fc034b2f6b42d12f5673ed2d3e2b36d81c49ffb7cfe65390badaf76eedb04d713208e8722674e9b22fd01",
+      "sha256": "95d2066547624057a8edd187232a78e1b750135f6eaefce91a55361a7bd27e99"
+    },
+    "fileSize": 2853890,
+    "downloads": [
+      "https://cdn.modrinth.com/data/ufgOyMFr/versions/EnSy80ea/modern-guns-V1.5-data.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "ufgOyMFr",
+    "versionId": "EnSy80ea",
+    "name": "Modern Guns",
+    "license": "CC-BY-NC-ND-4.0",
+    "homepage": "https://modrinth.com/datapack/modern-guns"
+  },
+  {
+    "path": "mods/modmenu-13.0.4.jar",
+    "hashes": {
+      "sha1": "b5d816f6df9ffb9af8f9c2b43dfb15d9bbfcf400",
+      "sha512": "863f7c367898e0fce283b11554d253f05acadf46057ab0d2c14a592582ce35bbd9cf4f4b8cf1e3658a6f7a4bb765f9e49a8a02127edbe017daeea8fb24b0ab4f",
+      "sha256": "9774ff929f747d913458d469b1ad539bc0c61294a8f3aa58fe89b1b212cfc066"
+    },
+    "fileSize": 1050885,
+    "downloads": [
+      "https://cdn.modrinth.com/data/mOgUt4GM/versions/qEKKsTqd/modmenu-13.0.4.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "mOgUt4GM",
+    "versionId": "qEKKsTqd",
+    "name": "Mod Menu",
+    "license": "MIT",
+    "homepage": "https://modrinth.com/mod/modmenu"
+  },
+  {
+    "path": "mods/placeholder-api-2.5.2+1.21.3.jar",
+    "hashes": {
+      "sha1": "841b1ef57880fc0f94a22ab268b737c3830b5595",
+      "sha512": "06db18ada7973bd8cbe316faeebd25d89d79820da951208cc2ec69eb4058379d4e0c0233799d7043b5a19b62248f6a4d5f7031c110066fdf5d335e29385e3853",
+      "sha256": "d09cb209dac7e63d9b73cdf7da6f35da164720f0641c2d95ca14ec978b11cd32"
+    },
+    "fileSize": 237288,
+    "downloads": [
+      "https://cdn.modrinth.com/data/eXts2L7r/versions/eeN3FuMY/placeholder-api-2.5.2%2B1.21.3.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "eXts2L7r",
+    "versionId": "eeN3FuMY",
+    "name": "Placeholder API",
+    "license": "LGPLv3",
+    "homepage": "https://pb4.eu"
+  },
+  {
+    "path": "mods/player-animation-lib-fabric-2.0.5+1.21.4.jar",
+    "hashes": {
+      "sha1": "042c3d9e38538d5076eafed31d761ff1d4d39f14",
+      "sha512": "e7192c7403516b09f9beca496e2befea70a07d1016adc0bd10da4a53cea1492b67e03453b0d29bf16e09267569dc7dd4c5b6d57b162f75695ea1e800ea8e62d3",
+      "sha256": "3be94302d070f01222ada581def30a6aad142f36ef83890db5499715aea720d9"
+    },
+    "fileSize": 202859,
+    "downloads": [
+      "https://cdn.modrinth.com/data/gedNE4y2/versions/ZTeZ33xQ/player-animation-lib-fabric-2.0.5%2B1.21.4.jar"
+    ],
+    "env": {
+      "client": "required",
+      "server": "unsupported"
+    },
+    "projectId": "gedNE4y2",
+    "versionId": "ZTeZ33xQ",
+    "name": "Player Animator",
+    "license": "MIT",
+    "homepage": "kosmx.dev"
+  }
+]

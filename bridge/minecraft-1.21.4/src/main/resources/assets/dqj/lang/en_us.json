@@ -1,0 +1,5 @@
+{
+ "death.attack.dqjWukong": "%1$s was struck down in the world of Wukong",
+ "death.attack.dqjWukong.player": "%1$s was slain by %2$s",
+ "death.attack.dqjWukong.item": "%1$s was slain by %2$s using %3$s"
+}

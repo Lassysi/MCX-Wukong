@@ -1,0 +1,6 @@
+{
+  "required":true,"package":"dev.rehan.passthrough.client.mixin","compatibilityLevel":"JAVA_21",
+  "client":["HostNoFogMixin","GameRendererAccess","GameRendererMixin","LevelRendererMixin","MouseHandlerAccess","MouseHandlerMixin","WeatherEffectRendererMixin","FramerateLimitTrackerMixin","RenderSystemMixin","OverlayColorMaskMixin","KeyMappingAccessor","ContainerScreenAccess","HostEntityRenderMixin","HostGuiModifiersMixin","HostContainerModifiersMixin","LocalPlayerSprintMixin","WindowFocusMixin","HostBlockModelMixin","HostIndigoTerrainMixin","HostIndigoBlockMixin","HostIndigoFaceMixin","HostLiquidGroundMixin","ItemInHandAccess","HostNativeOutlineMixin","HostEmptyHandMixin","HostBlockEntityRenderMixin","ChatScreenAccess","EntityCollideInvoker","HostProxyLerpMixin","HostProxySnapMixin"],
+  "mixins":["HostPlayerSkinMixin"],
+  "injectors":{"defaultRequire":1}
+}

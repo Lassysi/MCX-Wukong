@@ -1,0 +1,38 @@
+{
+  "release": "v0.1.0-beta.1",
+  "status": "pre-release",
+  "host": {
+    "stage6Build": "passed",
+    "cecilRewriteBytes": 249856,
+    "assemblyResolveErrors": 0,
+    "baselineMethodIlMatches": 685,
+    "sha256": "726027033089f26a4d6f33410c0175d57c15fe729ba7a556d8e4822b1b1da523"
+  },
+  "minecraft": {
+    "gradleBuild": "passed",
+    "publicChanges": [
+      "project-owned skin",
+      "marked-world startup guard",
+      "no development lab helper"
+    ]
+  },
+  "offlineChecks": {
+    "csharpSuitesPassed": 13,
+    "installerTestsPassed": 9,
+    "fixtureTestsCover": [
+      "install and uninstall",
+      "save preservation",
+      "wrong instance rejection",
+      "modified-file rejection",
+      "write-failure rollback",
+      "new empty-world NBT",
+      "mesh contract"
+    ]
+  },
+  "liveAcceptance": {
+    "publicProfileStartup": "pending",
+    "newSkinAppearance": "pending",
+    "chapterTransition": "pending",
+    "manualCgSkip": "pending"
+  }
+}

@@ -1,0 +1,5 @@
+{
+ "death.attack.dqjWukong": "%1$s 倒在了黑神话的世界里",
+ "death.attack.dqjWukong.player": "%1$s 被 %2$s 击败",
+ "death.attack.dqjWukong.item": "%1$s 被 %2$s 用 %3$s 击败"
+}

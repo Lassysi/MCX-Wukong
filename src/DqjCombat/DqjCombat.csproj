@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>DqjCombat</AssemblyName>
+    <RootNamespace>DqjCombat</RootNamespace>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>0.1.0</Version>
+    <Deterministic>true</Deterministic>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <!-- 阶段开关：dotnet build -c Release -p:Stage=1|2|3
+         1 = S1.1 相机　2 = +S1.2 HUD　3 = +S1.3 输入接管 -->
+    <Stage Condition="'$(Stage)' == ''">1</Stage>
+    <GameReferencesDir Condition="'$(GameReferencesDir)' == ''">$(MSBuildThisFileDirectory)..\..\references</GameReferencesDir>
+    <LoaderReferencePath Condition="'$(LoaderReferencePath)' == ''">$(GameReferencesDir)\CSharpModBase.dll</LoaderReferencePath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Stage)' == '2'">
+    <DefineConstants>$(DefineConstants);S12</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Stage)' == '3'">
+    <DefineConstants>$(DefineConstants);S12;S13</DefineConstants>
+  </PropertyGroup>
+  <!-- Stage 4 = S1.2 + S1.4（Steve 身体）。刻意不含 S13：输入接管会替换原生输入处理器，
+       风险更高，必须与身体分开验证，否则出问题无法定位。 -->
+  <PropertyGroup Condition="'$(Stage)' == '4'">
+    <DefineConstants>$(DefineConstants);S12;S14</DefineConstants>
+  </PropertyGroup>
+  <!-- Stage 5 = 显示层 + 身体 + MC 移动（不含输入接管） -->
+  <PropertyGroup Condition="'$(Stage)' == '5'">
+    <DefineConstants>$(DefineConstants);S12;S14;S15</DefineConstants>
+  </PropertyGroup>
+  <!-- Stage 6 = 全部（含输入接管） -->
+  <PropertyGroup Condition="'$(Stage)' == '6'">
+    <DefineConstants>$(DefineConstants);S12;S13;S14;S15</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="CSharpModBase">
+      <HintPath>$(LoaderReferencePath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="$(GameReferencesDir)\*.dll">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,4 @@
+{
+  "required":true,"package":"dev.rehan.passthrough.mixin","compatibilityLevel":"JAVA_21",
+  "mixins":["LevelMixin","HostUnbreakableMixin","ExplosionMixin","LivingEntityBridgeMixin","HostSurfaceMixin","HostFoodMixin","HostTerrainLeaseMixin","HostTerrainUseMixin","HostBlockAnchorMixin","HostBlockPlaceMixin","HostBlockClipMixin","HostBlockUseContextMixin","HostBlockPacketMixin","HostPrimedTntMixin","HostBreakDiagnosticsMixin","HostBlockCollisionsMixin","HostExplosionProxyMixin","HostExplosionKeepProxyMixin","MobGoalAccess","AllySpawnEggMixin"],"injectors":{"defaultRequire":1}
+}
