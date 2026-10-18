@@ -201,7 +201,8 @@ namespace UnrealEngine.Runtime {public class UObject {public IntPtr Address=new 
 namespace UnrealEngine.Engine
 {
     public class AActor:UnrealEngine.Runtime.UObject
-    {public UWorld World {get;set;}=new UWorld();}
+    {public UWorld World {get;set;}=new UWorld();public StubClass GetClass()=>new StubClass{Name=GetType().Name+"_C"};}
+    public sealed class StubClass{public string Name;public string GetName()=>Name;}
     public class UWorld:UnrealEngine.Runtime.UObject{}
 }
 namespace b1

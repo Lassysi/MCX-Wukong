@@ -25,3 +25,5 @@ java { sourceCompatibility = JavaVersion.VERSION_21; targetCompatibility = JavaV
 base { archivesName='MCX-Wukong-Bridge' }
 
 jar { from("../../LICENSES/universal-modder-MIT.txt") { rename { "LICENSE-upstream.txt" } }; from("../../LICENSE") }
+
+jar { from("../../LICENSES/Java-WebSocket-MIT.txt") { rename { "LICENSE-Java-WebSocket.txt" } } }

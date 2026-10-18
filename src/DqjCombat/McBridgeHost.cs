@@ -55,6 +55,9 @@ namespace DqjCombat
         private long lastNativeRayFrame;
         private McGroundPreparation groundPreparation;
         private bool prepareBlocked;
+        private NativeShrineAdapter shrineAdapter;
+        private ShrineEconomy economy;
+        private bool lastNearShrine;
         private double nextSkinRetry;
         private int skinRetries;
         private FVector blockedAt;
@@ -102,14 +105,20 @@ namespace DqjCombat
             this.player=player;this.controller=controller;
             nativeWorld=NativeObjectLifetime.ActorWorld(player);
             if(nativeWorld==null)throw new InvalidOperationException("native player world is not ready");
-            ordinaryPlayer=PlayerFormPolicy.CanOwnMovement(player.GetClass().GetName());
+            bool humanoid=false;
+            try{var mesh=player.Mesh;if(NativeObjectLifetime.Live(mesh)){var bones=new System.Collections.Generic.List<string>();
+                for(int i=0;i<mesh.GetNumBones();i++)bones.Add(mesh.GetBoneName(i).ToString());HumanoidSkinRig rig;humanoid=HumanoidSkinRig.TryResolve(bones,out rig);}}catch{}
+            ordinaryPlayer=PlayerFormPolicy.CanOwnMovement(player.GetClass().GetName(),humanoid);
+            Log.Write("native-form","pawn "+player.GetClass().GetName()+" humanoidRig="+humanoid+" -> "+(ordinaryPlayer?"MC locomotion, combat and skin":"native control"));
             router=new McInputRouter(player,GameApi.Events(player));router.TakeoverBridge=true;
             try{
                 mapping=MemoryMappedFile.CreateOrOpen("Local\\DqjWukongBridge",96);
                 memory=mapping.CreateViewAccessor(0,96);
                 if(!router.Install())throw new InvalidOperationException(router.LastError);
                 wire=new McBridgeWire();
-                var shrine=new NativeShrineAdapter(player);
+                var shrine=new NativeShrineAdapter(player);shrineAdapter=shrine;
+                economy=new ShrineEconomy(json=>{if(wire!=null)wire.Send(json);});
+                DropCatalog.ExportOnce(); // Preview105: one-time read-only drop/item export for the MC drop replacement list
                 nativeShrine=new NativeShrineSession(shrine.Read,shrine.LeaveActivatedShrineMenu,()=>nativeMap.Open(lastUpdateTime,SuspendForNativeUi));
                 router.BridgeNativeInteraction=NativeInteraction;
                 travelKeyMessages=new NativeTravelKey(RequestTravel,QueueWheel,null,QueueControl,QueuePointer);
@@ -146,6 +155,8 @@ namespace DqjCombat
                 catch(Exception e){steveSkin=null;Log.Write("steve-skin-error","rebuild "+skinRetries+"/5 failed: "+e.GetType().Name+": "+e.Message);}
             }
             if(steveSkin!=null){steveSkin.SetNativeView(!owning||NativeUiActive);steveSkin.Update();}
+            InteractionHint(now);
+            if(economy!=null)economy.Update(now,controller);
             var origin=UGameplayStatics.GetWorldOriginLocation(NativeObjectLifetime.ActorWorld(player));
             unrealOrigin=new BridgePoint(origin.X,origin.Y,origin.Z);
             LitJson.JsonData travelEvent;
@@ -699,6 +710,11 @@ namespace DqjCombat
             if(lastAccepted==null)return Math.Abs(frame.Y-spawnPoint.Y)<.2;
             double dt=Math.Max(.05,(frame.Received-lastAccepted.Received)/1000000000.0);
             double dx=frame.X-lastAccepted.X,dy=frame.Y-lastAccepted.Y,dz=frame.Z-lastAccepted.Z;
+            var pearl=McWorldLink.PearlTarget;
+            if(McPlayerHealthGate.Clock()-McWorldLink.PearlAt<3){
+                double px=frame.X-pearl.X,py=frame.Y-pearl.Y,pz=frame.Z-pearl.Z;
+                if(px*px+py*py+pz*pz<4){McWorldLink.PearlAt=-100;Log.Write("pearl","pearl landing accepted by host at "+F(frame.X)+","+F(frame.Y)+","+F(frame.Z));return true;}
+            }
             if(dx*dx+dy*dy+dz*dz>Math.Pow(4+80*dt,2))return false;
             if(dy<-.05){FHitResult floor;var at=ConvertPosition(frame.X,lastAccepted.Y,frame.Z);
                 if(TraceFloor(at,50,1200,out floor)&&ConvertPosition(frame.X,frame.Y,frame.Z).Z<floor.ImpactPoint.Z-20)return false;
@@ -863,6 +879,7 @@ namespace DqjCombat
                 if(max>0&&hp<max){BGUFunctionLibraryCS.BGUSetAttrValue(player,EBGUAttrFloat.Hp,max);Log.Write("shrine","rest top-up hp "+F(hp)+"->"+F(max));}
                 else Log.Write("shrine","native rest restored hp="+F(hp)+"/"+F(max));
                 Command("effect clear @a");
+                wire.Send("{\"t\":\"shrine_rest\"}"); // Preview105: MC repairs gear for emeralds
                 Log.Write("shrine","MC status effects cleared after rest; MC health follows host on reattach");
             }catch(Exception e){Log.Write("shrine-error","after rest: "+e.GetType().Name+": "+e.Message);}
         }
@@ -889,6 +906,33 @@ namespace DqjCombat
                     Log.Write("interaction","native selected-target handoff; original movement and animation restored");
                 },nativePress);
             }catch(Exception e){nativeShrine.Clear();if(!nativeMap.Active)RestoreNativeUiCursor();Log.Write("shrine-error",e.ToString());}
+        }
+        // Preview102 (user: "I run toward the campfire for a while before it triggers"): the native interaction
+        // prompt is hidden under MC, and the interact key only reaches the game once Wukong has selected a
+        // target. Mirror that selection on the MC action bar so the player knows when the key will work.
+        private double nextHint,hintRefresh;private string lastHint="";
+        private void InteractionHint(double now)
+        {
+            if(now<nextHint||shrineAdapter==null)return;nextHint=now+.25;
+            string text="";
+            if(owning&&!NativeUiActive&&wire.Latest!=null&&string.IsNullOrEmpty(wire.Latest.Screen))
+                try{var state=shrineAdapter.Read(0);if(state.SelectedInteractable&&!state.Busy)text=HintText(state);
+                    // Preview105: tell MC when Steve stands at an activated shrine (right-click opens the trader there).
+                    bool near=state.SelectedShrine&&state.Activated;
+                    if(near!=lastNearShrine){lastNearShrine=near;wire.Send("{\"t\":\"shrine\",\"near\":"+(near?"true":"false")+",\"id\":"+state.Id+"}");}
+                }catch{}
+            if(text==lastHint&&(text.Length==0||now<hintRefresh))return;
+            lastHint=text;hintRefresh=now+1.5;
+            wire.Send("{\"t\":\"travel_notice\",\"text\":\""+text+"\"}");
+        }
+        private static string HintText(NativeShrineState state)
+        {
+            string c=state.TargetClass??"";
+            if(state.SelectedShrine)return state.Activated?"Shrine - interact: rest/repair | right-click empty hand: trader | weapon + book in off-hand: enchant":"Shrine - press interact to light it";
+            if(c.IndexOf("Collection",StringComparison.OrdinalIgnoreCase)>=0)return "Press interact to gather";
+            if(c.IndexOf("Chest",StringComparison.OrdinalIgnoreCase)>=0||c.IndexOf("Box",StringComparison.OrdinalIgnoreCase)>=0)return "Press interact to open";
+            if(c.IndexOf("CharacterAI",StringComparison.OrdinalIgnoreCase)>=0||c.IndexOf("NPC",StringComparison.OrdinalIgnoreCase)>=0)return "Press interact to talk";
+            return "Press interact";
         }
         private void RestoreNativeUiCursor()
         {

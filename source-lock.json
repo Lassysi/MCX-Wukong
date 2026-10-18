@@ -1,6 +1,6 @@
 {
-  "release": "v0.1.0-beta.1",
-  "hostVersion": "1.0.16",
+  "release": "v0.2.0",
+  "hostVersion": "0.2.0",
   "protocol": 16,
   "minecraft": "1.21.4",
   "fabricLoader": "0.19.5",
@@ -9,15 +9,15 @@
   "gradle": "9.7.1",
   "buildJdk": "25",
   "wukongSteamBuild": "21393610",
-  "hostBaselineSha256": "4A8126361305823DFCD3F9C7FEF0199B1C9EA39B0ED1FCAA0F36CDDC2116105C",
-  "mcCodeBaselineSha256": "66D79748943E969BA0F8DFCF0DEF33CA03C9E0473A8023807CD4171B3516ADC3",
+  "hostBaselineSha256": "c26d5cbd9f089ac36ef79fc8d90f8bccad01c98547bc4107079f801c7761cb8f",
+  "mcCodeBaselineSha256": "89070b92eb153a623ec59e458166b221375af926cf11a66da084ff92428845d1",
   "upstream": {
     "repository": "https://github.com/rehan-remade/universal-modder",
     "commit": "2c2201437ca676fb4e5f06a18fff6e8db99eef0f",
     "path": "examples/minecraft-gta5-passthrough/mc",
     "license": "MIT"
   },
-  "liveStatus": "Preview; chapter transition/manual CG skip fixes are not yet accepted live",
-  "developmentBaseline": "Preview101",
-  "minecraftModVersion": "0.1.0-beta.1"
+  "liveStatus": "Public profile and combined dual-game acceptance pending; full all-chapter testing not completed",
+  "developmentBaseline": "Preview117",
+  "minecraftModVersion": "0.2.0"
 }

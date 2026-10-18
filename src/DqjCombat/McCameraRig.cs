@@ -105,7 +105,7 @@ namespace DqjCombat
             try
             {
                 cameraActor = BGUFunctionLibraryCS.BGUSpawnActor(
-                    player.World, UClass.GetClass<AActor>(), player.GetActorLocation(), default(FRotator));
+                    NativeObjectLifetime.ActorWorld(player), UClass.GetClass<AActor>(), player.GetActorLocation(), default(FRotator));
                 if (cameraActor == null)
                 {
                     lastError = "相机载体 Actor 创建失败";

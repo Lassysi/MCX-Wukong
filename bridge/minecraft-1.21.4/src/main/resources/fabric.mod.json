@@ -1,6 +1,6 @@
 {
   "schemaVersion":1,"id":"dqjmcbridge","version":"${version}",
-  "name":"MCX Wukong Bridge","environment":"*","license":"MIT",
+  "name":"Dqj Real Minecraft Bridge","environment":"*","license":"MIT",
   "authors":["DqjCombat contributors","rehan (upstream protocol and bridge reference)"],
   "entrypoints":{"main":["dev.rehan.passthrough.Passthrough"],"client":["dev.rehan.passthrough.client.PassthroughClient"]},
   "mixins":["dqjbridge.common.mixins.json",{"config":"dqjbridge.client.mixins.json","environment":"client"}],

@@ -30,6 +30,29 @@ namespace DqjCombat
         // Bounds include animation and weapons, so they are sampled once per second, not per frame.
         private readonly Dictionary<string,float[]> bossSize=new Dictionary<string,float[]>();
         private readonly Dictionary<string,int> bossSizeAt=new Dictionary<string,int>();
+        private readonly Dictionary<string,float[]> bodyBounds=new Dictionary<string,float[]>();
+        private readonly Dictionary<string,int> bodyBoundsAt=new Dictionary<string,int>();
+        private void BodyProxy(string id,BGUCharacterCS actor,float radius,float half,bool boss,out float proxyRadius,out float proxyHalf,out FVector feet)
+        {
+            var location=actor.GetActorLocation();
+            proxyRadius=radius;proxyHalf=half;feet=location-new FVector(0,0,half);
+            if(boss)BossProxySize(id,actor,radius,half,out proxyRadius,out proxyHalf);
+            int now=Environment.TickCount,at;float[] b;
+            if(!bodyBounds.TryGetValue(id,out b)||!bodyBoundsAt.TryGetValue(id,out at)||unchecked(now-at)>500){
+                try{FVector o,e;actor.GetActorBounds(false,out o,out e,false);b=new[]{o.X,o.Y,o.Z,e.X,e.Y,e.Z};}catch{b=null;}
+                bodyBounds[id]=b;bodyBoundsAt[id]=now;
+            }
+            if(b==null||!Finite(b[0]+b[1]+b[2]+b[3]+b[4]+b[5]))return;
+            float ex=b[3],ey=b[4],ez=b[5];
+            if(ex>2000||ey>2000||ez>2000)return;   // bounds swollen by attached effects: keep the capsule
+            if(!boss){
+                proxyRadius=Math.Min(250f,Math.Max(radius,.6f*Math.Min(ex,ey)));
+                proxyHalf=Math.Min(600f,Math.Max(half,.9f*ez));
+            }
+            float dx=b[0]-location.X,dy=b[1]-location.Y;
+            if(dx*dx+dy*dy>400f*400f)return;          // body centre implausibly far from the actor: keep the capsule
+            feet=new FVector(b[0],b[1],Math.Min(location.Z-half,b[2]-ez));
+        }
         private void BossProxySize(string id,BGUCharacterCS actor,float radius,float half,out float proxyRadius,out float proxyHalf)
         {
             proxyRadius=radius;proxyHalf=half;
@@ -60,7 +83,8 @@ namespace DqjCombat
         private int voxelIndex;
         private McPlayerHealthGate healthGate;
         internal McWorldLink(BGUPlayerCharacterCS player,McBridgeWire wire,Func<double,double,double,FVector> convert,Func<FVector,BridgePoint> toMc)
-        {this.player=player;this.wire=wire;this.convert=convert;this.toMc=toMc;}
+        {this.player=player;this.wire=wire;this.convert=convert;this.toMc=toMc;sceneBreak=new SceneBreak(player,convert);}
+        private readonly SceneBreak sceneBreak;
         private static string F(double n){return n.ToString("0.######",CultureInfo.InvariantCulture);}
         private static double N(JsonData d){return double.Parse(d.ToString(),CultureInfo.InvariantCulture);}
         private static bool Finite(double n){return !double.IsNaN(n)&&!double.IsInfinity(n);}
@@ -83,6 +107,16 @@ namespace DqjCombat
                     else if(type=="block_reset")ClearBlocks();
                     else if(type=="block_cells")foreach(JsonData cell in ev["cells"])ApplyCell(cell);
                     else if(type=="target_block")Outline(ev);
+                    // Preview107: MC pickaxe swings and explosions break the game's own destructible scenery.
+                    else if(type=="mine"){var ignore=new List<AActor>{player,camera};foreach(var a in targets.Values)ignore.Add(a);foreach(var owned in blocks.Values)ignore.AddRange(owned);
+                        sceneBreak.Mine((string)ev["tool"],ev.Keys.Contains("eff")?(int)N(ev["eff"]):0,camera,ignore);}
+                    else if(type=="swing"){var ignore=new List<AActor>{player,camera};foreach(var a in targets.Values)ignore.Add(a);foreach(var owned in blocks.Values)ignore.AddRange(owned);
+                        sceneBreak.Hit((string)ev["tool"],camera,ignore);}
+                    else if(type=="pearl")Pearl(ev,camera);
+                    else if(type=="proxy_fx")ProxyEffects(ev);
+                    else if(type=="player_fx"){McPlayerHealthGate.FireResistant=(bool)ev["fireRes"];Log.Write("items","fire resistance "+(McPlayerHealthGate.FireResistant?"on: native burn ticks blocked":"off"));}
+                    else if(type=="player_cure"){string kind=(string)ev["kind"];McPlayerHealthGate.CureUntil=McPlayerHealthGate.Clock()+(kind=="milk"?30:15);Log.Write("items",kind+" drunk: native status damage blocked for "+(kind=="milk"?30:15)+" s");}
+                    else if(type=="explosion"){var p=ev["pos"];sceneBreak.Blast(N(p[0]),N(p[1]),N(p[2]),N(ev["r"]),(string)ev["src"]);}
                 }catch(Exception e){Log.Write("world-error",e.GetType().Name+": "+e.Message);}
             }
             if(now>=nextTargets){nextTargets=now+.5;RefreshTargets();}
@@ -97,7 +131,13 @@ namespace DqjCombat
         {
             targets.Clear();var at=player.GetActorLocation();
             foreach(BGUCharacterCS actor in UObject.GetObjects<BGUCharacterCS>()){
-                if(actor==player||!Alive(actor)||NativeObjectLifetime.ActorWorld(actor)!=NativeObjectLifetime.ActorWorld(player)||!BGUFunctionLibraryCS.BGUIsEnemyTeam(player,actor))continue;
+                if(actor==player||!Alive(actor)||NativeObjectLifetime.ActorWorld(actor)!=NativeObjectLifetime.ActorWorld(player))continue;
+                if(!BGUFunctionLibraryCS.BGUIsEnemyTeam(player,actor)){
+                    // Preview107 diagnostic: a nearby live unit that is not (yet) hostile gets no MC hitbox; name it once.
+                    if(skipLogged.Count<20&&(actor.GetActorLocation()-at).Size()<3000&&skipLogged.Add(actor.GetUniqueID()))
+                        Log.Write("world-damage","no MC hitbox (not enemy team): class="+actor.GetClass().GetName()+" id="+actor.GetUniqueID());
+                    continue;
+                }
                 if((actor.GetActorLocation()-at).Size()>6400)continue;
                 targets[actor.GetUniqueID().ToString(CultureInfo.InvariantCulture)]=actor;
                 if(targets.Count>=128)break;
@@ -115,26 +155,110 @@ namespace DqjCombat
                 var capsule=actor.CapsuleComponent;if(capsule==null||capsule.IsDestroyed)continue;
                 float half=capsule.GetScaledCapsuleHalfHeight(),radius=capsule.GetScaledCapsuleRadius();
                 float proxyRadius=radius,proxyHalf=half;
-                if(max>=BossHpMax)BossProxySize(pair.Key,actor,radius,half,out proxyRadius,out proxyHalf);
+                // Live110 (user: a crouching bone demon on a ledge could not be hit, not even by arrows; 0 MC hits logged): every
+                // enemy's hitbox now follows its visible body (actor bounds), not only Bosses'. Capsules of crouching or leaning
+                // creatures sit far from the body.
+                FVector feetAt;BodyProxy(pair.Key,actor,radius,half,max>=BossHpMax,out proxyRadius,out proxyHalf,out feetAt);
                 if(sizeLogged.Add(pair.Key)){
                     // Preview67 diagnostic for Boss hitboxes: capsule vs whole-actor bounds.
                     try{FVector origin,extent;actor.GetActorBounds(false,out origin,out extent,false);
                         Log.Write("target-size","id="+pair.Key+" class="+actor.GetClass().GetName()+" hpMax="+F(max)+" capsuleR="+F(radius)+" capsuleHalf="+F(half)+" boundsExtent="+F(extent.X)+","+F(extent.Y)+","+F(extent.Z));
                     }catch(Exception e){Log.Write("target-size","id="+pair.Key+" bounds error "+e.GetType().Name);}
                 }
-                var pos=ToMc(actor.GetActorLocation()-new FVector(0,0,half));
+                var pos=ToMc(feetAt);
                 if(comma)json.Append(',');comma=true;
                 float unit=Math.Max(healthUnit,max/1024f);targetUnits[pair.Key]=unit;
                 json.Append("{\"id\":\"").Append(pair.Key).Append("\",\"hp\":").Append(F(hp/unit))
                     .Append(",\"max\":").Append(F(max/unit)).Append(",\"w\":").Append(F(proxyRadius*.02))
-                    .Append(",\"h\":").Append(F(proxyHalf*.02)).Append(",\"p\":[").Append(F(pos.X)).Append(',').Append(F(pos.Y)).Append(',').Append(F(pos.Z)).Append("]}");
+                    .Append(",\"h\":").Append(F(proxyHalf*.02)).Append(KindField(actor)).Append(max>=CaptureMaxHp?",\"big\":true":"").Append(",\"p\":[").Append(F(pos.X)).Append(',').Append(F(pos.Y)).Append(',').Append(F(pos.Z)).Append("]}");
             }
             wire.Send(json.Append("]}").ToString());
         }
+        private readonly HashSet<string> rejectLogged=new HashSet<string>();
+        private readonly HashSet<string> kindLogged=new HashSet<string>();
+        private int staleLogged;
+        private string KindField(AActor actor)
+        {
+            string cls=actor.GetClass().GetName();string kind=EnemyEffects.Kind(cls);
+            if(kindLogged.Add(cls))Log.Write("enchant-kind",cls+" -> "+(kind.Length==0?"none (Smite/Bane no bonus)":kind));
+            return kind.Length==0?"":",\"k\":\""+kind+"\"";
+        }
+        // Potions & items D1: MC effects on a proxy -> native time dilation / weakness scaling / launch (EnemyEffects).
+        private static readonly float EffectBossHp=3000f;
+        // Live112 polish (user): enemies with a bottom health bar (chiefs, Bosses) can't be captured in boats/minecarts or reeled in.
+        private static readonly float CaptureMaxHp=1000f;
+        private int fxLogged;
+        private readonly Dictionary<string,FVector> captureOffsets=new Dictionary<string,FVector>();
+        private void FollowCapture(string id,BGUCharacterCS actor,JsonData e)
+        {
+            if(!e.Keys.Contains("seat_p")||!NativeObjectLifetime.Live(actor))return;
+            var p=e["seat_p"];if(p.Count!=3)return;
+            double x=N(p[0]),y=N(p[1]),z=N(p[2]);if(!Finite(x+y+z))return;
+            var seat=convert(x,y,z);FVector offset;
+            if(!captureOffsets.TryGetValue(id,out offset)){
+                var capsule=actor.CapsuleComponent;if(capsule==null||capsule.IsDestroyed)return;
+                float r,h;FVector feet;
+                BodyProxy(id,actor,capsule.GetScaledCapsuleRadius(),capsule.GetScaledCapsuleHalfHeight(),false,out r,out h,out feet);
+                offset=actor.GetActorLocation()-feet;
+            }
+            var target=seat+offset;
+            if(!Finite(target.X+target.Y+target.Z)||(target-actor.GetActorLocation()).Size()>600f)return;
+            captureOffsets[id]=offset;
+            actor.SetActorLocation(target,false,out _,true);
+            // Bounds contain world coordinates. Invalidate after moving so the next hitbox snapshot follows the actor.
+            bodyBounds.Remove(id);bodyBoundsAt.Remove(id);
+        }
+        private void ProxyEffects(JsonData ev)
+        {
+            foreach(JsonData e in ev["e"]){
+                string id=(string)e["id"];BGUCharacterCS actor;
+                if(!targets.TryGetValue(id,out actor)||!Alive(actor)){McPlayerHealthGate.WeakScale.Remove(id);continue;}
+                bool boss=BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.HpMax)>=EffectBossHp;
+                int slow=(int)N(e["slow"]),weak=(int)N(e["weak"]),lev=(int)N(e["lev"]);
+                bool freeze=(bool)e["freeze"],web=(bool)e["web"],soul=(bool)e["soul"];
+                bool seat=e.Keys.Contains("seat")&&(bool)e["seat"]&&BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.HpMax)<CaptureMaxHp;
+                float dilation=EnemyEffects.Dilation(slow,freeze,web,soul,boss);
+                if(seat){dilation=Math.Min(dilation,.0001f);FollowCapture(id,actor,e);}
+                else captureOffsets.Remove(id);
+                EnemyEffects.SetDilation(actor,dilation);
+                float scale=EnemyEffects.WeaknessScale(weak,boss);
+                if(scale<.999f)McPlayerHealthGate.WeakScale[id]=scale;else McPlayerHealthGate.WeakScale.Remove(id);
+                bool hasKb=false;foreach(string key in e.Keys)if(key=="kb")hasKb=true;
+                if(!boss&&!seat&&(hasKb||lev>=0)){
+                    float x=0,y=0,z=0;
+                    if(hasKb){var k=e["kb"];EnemyEffects.LaunchVelocity(N(k[0]),N(k[1]),N(k[2]),out x,out y,out z);}
+                    if(lev>=0)z=Math.Max(z,250f+100f*lev);
+                    try{actor.LaunchCharacter(new FVector(x,y,z),hasKb,lev>=0);}catch(Exception ex){if(fxLogged<40){fxLogged++;Log.Write("items","launch failed: "+ex.Message);}}
+                }
+                if(fxLogged<40&&(dilation<.999f||scale<.999f||hasKb||lev>=0||seat)){fxLogged++;
+                    Log.Write("items","enemy "+actor.GetClass().GetName()+" id="+id+(boss?" (boss caps)":"")+": time x"+F(dilation)+" weakness x"+F(scale)+(hasKb?" knockback":"")+(lev>=0?" levitation":"")+(seat?" captured":""));}
+            }
+        }
+        // Preview107 (user: ender pearls don't teleport): MC only has Wukong geometry rastered near Steve, so a pearl flew
+        // through the real terrain. MC sends each tick's pearl segment; the host traces it against the native world and
+        // replies with the hit point (backed off 0.6 m), where MC teleports the thrower.
+        // Live108: the host's pose safety check rejected the pearl jump (speed limit) and pulled Steve back; the confirmed
+        // landing point is accepted once within 3 s (McBridgeHost.SafePose).
+        internal static BridgePoint PearlTarget;internal static double PearlAt=-100;
+        private void Pearl(JsonData ev,AActor camera)
+        {
+            var a=ev["a"];var b=ev["b"];
+            var from=convert(N(a[0]),N(a[1]),N(a[2]));var to=convert(N(b[0]),N(b[1]),N(b[2]));
+            var ignore=new List<AActor>{player};if(NativeObjectLifetime.Live(camera))ignore.Add(camera);foreach(var t in targets.Values)ignore.Add(t);
+            FHitResult hit;
+            if(!USystemLibrary.LineTraceSingle(player,from,to,ETraceTypeQuery.TraceTypeQuery1,true,ignore,EDrawDebugTrace.None,out hit,true,default(FLinearColor),default(FLinearColor),0)||hit.StartPenetrating)return;
+            var point=new FVector(hit.ImpactPoint.X,hit.ImpactPoint.Y,hit.ImpactPoint.Z);
+            var back=from-to;float len=back.Size();if(len>1)point=point+back*(60f/len);
+            var mc=toMc(point);if(!mc.Finite)return;
+            PearlTarget=mc;PearlAt=McPlayerHealthGate.Clock();
+            wire.Send("{\"t\":\"pearl_hit\",\"id\":"+(int)N(ev["id"])+",\"p\":["+F(mc.X)+","+F(mc.Y)+","+F(mc.Z)+"]}");
+            Log.Write("pearl","ender pearl hit native "+(hit.Component.Get()==null?"world":hit.Component.Get().GetOwner()==null?"world":hit.Component.Get().GetOwner().GetClass().GetName())+" -> teleport to "+F(mc.X)+","+F(mc.Y)+","+F(mc.Z));
+        }
+        private readonly HashSet<uint> skipLogged=new HashSet<uint>();
         private void ApplyHealth(JsonData message)
         {
             if((string)message["session"]!=session)return;
-            long seq=(long)N(message["seq"]);if(seq<=ack)return;
+            long seq=(long)N(message["seq"]);if(seq<=ack){if(staleLogged++<20)Log.Write("world-health","stale MC hit dropped: seq="+seq+" ack="+ack+" id="+(string)message["id"]);return;}
             // FIFO on one WebSocket; a sequence gap forces resync rather than silent damage loss.
             if(seq!=ack+1)throw new InvalidOperationException("MC damage sequence gap "+ack+"->"+seq);
             string id=(string)message["id"];double amount=N(message["amount"]);
@@ -172,11 +296,18 @@ namespace DqjCombat
                     if(hostDamage<=0){Log.Write("world-health","id=player MC="+F(amount)+" host held at "+F(before)+" (MC owns death)");}
                     else{
                     var config=new FSkillDamageConfig{DmgReason=EDamageReason.FallDmg,DamageCalcType=EDamageCalcType.HPMaxRatioAbs,
-                        HPMaxINV10000Damage_Abs=(float)(hostDamage/max*10000),DamageImmueLevel=victim==player?2:0,CameraShakeDA=""};
+                        HPMaxINV10000Damage_Abs=(float)(hostDamage/max*10000),DamageImmueLevel=2,CameraShakeDA=""};
                     deathRequest=request;
                     healthGate.Applying=true;
                     try{NativeEventInvoker.Invoke(NativeEventInvoker.Signal(GameApi.Events(victim),"Evt_TriggerNormalDamageEffect"),source,config,request,new FBattleAttrSnapShot(source,false));}
                     finally{healthGate.Applying=false;}
+                    // Preview107 (user: some enemies, especially after skipped areas, take no damage): native
+                    // IsDamageValid rejects level-0 damage on CommonDamageImmue (116) units; MC hits now carry level 1 like
+                    // a normal Wukong attack. Live107: rooftop crossbowmen (ShuNuShou Stand) still refused level 1, so level 2
+                    // (passes StrongDamageImmue 117 too). Full ImmueDamage (1: scripted invulnerability) is still respected. Any enemy
+                    // that still refuses a hit is named once, so a remaining case can be identified.
+                    if(enemy&&!finishing&&Alive(victim)&&BGUFunctionLibraryCS.BGUGetFloatAttr(victim,EBGUAttrFloat.Hp)>=before-.0001f&&rejectLogged.Add(id))
+                        Log.Write("world-damage","enemy refused MC hit: id="+id+" class="+victim.GetClass().GetName()+" hp="+F(before)+"/"+F(max)+" damage="+F(hostDamage)+" (native immune state)");
                     }
                     // Preview58: the absolute-damage path carries no stiff; raise the native normal stiff.
                     if(enemy&&!finishing&&Alive(victim)){
@@ -296,7 +427,7 @@ namespace DqjCombat
                 // (35-95% of its height) and 0.4 m across. The lower part is the exact-height surface proxy's job; the old
                 // 0.6 x 0.88 m probe caught the next stair's edge and turned whole 1 m cells above the real steps solid.
                 var center=convert(x+.5,y+.65,z+.5);FHitResult hit;
-                bool solid=PawnSolid(center,ignore);
+                bool solid=PawnSolid(center,ignore,30)&&!GroundOnly(x,y,z,ignore);
                 string key=x+","+y+","+z;int value=solid?1:0,previous;
                 if(terrain.TryGetValue(key,out previous)&&previous==value)continue;terrain[key]=value;
                 if(comma)json.Append(',');comma=true;json.Append(x).Append(',').Append(y).Append(',').Append(z).Append(',').Append(value);
@@ -315,10 +446,29 @@ namespace DqjCombat
             if(explorer==null){explorer=System.IO.File.Exists(System.IO.Path.Combine(Log.Dir,"dqj-explorer.on"));Log.Write("explorer","Explorer mode "+(explorer.Value?"ON: invisible blockers are passable":"off"));}
             return explorer.Value;
         }
-        private bool PawnSolid(FVector center,List<AActor> ignore)
+        // Preview102 (user: slopes very sticky, often stuck): on a slope the walkable ground itself rises into the
+        // probed upper part of a cell, so the whole 1 m cell became a wall (and its full barrier replaced the exact-height
+        // ground surface). A cell whose blocking geometry is only walkable ground (normal within ~45 deg of up) is left
+        // to the surface proxy; only geometry clearly above that ground still counts as a wall.
+        private int slopeCellsKept;private double nextSlopeLog;
+        private bool GroundOnly(int x,int y,int z,List<AActor> ignore)
+        {
+            // The ground may be in this cell or up to 0.6 m below it (the cell above a steep slope's surface cell).
+            var start=convert(x+.5,y+1.0,z+.5);var end=convert(x+.5,y-.6,z+.5);var bottom=convert(x+.5,y,z+.5);FHitResult hit;
+            if(!USystemLibrary.LineTraceSingle(player,start,end,ETraceTypeQuery.TraceTypeQuery1,true,ignore,EDrawDebugTrace.None,out hit,true,default(FLinearColor),default(FLinearColor),0))return false;
+            if(hit.StartPenetrating||hit.ImpactNormal.Z<.7f)return false;   // inside rock, or a steep face: a real wall
+            double floor=(hit.ImpactPoint.Z-bottom.Z)/100;                    // ground height relative to the cell, -0.6..1
+            // A <=45 deg slope rises at most 0.2 m across the probe's 0.2 m half-width; anything higher is not this ground.
+            double low=Math.Max(0,floor+.25),high=.98;
+            bool ground=high-low<.15||!PawnSolid(convert(x+.5,y+(low+high)/2,z+.5),ignore,(float)((high-low)*50));
+            if(ground){slopeCellsKept++;double now=UGameplayStatics.GetRealTimeSeconds(player);
+                if(now>=nextSlopeLog){nextSlopeLog=now+30;Log.Write("world-terrain","slope cells left to the ground surface (not walls) total="+slopeCellsKept);}}
+            return ground;
+        }
+        private bool PawnSolid(FVector center,List<AActor> ignore,float halfHeight)
         {
             List<FHitResult> hits;
-            if(!USystemLibrary.BoxTraceMultiForObjects(player,center-new FVector(0,0,.1f),center+new FVector(0,0,.1f),new FVector(20,20,30),default(FRotator),WallObjects,false,ignore,EDrawDebugTrace.None,out hits,true,default(FLinearColor),default(FLinearColor),0)||hits==null)return false;
+            if(!USystemLibrary.BoxTraceMultiForObjects(player,center-new FVector(0,0,.1f),center+new FVector(0,0,.1f),new FVector(20,20,halfHeight),default(FRotator),WallObjects,false,ignore,EDrawDebugTrace.None,out hits,true,default(FLinearColor),default(FLinearColor),0)||hits==null)return false;
             bool any=false;
             foreach(var hit in hits){
                 var component=hit.Component.Get();if(component==null||component.IsDestroyed)continue;any=true;
@@ -407,6 +557,6 @@ namespace DqjCombat
         private void HideOutline(){if(outlineActor!=null)try{if(NativeObjectLifetime.Live(outlineActor))outlineActor.DestroyActor();}catch{}outlineActor=null;outlineKey=null;}
         private void ClearBlocks(){HideOutline();outlineBounds.Clear();foreach(var list in blocks.Values)foreach(var actor in list)try{if(NativeObjectLifetime.Live(actor))actor.DestroyActor();}catch{}blocks.Clear();
             if(nativeDrawn.Count>0){nativeDrawn.Clear();try{wire.Send("{\"t\":\"native_blocks\",\"clear\":true}");}catch{}}}
-        public void Dispose(){if(healthGate!=null)healthGate.Dispose();healthGate=null;ClearBlocks();targets.Clear();targetUnits.Clear();terrain.Clear();started=false;}
+        public void Dispose(){EnemyEffects.RestoreAll();captureOffsets.Clear();if(healthGate!=null)healthGate.Dispose();healthGate=null;ClearBlocks();targets.Clear();targetUnits.Clear();terrain.Clear();started=false;}
     }
 }

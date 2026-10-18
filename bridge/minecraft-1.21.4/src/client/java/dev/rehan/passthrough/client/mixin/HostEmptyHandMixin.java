@@ -17,10 +17,17 @@ abstract class HostEmptyHandMixin {
     @Shadow private float mainHandHeight;
     @Shadow private net.minecraft.world.item.ItemStack mainHandItem;
     @Shadow private float oMainHandHeight;
+    @Shadow private net.minecraft.world.item.ItemStack offHandItem;
+    @Shadow private float offHandHeight;
+    @Shadow private float oOffHandHeight;
     private static boolean dqj$logged;
     @Inject(method="tick",at=@At("TAIL"))
     private void dqj$emptyHand(CallbackInfo ci){
         var player=Minecraft.getInstance().player;
+        // Live115 (user: with a bow the off-hand shield still shows): while a ranged weapon is in the main hand the off-hand
+        // shield is put away (not drawn); ShieldRangedMixin already keeps it from raising.
+        if(player!=null&&Passthrough.minecraftAuthority&&player.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem
+            &&dev.rehan.passthrough.Balance.rangedMain(player)){offHandItem=net.minecraft.world.item.ItemStack.EMPTY;offHandHeight=0f;oOffHandHeight=0f;}
         if(player==null||!Passthrough.minecraftAuthority||player.isHandsBusy())return;
         if(mainHandHeight<.5f&&!dqj$logged){dqj$logged=true;
             Passthrough.LOG.info("DQJ hand-recovery empty hand height={} strength={}; held fully raised while bridged",mainHandHeight,player.getAttackStrengthScale(1f));}

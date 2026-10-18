@@ -136,6 +136,7 @@ public final class WorldBridge {
         preparing=hold;groundReady=groundCommitted=groundAnchorResolved=false;
     });}
     public static boolean ready() { return server != null; }
+    public static MinecraftServer server() { return server; }
     public static void command(String value) {
         var s = server;
         if (s != null) s.execute(() -> s.getCommands().performPrefixedCommand(s.createCommandSourceStack().withSuppressedOutput(), value));
@@ -277,6 +278,8 @@ public final class WorldBridge {
         }
         CombatBridge.tick(value);
         BlockGravity.tick(value);
+        Pearls.tick(value);
+        ProxyFx.tick(value);
         if (changed.isEmpty()) return;
         StringBuilder set=new StringBuilder(),clear=new StringBuilder();JsonArray cells=new JsonArray();
         for (var e:changed.entrySet()) {

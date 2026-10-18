@@ -33,6 +33,12 @@ public final class HostLink extends WebSocketServer {
             }
             if (type.equals("native_blocks")) {NativeBlocks.handle(m);return;}
             if (type.equals("cmd")) {WorldBridge.command(m.get("c").getAsString());return;}
+            // Preview105: shrine shop state from the host (Will gained, shrine proximity, rest, chapter).
+            if (type.equals("will")) {dev.rehan.passthrough.ShrineShop.will(m.get("gain").getAsLong());return;}
+            if (type.equals("shrine")) {dev.rehan.passthrough.ShrineShop.nearShrine=m.get("near").getAsBoolean();dev.rehan.passthrough.ShrineShop.shrineId=m.has("id")?m.get("id").getAsInt():0;return;}
+            if (type.equals("pearl_hit")) {var p=m.getAsJsonArray("p");dev.rehan.passthrough.Pearls.hit(m.get("id").getAsInt(),p.get(0).getAsDouble(),p.get(1).getAsDouble(),p.get(2).getAsDouble());return;}
+            if (type.equals("shrine_rest")) {dev.rehan.passthrough.ShrineShop.rest();return;}
+            if (type.equals("chapter")) {dev.rehan.passthrough.ShrineShop.chapter=Math.max(1,Math.min(6,m.get("n").getAsInt()));return;}
             if (type.equals("enemy_break")) {var p=m.getAsJsonArray("p");WorldBridge.enemyBreak(p.get(0).getAsInt(),p.get(1).getAsInt(),p.get(2).getAsInt());return;}
             if (type.equals("host_entities")) {CombatBridge.sync(m);return;}
             if (type.equals("host_health")) {CombatBridge.hostHealth(m);return;}

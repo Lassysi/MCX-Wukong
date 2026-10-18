@@ -40,5 +40,25 @@
   "boss": {
     "gunAndExplosionScale": 0.6,
     "minProxyHealth": 400.0
+  },
+  "durability": {
+    "wearRate": 0.2
+  },
+  "shop": {
+    "willPerEmeraldByChapter": [
+      60.0,
+      100.0,
+      160.0,
+      250.0,
+      350.0,
+      500.0
+    ]
+  },
+  "hunger": {
+    "exhaustionScale": 0.1,
+    "shieldBlockExhaustion": 0.05,
+    "starvation": false,
+    "regenDelaySeconds": 60.0,
+    "regenIntervalTicks": 80
   }
 }

@@ -53,7 +53,7 @@ namespace DqjCombat
         {
             if(!movie){
                 if(cutsceneSkins.Count>0){foreach(var skin in cutsceneSkins)skin.Dispose();cutsceneSkins.Clear();Log.Write("steve-skin","cutscene skins removed");}
-                nativeCutsceneActors.Clear();loggedStoryActors.Clear();nextCutsceneScan=0;
+                nativeCutsceneActors.Clear();loggedStoryActors.Clear();nextCutsceneScan=0;rejectedLogged=0;
                 return;
             }
             for(int i=cutsceneSkins.Count-1;i>=0;i--){var skin=cutsceneSkins[i];if(!skin.Live){skin.Dispose();cutsceneSkins.RemoveAt(i);}else{skin.SetCinematic(enlarge);skin.SetNativeView(true);skin.Update();}}
@@ -72,12 +72,23 @@ namespace DqjCombat
                     }
                 }}catch(Exception e){if(loggedStoryActors.Add("role-binding-error"))Log.Write("cg-skin-role","native role bindings unavailable; explicit hero class policy retained: "+e.Message);}
                 var candidates=new Dictionary<AActor,USkeletalMeshComponent>();
+                var heroCharacter=primaryOwner as ACharacter;
+                var heroComponent=NativeObjectLifetime.Live(heroCharacter)?heroCharacter.Mesh:null;
+                var heroAsset=NativeObjectLifetime.Live(heroComponent)?heroComponent.SkeletalMesh:null;
+                var heroSkeleton=heroAsset==null?null:heroAsset.Skeleton;
                 foreach(USkeletalMeshComponent component in UObject.GetObjects<USkeletalMeshComponent>()){
                     if(!NativeObjectLifetime.Live(component))continue;
                     var actor=component.GetOwner();if(!NativeObjectLifetime.Live(actor)||actor==primaryOwner)continue;
                     string actorName=actor.GetName(),actorClass=actor.GetClass().GetName();bool sameWorld=NativeObjectLifetime.ActorWorld(actor)==world;
                     if(nativeCutsceneActors.Contains(actorName))continue; // one failed construction attempt per CG
-                    if(!CutsceneSkinScope.CanReplaceStandIn(actor is BGUPlayerCharacterCS||boundHeroes.Contains(actor),actorName,actorClass,sameWorld))continue;
+                    // Preview102 (user: CGs still show the Wukong model): sequencer copies of the hero are often plain
+                    // skeletal-mesh actors with no hero class name. Wukong's own mesh asset or skeleton marks them too.
+                    bool heroMesh=sameWorld&&IsHeroMesh(component,heroAsset,heroSkeleton);
+                    if(!CutsceneSkinScope.CanReplaceStandIn(actor is BGUPlayerCharacterCS||boundHeroes.Contains(actor)||heroMesh,actorName,actorClass,sameWorld)){
+                        if(sameWorld&&rejectedLogged<12&&component.GetNumBones()>=60&&!component.HiddenInGame&&loggedStoryActors.Add("rejected:"+actorName)){
+                            rejectedLogged++;Log.Write("cg-skin-role","not replaced: "+actorName+" class="+actorClass+" mesh="+(component.SkeletalMesh==null?"none":component.SkeletalMesh.GetPathName())+" bones="+component.GetNumBones());}
+                        continue;
+                    }
                     if(loggedStoryActors.Add(actorName))Log.Write("cg-skin-role","candidate="+actorName+" class="+actorClass+" boundHero="+boundHeroes.Contains(actor));
                     // HQ/story and transformed-player CGs need not use the controlled pawn's skeleton asset.
                     // Hero ownership plus the actual required humanoid joint contract establishes eligibility.
@@ -94,6 +105,14 @@ namespace DqjCombat
                     catch(Exception e){if(nativeCutsceneActors.Add(pair.Key.GetName()))Log.Write("cg-skin-error","CG hero kept native: "+pair.Key.GetName()+" "+e.Message);}
                 }
             }catch(Exception e){nextCutsceneScan=now+5;Log.Write("steve-skin-error","cutscene scan: "+e.GetType().Name+": "+e.Message);}
+        }
+        private int rejectedLogged;
+        private static bool IsHeroMesh(USkeletalMeshComponent component,USkeletalMesh heroAsset,USkeleton heroSkeleton)
+        {
+            var asset=component.SkeletalMesh;if(asset==null)return false;
+            if(heroAsset!=null&&(asset==heroAsset||heroSkeleton!=null&&asset.Skeleton==heroSkeleton))return true;
+            string path=asset.GetPathName()??"";
+            return path.IndexOf("wukong",StringComparison.OrdinalIgnoreCase)>=0&&path.IndexOf("Preview",StringComparison.OrdinalIgnoreCase)<0;
         }
         private void UpdateCutsceneInput(double now,UWorld world,APlayerController controller,bool movie,bool canSkip)
         {

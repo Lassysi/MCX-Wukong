@@ -16,7 +16,7 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('--host',required=True);p.add_argument('--addon',required=True);p.add_argument('--reshade',required=True);p.add_argument('--setup',required=True);p.add_argument('--output',required=True);p.add_argument('--staging',required=True);a=p.parse_args()
     source=verify(ROOT);out=Path(a.output).resolve();out.mkdir(parents=True,exist_ok=True)
     if source['release']!=TAG:raise ValueError('Source manifest version differs from public version')
-    if ('version='+VERSION) not in (ROOT/'bridge/minecraft-1.21.4/gradle.properties').read_text():raise ValueError('Gradle version differs')
+    if ('version='+VERSION) not in (ROOT/'bridge/minecraft-1.21.4/gradle.properties').read_text(encoding='utf-8'):raise ValueError('Gradle version differs')
     player=Path(a.staging).resolve()/STEM
     if player.exists():raise RuntimeError('Do not merge into an existing player package')
     payload=player/'payload';payload.mkdir(parents=True)
@@ -46,7 +46,7 @@ def main():
         if rel.startswith('LICENSES/'):
             dest=player/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/rel,dest)
     doc_paths=['LICENSE','README.md','README.zh-CN.md','CHANGELOG.md','CHANGELOG.zh-CN.md','THIRD-PARTY-NOTICES.md','THIRD-PARTY-NOTICES.zh-CN.md']
-    doc_paths += ['docs/'+name+lang+'.md' for name in ('INSTALL','FAQ','KNOWN-ISSUES','SKINS') for lang in ('','.zh-CN')]
+    doc_paths += ['docs/'+name+lang+'.md' for name in ('INSTALL','FAQ','KNOWN-ISSUES','SKINS','USAGE','UPGRADE') for lang in ('','.zh-CN')]
     for name in doc_paths:
         target=player/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,target)
     # Source and player guides share the same bilingual layout. Build guides stay in source.

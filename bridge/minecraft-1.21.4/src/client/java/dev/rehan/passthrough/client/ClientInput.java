@@ -40,6 +40,13 @@ final class ClientInput {
                     }
                     return;
                 }
+                // Preview105: at an activated shrine, right-click with an empty hand or emeralds opens the shrine trader.
+                if(k.equals("use")&&down&&minecraft.screen==null&&player!=null&&dev.rehan.passthrough.ShrineShop.nearShrine){
+                    var held=player.getMainHandItem();
+                    // Live111: weapon in the main hand + enchanted book in the off hand -> free shrine enchanting.
+                    if(!held.isEmpty()&&player.getOffhandItem().is(net.minecraft.world.item.Items.ENCHANTED_BOOK)){dev.rehan.passthrough.ShrineShop.enchant();return;}
+                    if(held.isEmpty()||held.is(net.minecraft.world.item.Items.EMERALD)){dev.rehan.passthrough.ShrineShop.open();return;}
+                }
                 if(k.equals("attack")&&minecraft.screen==null)InputDiagnostics.attack(minecraft,down);
                 if(k.equals("sneak"))NativeControl.shiftHeld=down;
                 if(k.equals("sprint")){NativeControl.sprintKey(down);return;}

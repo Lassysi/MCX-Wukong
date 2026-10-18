@@ -27,7 +27,7 @@ namespace DqjCombat
             get
             {
 #if S13 && S15
-                return "1.0.16-MC121-BridgePreview101";
+                return "0.2.0";
 #elif S13
                 return "0.2.0-S13";
 #elif S12

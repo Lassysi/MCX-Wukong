@@ -1,27 +1,36 @@
 {
-  "release": "v0.1.0-beta.1",
+  "release": "v0.2.0",
   "status": "pre-release",
   "host": {
     "stage6Build": "passed",
-    "cecilRewriteBytes": 249856,
+    "cecilRewriteBytes": 275456,
     "assemblyResolveErrors": 0,
-    "baselineMethodIlMatches": 685,
-    "sha256": "726027033089f26a4d6f33410c0175d57c15fe729ba7a556d8e4822b1b1da523"
+    "baselineMethodsCompared": 735,
+    "onlyBaselineIlDifference": "public version getter",
+    "sha256": "1c13910982b5ae0d372c2f0229bd35f24641f668f592c0e1da6baf8d3491f98c"
   },
   "minecraft": {
     "gradleBuild": "passed",
+    "sha256": "ddf43fce14af5d69165fdc74bba8e5911237f31c3745f11f901e291aace8722d",
     "publicChanges": [
       "project-owned skin",
       "marked-world startup guard",
-      "no development lab helper"
+      "no development lab helper",
+      "Java-WebSocket MIT notice included"
     ]
   },
+  "setup": {
+    "frozenBuild": "passed",
+    "sha256": "53e51c5059ccf927bfe710e60a764cfb564eb307068d06fe749181ddf29302b4"
+  },
   "offlineChecks": {
-    "csharpSuitesPassed": 13,
-    "installerTestsPassed": 9,
+    "csharpSuitesPassed": 14,
+    "installerTestsPassed": 11,
     "fixtureTestsCover": [
       "install and uninstall",
-      "save preservation",
+      "native save preservation",
+      "existing MCX world backup without changing inventory or builds",
+      "changed save rejection before installation",
       "wrong instance rejection",
       "modified-file rejection",
       "write-failure rollback",
@@ -32,7 +41,9 @@
   "liveAcceptance": {
     "publicProfileStartup": "pending",
     "newSkinAppearance": "pending",
-    "chapterTransition": "pending",
-    "manualCgSkip": "pending"
-  }
+    "allChapterPlaythrough": "not completed",
+    "newFeatureCombinations": "pending",
+    "manualCgSkip": "not all scenes supported"
+  },
+  "scope": "Build, loader and offline checks only. No dual-game acceptance was performed for this public package."
 }

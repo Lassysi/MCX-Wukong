@@ -8,9 +8,10 @@ internal static class Program
     {if(!condition)throw new Exception(description);checks++;Console.WriteLine("PASS "+description);}
     private static int Main()
     {
-        Check(PlayerFormPolicy.CanOwnMovement("Unit_Player_Wukong_C"),"ordinary captured Wukong player keeps MC locomotion");
-        Check(!PlayerFormPolicy.CanOwnMovement("Unit_Player_Chan_C"),"captured cicada pawn keeps native controls and transformation state");
-        Check(!PlayerFormPolicy.CanOwnMovement("Unit_Player_Wolf_C"),"unknown transformation is never implicitly given MC authority");
+        Check(PlayerFormPolicy.CanOwnMovement("Unit_Player_Wukong_C",false),"ordinary captured Wukong player keeps MC locomotion");
+        Check(!PlayerFormPolicy.CanOwnMovement("Unit_Player_Chan_C",true),"captured cicada pawn keeps native controls and transformation state");
+        Check(PlayerFormPolicy.CanOwnMovement("Unit_Player_Wolf_C",true),"Preview102: humanoid transformation (e.g. giant monkey) is MC-driven");
+        Check(!PlayerFormPolicy.CanOwnMovement("Unit_Player_Wolf_C",false),"non-humanoid transformation keeps native controls");
         Check(!PlayerFormPolicy.Enlarge(true,true)&&PlayerFormPolicy.Enlarge(true,false),"interaction sessions stay normal-sized even when native Movie is set");
         var biped=new[]{"pelvis","spine_01","neck_01","head","upperarm_l","hand_l","upperarm_r","hand_r","thigh_l","foot_l","thigh_r","foot_r"};
         HumanoidSkinRig rig;

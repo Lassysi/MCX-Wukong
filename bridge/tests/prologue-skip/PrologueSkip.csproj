@@ -4,6 +4,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="../../../src/DqjCombat/PrologueSkip.cs" Link="PrologueSkip.cs" />
     <Compile Include="../../../src/DqjCombat/PrologueSkipGate.cs" Link="PrologueSkipGate.cs" />
+    <Compile Include="../../../src/DqjCombat/NativeObjectLifetime.cs" Link="NativeObjectLifetime.cs" />
     <Compile Include="../../../src/DqjCombat/NativeEventInvoker.cs" Link="NativeEventInvoker.cs" />
   </ItemGroup>
 </Project>

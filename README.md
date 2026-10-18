@@ -2,26 +2,24 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Integrates Minecraft movement, camera, equipment and blocks with **Black Myth: Wukong**, retaining its maps, enemies, bosses and story progression. Both games must run on the same PC.
+Brings Minecraft movement, camera, inventory, equipment and blocks into **Black Myth: Wukong**, retaining its maps, enemies, bosses and story progression. Both games must run on the same PC.
 
-**[Download the player package](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.1.0-beta.1/MCX-Wukong-v0.1.0-beta.1-Players.zip)** · [Release page](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.1.0-beta.1) · [Installation guide](docs/INSTALL.md)
+**[Download v0.2.0 Players](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.2.0/MCX-Wukong-v0.2.0-Players.zip)** · [Release page](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.2.0) · [First installation](docs/INSTALL.md) · [Upgrade](docs/UPGRADE.md)
 
-**v0.1.0-beta.1 — first public beta.** Fresh installations, some story scenes and chapter transitions require further in-game testing. See [known issues](docs/KNOWN-ISSUES.md).
+v0.2.0 is a public test release. Some real-time story scenes, chapter transitions and fresh installations require further in-game validation. See [known issues](docs/KNOWN-ISSUES.md).
 
-## Gameplay
+## Features
 
-- Minecraft movement, camera, inventory and equipment, with Black Myth's maps, enemies, bosses and story progression.
-- Place and break blocks to build cover and platforms. Enemies can destroy blocks after about three hits.
-- Ordinary building blocks need support and fall when support below them is removed.
-- Attack enemies with swords, axes, bows, crossbows, guns, TNT, lava and harming potions. Use spawn eggs to summon allies.
-- Shields block attacks from the front. Attacks from the sides and rear still hit. Minecraft food and healing effects restore health.
-- Weapon and armor attributes affect damage and damage reduction. Some combat rules are adjusted for the bridge.
-- Keep native shrine, travel, gathering and chest interactions. Ender pearls and elytra are supported.
-- Use Minecraft commands, including creative mode for obtaining items and building.
-- Import a custom skin for both games. See [skin setup](docs/SKINS.md).
-- New saves skip the entire prologue, including combat, by default. Hold E to try skipping later real-time cutscenes; some scenes still have compatibility issues.
+- Minecraft movement, camera, inventory and equipment. Weapon and armor attributes affect damage and defense.
+- Place and break blocks to build cover and platforms. Ordinary building blocks fall without support; enemies destroy blocks after about three hits.
+- Fight Black Myth enemies with swords, axes, bows, crossbows, guns, TNT, lava and harming potions. Spawn eggs summon allies.
+- Front-facing shield protection, food and healing effects, ender pearls and elytra.
+- Native shrine, travel, gathering and chest interactions; Minecraft commands and creative mode.
+- New Will-to-emerald rewards, shrine trading, paid repairs on rest and enchanted-book application.
+- Additional potion, terrain and enchantment effects on native enemies, plus interaction with destructible scene objects.
+- Import one skin PNG for both games. New saves skip the prologue and its combat by default. Hold E to try skipping later real-time cutscenes.
 
-Not every chapter, boss or item has been tested.
+See the [usage guide](docs/USAGE.md) for controls, rules and limits. Not every chapter, boss, item or combination has been validated.
 
 ## Requirements
 
@@ -32,56 +30,55 @@ Not every chapter, boss or item has been tested.
 | Minecraft | **Java Edition 1.21.4**, with your own Java Edition account |
 | Fabric Loader | **0.19.5**, configured by the included modpack |
 | Java runtime | **64-bit Java 21**, selected in your Minecraft launcher |
-| Black Myth loader | **CSharpLoader 0.1.0**, installed from its author's page |
-| Other components | ReShade 6.8.0 and bridge components are included; the launcher downloads the Minecraft mods |
-| Minecraft launcher | A launcher that imports `.mrpack`; these instructions use Prism Launcher |
+| Black Myth loader | **CSharpLoader 0.1.0**, downloaded separately from its author |
+| Other components | ReShade 6.8.0 and bridge components are included; the launcher downloads the required MC mods |
+| Minecraft launcher | Must import `.mrpack`; the installation guide uses Prism Launcher |
 
-Both games must be installed and running on one PC. Minimum hardware for running both has not been measured. Try 4 GB allocated to Minecraft as a starting point, leaving enough RAM for Black Myth and Windows.
+Local single-player only. Bedrock Edition, multiplayer and unmodded Minecraft are unsupported. Other game versions have not been validated and are rejected by the installer.
 
-Local single-player only. Bedrock Edition and multiplayer are unsupported. Other game versions have not been validated and are rejected by the installer.
+Minimum hardware for running both games has not been measured. Start with 4 GB allocated to Minecraft, a 1280×720 window and render distance 6, leaving resources for Black Myth and Windows.
 
-## Install
+## Install and play
 
-1. Download the **player package** linked above and extract it into a new folder. GitHub's `Source code` archive is not an installer.
-2. Install [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) into Black Myth's `b1/Binaries/Win64` folder.
-3. Import the included `.mrpack` into [Prism Launcher](https://prismlauncher.org/) and sign in with your own Minecraft Java account. Launch to Minecraft's main menu once to download the client, then exit normally.
-4. Close both games. Run `MCX-Wukong-Setup.exe` and select your Black Myth folder and Minecraft instance game folder. Select the vanilla Minecraft 1.21.4 client JAR if it is not found automatically.
-5. Optionally select a 64×64 PNG with classic four-pixel arms in the fourth field, **Custom skin PNG**. Leave it blank for the project skin. Click **Install / 安装**. Python, a JDK and the .NET SDK are not needed for players.
+1. Download and fully extract **Players.zip** above. GitHub's `Source code` archive is not an installer.
+2. Install [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) into Black Myth's `b1/Binaries/Win64`, following its author's instructions.
+3. Import `MCX-Wukong-v0.2.0.mrpack` into [Prism Launcher](https://prismlauncher.org/) or another compatible launcher. Sign in with your own Minecraft account, start Minecraft to its main menu once, then exit normally.
+4. Close both games. Run `MCX-Wukong-Setup.exe`; select the Black Myth root folder, the MC instance game folder and the vanilla Minecraft 1.21.4 client JAR.
+5. Optionally select a **64×64 PNG with classic four-pixel arms** in the fourth field. Leave it blank for the project skin, then click **Install / 安装**. Players do not need Python, a JDK or the .NET SDK.
+6. Start Minecraft and enter the **MCX-Wukong** world created by the installer. Keep it running in a window without minimizing, then start Black Myth. Play in the Black Myth window.
+7. Wait for bridge initialization. Press T and enter `/function mcx:starter` to claim basic equipment once.
 
-See the [first-time installation guide](docs/INSTALL.md) for folder examples, Java settings and startup steps. The installer has English and Chinese labels and messages. CSharpLoader is a separate download; block textures are generated from your local Minecraft client.
+Initial setup requires internet access. The MCX bridge JAR is included; the launcher downloads the other eight pinned mods. Do not update them separately. See [first installation](docs/INSTALL.md) for folder examples, Java settings and detailed steps.
 
-The Minecraft mods are required. The player package includes the MCX bridge JAR; importing the `.mrpack` downloads the other eight pinned mods through the launcher. Initial installation requires internet access. Unmodded Minecraft cannot run this project.
+## Controls
 
-## Play
-
-1. Start the imported Minecraft instance and enter the **MCX-Wukong** world created by the installer.
-2. Keep Minecraft running in a window without minimizing it. Switch to Black Myth and start a new game or load your save.
-3. Wait for the bridge to take over. Initial terrain setup can take tens of seconds.
-4. Press T and enter `/function mcx:starter` to claim basic equipment once.
-
-The new world is empty while waiting for the bridge. Use the dedicated world rather than a normal Minecraft survival world.
-
-| Action | Key |
+| Action | Key or method |
 |---|---|
-| Move, attack, place blocks, inventory | Normal Minecraft controls |
-| Gather, open chests, interact with shrines | H |
-| Black Myth map | F6 |
-| Black Myth menu | Esc |
-| Try skipping a real-time cutscene | Hold E |
-| Minecraft chat / commands | T / slash |
+| Move, attack, place blocks, inventory | Normal MC controls; E opens inventory |
+| Gather, open chests, native shrine interaction | H |
+| Black Myth map / menu | F6 / Esc |
+| Try skipping a real-time cutscene | Hold E; some scenes cannot be skipped |
+| MC chat / commands | T / slash |
+| Shrine shop | Near an activated shrine, right-click with an empty main hand or emeralds |
+| Shrine enchanting | Near an activated shrine, right-click with gear in the main hand and an enchanted book in the offhand |
 
-The installer enables prologue skipping, including its combat, for new saves by default. You can uncheck it during installation. Native story transformations such as the cicada remain controlled by Black Myth.
+Native story transformations such as the cicada remain controlled by Black Myth. Wait for the native sequence to finish; do not switch worlds during story or chapter loading.
 
-## Uninstall
+## Saves and uninstall
 
-Close both games, run the setup tool with the same two folders, and click **Uninstall / 卸载**. Saves, Minecraft worlds and the third-party loader are kept.
+Use the same Minecraft instance and dedicated MCX world with the matching Black Myth save. Do not use a normal survival world or share one MCX world across multiple Black Myth saves.
 
-## More
+Save and exit Black Myth normally before saving and exiting Minecraft. To uninstall, close both games, run the same-version setup tool with the original two folders, then click **Uninstall / 卸载**. Saves, builds, backups and the third-party loader are kept.
 
-- [FAQ](docs/FAQ.md)
+## Documentation
+
+- [Usage](docs/USAGE.md)
+- [Upgrade](docs/UPGRADE.md)
 - [Custom skins](docs/SKINS.md)
+- [FAQ](docs/FAQ.md)
 - [Known issues](docs/KNOWN-ISSUES.md)
+- [Changelog](CHANGELOG.md)
 - [Build instructions](docs/BUILD.md)
 - [Third-party notices](THIRD-PARTY-NOTICES.md)
 
-Original project code is MIT-licensed. This is an unofficial project, not affiliated with Mojang, Microsoft or Game Science.
+Original project code is MIT-licensed; third-party terms still apply. This is an unofficial project, not affiliated with Mojang, Microsoft or Game Science.

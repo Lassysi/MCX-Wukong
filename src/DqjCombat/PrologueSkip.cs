@@ -38,7 +38,7 @@ namespace DqjCombat
                 if(gate.Requested){
                     if(gate.Timeout(now)){holding=false;Log.Write("prologue-skip-error","completion reply timed out; no teleport or retry");return false;}
                     if(gate.CompletionReady){
-                        if(state==null||state.IsDestroyed||state.IsPendingKill||state.World!=world
+                        if(!NativeObjectLifetime.Live(state)||NativeObjectLifetime.ActorWorld(state)!=world
                             ||UGameplayStatics.GetPlayerState(world,0)!=state)throw new InvalidOperationException("player state changed while completion was pending");
                         var controller=GameApi.Controller(world);
                         var role=controller==null?null:BGU_DataUtil.GetReadOnlyData<BPC_PlayerRoleData>(controller);

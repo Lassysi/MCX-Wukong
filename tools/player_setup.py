@@ -87,6 +87,20 @@ def ini_loader(raw):
 def reskin_jar(source,skin,target):
     with zipfile.ZipFile(source) as src,zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as dst:
         for entry in src.infolist():dst.writestr(entry,Path(skin).read_bytes() if entry.filename=='assets/dqj/textures/entity/dasheng.png' else src.read(entry.filename))
+def backup_tree(source,target):
+    """Verify a closed game's save snapshot before changing installation files."""
+    source=Path(source)
+    if not source.is_dir():return False
+    rows=[(p,p.relative_to(source).as_posix(),digest(p)) for p in sorted(source.rglob('*')) if p.is_file()]
+    with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as z:
+        for p,relative,expected in rows:z.write(p,relative)
+    with zipfile.ZipFile(target) as z:
+        if z.testzip() is not None or set(z.namelist())!={r[1] for r in rows}:raise RuntimeError('Save backup verification failed. Nothing was installed. / 存档备份校验失败，未安装。')
+        for p,relative,expected in rows:
+            if digest(p)!=expected or hashlib.sha256(z.read(relative)).hexdigest()!=expected:raise RuntimeError('Save files changed during backup. Install stopped. / 存档在备份时发生变化，已停止安装。')
+    if {p.relative_to(source).as_posix() for p in source.rglob('*') if p.is_file()}!={r[1] for r in rows}:raise RuntimeError('Save files changed during backup. Install stopped. / 存档在备份时发生变化，已停止安装。')
+    return True
+
 def install(bundle,game,mc,client,skin=None,skip_prologue=True,log=print,strict=True):
     check_closed();bundle=Path(bundle);manifest,game,native,mc=preflight(bundle,game,mc,client,strict)
     backup=native/'MCX-Wukong-backups'/uuid.uuid4().hex
@@ -105,15 +119,8 @@ def install(bundle,game,mc,client,skin=None,skip_prologue=True,log=print,strict=
         if skip_prologue:plan.append(('game','CSharpLoader/Mods/DqjCombat/skip-prologue.on',b''))
         elif (native/'CSharpLoader/Mods/DqjCombat/skip-prologue.on').exists():raise RuntimeError('An old prologue-skip setting exists. Remove the previous MCX configuration first. / 已有序章跳过设置，请先移走旧版 MCX 配置后安装。')
         # Back up native progression locally; rollback never restores it automatically.
-        saves=game/'b1/Saved/SaveGames'
-        if saves.is_dir():
-            save_rows=[(p,p.relative_to(saves).as_posix(),digest(p)) for p in sorted(saves.rglob('*')) if p.is_file()]
-            with zipfile.ZipFile(backup/'native-save-before-install.zip','w',zipfile.ZIP_DEFLATED) as z:
-                for p,relative,expected in save_rows:z.write(p,relative)
-            with zipfile.ZipFile(backup/'native-save-before-install.zip') as z:
-                if z.testzip() is not None:raise RuntimeError('Save backup verification failed. Nothing was installed. / 存档备份校验失败，未安装。')
-                for p,relative,expected in save_rows:
-                    if digest(p)!=expected or hashlib.sha256(z.read(relative)).hexdigest()!=expected:raise RuntimeError('Save files changed during backup. Install stopped. / 存档在备份时发生变化，已停止安装。')
+        backup_tree(game/'b1/Saved/SaveGames',backup/'native-save-before-install.zip')
+        backup_tree(mc/'saves/MCX-Wukong',backup/'minecraft-world-before-install.zip')
         try:
             for i,(scope,relative,data) in enumerate(plan):
                 target=safe(native if scope=='game' else mc,relative)

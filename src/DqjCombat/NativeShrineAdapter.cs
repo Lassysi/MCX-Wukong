@@ -25,6 +25,7 @@ namespace DqjCombat
             state.Diagnostic="dataOwner=LocalPlayerState busy="+state.Busy+" target="+(actor==null?"none":actor.GetType().FullName)
                 +" sameWorld="+(NativeObjectLifetime.Live(actor)&&NativeObjectLifetime.ActorWorld(actor)==playerWorld);
             state.SelectedInteractable=NativeObjectLifetime.Live(actor)&&actor!=player&&NativeObjectLifetime.ActorWorld(actor)==playerWorld;
+            if(state.SelectedInteractable)state.TargetClass=actor.GetType().Name+" "+actor.GetClass().GetName();
             if(actor is BGURebirthPointBase&&NativeObjectLifetime.Live(actor)&&NativeObjectLifetime.ActorWorld(actor)==playerWorld){
                 state.SelectedShrine=true;
                 MethodInfo selected=null;

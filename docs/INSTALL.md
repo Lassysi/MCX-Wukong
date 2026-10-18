@@ -4,6 +4,8 @@ English | [简体中文](INSTALL.zh-CN.md)
 
 You need both games. Make sure each game starts on its own before installing the bridge.
 
+Existing users: follow the [upgrade guide](UPGRADE.md) before replacing files.
+
 ## 1. Check the requirements
 
 | Component | Required version | Where to get it |
@@ -24,11 +26,11 @@ Exit both games normally before installing or uninstalling.
 
 ## 2. Get the player package
 
-Download [MCX-Wukong-v0.1.0-beta.1-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.1.0-beta.1/MCX-Wukong-v0.1.0-beta.1-Players.zip) and extract it into a separate folder.
+Download [MCX-Wukong-v0.2.0-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.2.0/MCX-Wukong-v0.2.0-Players.zip) and extract it into a separate folder.
 
 Players need the **Players ZIP**. GitHub's automatic **Source code** downloads are for developers.
 
-The extracted folder contains `MCX-Wukong-Setup.exe`, `MCX-Wukong-v0.1.0-beta.1.mrpack`, `payload`, guides and licenses. Keep these files together; run the installer from this folder.
+The extracted folder contains `MCX-Wukong-Setup.exe`, `MCX-Wukong-v0.2.0.mrpack`, `payload`, guides and licenses. Keep these files together; run the installer from this folder.
 
 ## 3. Install the Black Myth loader
 
@@ -55,7 +57,7 @@ Start with a clean Black Myth installation. Compatibility with other character, 
 These steps use [Prism Launcher](https://prismlauncher.org/). Other launchers must support `.mrpack` imports.
 
 1. Install the launcher and sign in with your own Minecraft Java account.
-2. Add an instance using Import, then select `MCX-Wukong-v0.1.0-beta.1.mrpack`.
+2. Add an instance using Import, then select `MCX-Wukong-v0.2.0.mrpack`.
 3. Wait for the mods to download. Keep Minecraft 1.21.4 and Fabric Loader 0.19.5.
 4. Select **64-bit Java 21** for the instance. You can start with a 4096 MiB memory allocation.
 5. Launch to Minecraft's main menu, then exit normally. This first launch downloads the client and runtime files.
@@ -89,7 +91,7 @@ Select the vanilla game client, not a file in `mods`, a Fabric installer or a se
 
 **Skip the entire prologue in new saves** is checked by default, including its combat. Uncheck it to keep the native prologue. Opening character appearance may still have issues.
 
-Click **Install / 安装** and wait. Setup backs up replaced files and Black Myth saves, generates local textures and a character mesh, and creates an empty **MCX-Wukong** world. Players do not need Python, a JDK or the .NET SDK.
+Click **Install / 安装** and wait. Setup backs up replaced files, Black Myth saves and any existing marked MCX world, generates local textures and a character mesh, and creates an empty **MCX-Wukong** world only when absent. Players do not need Python, a JDK or the .NET SDK.
 
 If a version check fails, read the error and stop. Other game builds need separate validation.
 
@@ -99,7 +101,7 @@ If a version check fails, read the error and stop. Other game builds need separa
 2. Keep Minecraft running. Use Alt+Tab to switch windows; leave Minecraft unminimized.
 3. Start Black Myth and choose New Game or Continue. Play with the Black Myth window focused.
 4. Wait for bridge initialization, which can take tens of seconds. The Minecraft world is empty while waiting.
-5. After the bridge takes over, press T and enter `/function mcx:starter` to claim basic equipment once. See the FAQ for guns.
+5. After the bridge takes over, press T and enter `/function mcx:starter` to claim basic equipment once. Buy guns and ammunition near an activated shrine; see [usage](USAGE.md).
 
 Use Minecraft controls to move and manage equipment. Press H for gathering, chests and shrines, F6 for Black Myth's map, and Esc for its menu. Hold E to try skipping real-time cutscenes; some scenes still cannot be skipped.
 
@@ -113,6 +115,6 @@ Native story transformations such as the cicada stay under Black Myth's control.
 - To uninstall, close both games, run setup with the original two folders, and click **Uninstall / 卸载**.
 - Saves, worlds, backups and the third-party loader are kept. Uninstall restores program files without rolling back later game progress.
 
-Original-file and Black Myth save backups are under `b1/Binaries/Win64/MCX-Wukong-backups`.
+Original-file, Black Myth save and existing MCX world backups are under `b1/Binaries/Win64/MCX-Wukong-backups`.
 
 This is a public beta. Fresh installations, skin appearance, long story scenes and chapter transitions require further in-game testing. See the [FAQ](FAQ.md) and [known issues](KNOWN-ISSUES.md).

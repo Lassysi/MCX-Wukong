@@ -38,7 +38,12 @@ public final class BlockGravity {
         }
         return false;
     }
+    /** Preview103: game tick of the last block change per cell, except changes made by landings() itself.
+     *  A falling block was placed by vanilla only if its own landing cell changed in the last tick. */
+    private static final java.util.Map<BlockPos,Long> lastSet=new ConcurrentHashMap<>();
+    private static boolean placingSelf;
     static void changed(ServerLevel level,BlockPos pos){
+        if(!placingSelf){if(lastSet.size()>4096)lastSet.clear();lastSet.put(pos.immutable(),level.getGameTime());}
         if(queue.size()>8192)return;
         queue.add(pos.immutable());queue.add(pos.above().immutable());
     }
@@ -62,9 +67,49 @@ public final class BlockGravity {
             var f=it.next();var e=f.entity();
             if(!e.isRemoved())continue;
             it.remove();
+            var reason=e.getRemovalReason();
+            if(reason!=null&&reason.shouldSave())continue; // chunk unloaded mid-fall: the saved entity resumes later (rare; not re-tracked)
             BlockPos at=e.blockPosition();
-            if(level.getBlockState(at).is(f.state().getBlock()))
-                try{HostBlockAnchors.landed(level,at,level.getBlockState(at),e.getX(),e.getZ());}catch(RuntimeException ex){Passthrough.LOG.warn("DQJ gravity landing {}: {}",at,ex.toString());}
+            // Preview103 (user: a broken block's column should drop and land as blocks, like felling a tree, not
+            // turn into items): vanilla drops the block as an item when its cell cannot hold it, which on Wukong
+            // ground is usually the partial-height ground barrier. Our falling blocks never drop; we place them here.
+            // Live103 self-test: a block landing on an earlier, sunk (offset) block rests inside that block's cell, so
+            // "a block of this type is here" is not proof; only a vanilla change of this cell in the last tick is.
+            Long set=lastSet.remove(at);
+            boolean vanillaPlaced=level.getBlockState(at).is(f.state().getBlock())&&set!=null&&level.getGameTime()-set<=2;
+            placingSelf=true;
+            try{
+            if(!vanillaPlaced){
+                BlockPos free=null;
+                for(int up=0;up<=3&&free==null;up++){
+                    var c=at.above(up);var s=level.getBlockState(c);
+                    if(!WorldBridge.isHostProxy(c)&&(s.isAir()||s.canBeReplaced())&&s.getFluidState().isEmpty())free=c;
+                }
+                if(free==null){
+                    net.minecraft.world.level.block.Block.popResource(level,at,new net.minecraft.world.item.ItemStack(f.state().getBlock()));
+                    Passthrough.LOG.info("DQJ gravity: {} found no free cell at {}; dropped as item",f.state().getBlock(),at.toShortString());
+                    continue;
+                }
+                level.setBlock(free,f.state(),3);at=free;
+            }
+            try{HostBlockAnchors.landed(level,at,level.getBlockState(at),e.getX(),e.getZ());}catch(RuntimeException ex){Passthrough.LOG.warn("DQJ gravity landing {}: {}",at,ex.toString());}
+            liftPlayers(level,at);
+            }finally{placingSelf=false;}
+        }
+    }
+    /** Live109 (user: standing on a stack whose bottom breaks, Steve fell into a landed block and got stuck): a player
+     *  whose body overlaps a just-landed block (its anchored, possibly sunk shape) is lifted onto its top, so riding a
+     *  falling stack ends standing on it. */
+    private static void liftPlayers(ServerLevel level,BlockPos at){
+        var shape=level.getBlockState(at).getCollisionShape(level,at);
+        if(shape.isEmpty())return;
+        var box=shape.bounds().move(at);
+        for(var p:level.players()){
+            if(!p.isAlive()||p.isSpectator()||!p.getBoundingBox().deflate(.01).intersects(box))continue;
+            double top=box.maxY+.001;
+            if(top-p.getY()>2.5)continue; // a block far above the feet is a ceiling, not a floor
+            p.teleportTo(p.getX(),top,p.getZ());p.resetFallDistance();p.setDeltaMovement(p.getDeltaMovement().multiply(1,0,1));
+            Passthrough.LOG.info("DQJ gravity: lifted {} onto landed {} at {} (top {})",p.getScoreboardName(),level.getBlockState(at).getBlock(),at.toShortString(),String.format(java.util.Locale.ROOT,"%.2f",top));
         }
     }
     private static void fallIfFree(ServerLevel level,BlockPos pos){
@@ -86,7 +131,8 @@ public final class BlockGravity {
         waiting.remove(pos);
         var entity=FallingBlockEntity.fall(level,pos,state);
         if(offset!=net.minecraft.world.phys.Vec3.ZERO)entity.setPos(pos.getX()+.5+offset.x,pos.getY()+offset.y,pos.getZ()+.5+offset.z);
-        if(falling.size()<512)falling.add(new Fall(entity,state));
+        // Preview103: only tracked falls skip the vanilla item drop; landings() places them as blocks.
+        if(falling.size()<512){entity.dropItem=false;falling.add(new Fall(entity,state));}
         if(logged++<200)Passthrough.LOG.info("DQJ gravity: {} at {} falls (offset {})",state.getBlock(),pos.toShortString(),offset);
     }
     /** Any block or host proxy in a cell under the (shifted) footprint holds the block up. */

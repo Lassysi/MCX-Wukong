@@ -1,0 +1,27 @@
+gradle.beforeProject { p ->
+    p.plugins.withId('net.fabricmc.fabric-loom-remap') {
+        def fixture = new File(p.rootDir, '../tests/capture-lease')
+        p.sourceSets {
+            captureLease {
+                java.srcDir new File(fixture, 'java')
+                resources.srcDir new File(fixture, 'resources')
+                compileClasspath += p.sourceSets.main.compileClasspath + p.sourceSets.main.output
+                runtimeClasspath += p.sourceSets.main.runtimeClasspath + p.sourceSets.main.output
+            }
+        }
+        p.loom {
+            mods { captureLease { sourceSet p.sourceSets.captureLease } }
+            runs {
+                captureLease {
+                    server()
+                    name 'Isolated capture lease GameTest'
+                    source p.sourceSets.captureLease
+                    runDir '../../.work/capture-lease-gametest'
+                    vmArg '-Dfabric-api.gametest'
+                    vmArg '-Dfabric-api.gametest.report-file=reports/results.xml'
+                    vmArg '-Dfile.encoding=UTF-8'
+                }
+            }
+        }
+    }
+}

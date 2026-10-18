@@ -7,6 +7,7 @@ namespace DqjCombat
         internal int Id;
         internal bool SelectedShrine,SelectedInteractable,Busy,Activated;
         internal string Diagnostic;
+        internal string TargetClass; // Preview102: native selected target class, for the MC interaction hint
     }
     // Native selection owns the target: shrines, gathering, chests and story interactions.
     // The original action owns rewards/quest flags. Only shrine completion counts as rest.

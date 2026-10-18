@@ -14,6 +14,7 @@ abstract class HostProxyLerpMixin {
     private void dqj$snap(double x,double y,double z,float yRot,float xRot,int steps,CallbackInfo ci){
         var self=(LivingEntity)(Object)this;
         if(!CombatBridge.isProxy(self))return;
+        if(self.isPassenger()){ci.cancel();return;}
         self.setPos(x,y,z);self.setOldPosAndRot();ci.cancel();
     }
 }

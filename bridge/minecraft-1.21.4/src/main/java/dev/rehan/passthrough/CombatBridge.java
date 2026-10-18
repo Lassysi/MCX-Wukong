@@ -18,6 +18,11 @@ public final class CombatBridge {
     private static final Map<String,Pig> targets=new LinkedHashMap<>();
     private static final Map<UUID,String> ids=new ConcurrentHashMap<>();
     private static final Map<UUID,float[]> sizes=new ConcurrentHashMap<>();
+    /** Live112: host enemy category for Smite/Bane ("undead", "arthropod" or ""). */
+    private static final Map<UUID,String> kinds=new ConcurrentHashMap<>();
+    /** Live112 polish (user): enemies with a bottom health bar (host hpMax >= 1000) can't be captured or reeled in. */
+    private static final Set<UUID> big=ConcurrentHashMap.newKeySet();
+    static boolean big(Entity e){return big.contains(e.getUUID());}
     private static final Set<UUID> knownProxyIds=ConcurrentHashMap.newKeySet();
     /** C1: latest proxy feet positions, read by the client thread (same JVM) to snap proxies. */
     private static final Map<UUID,double[]> positions=new ConcurrentHashMap<>();
@@ -62,6 +67,7 @@ public final class CombatBridge {
     public static boolean isProxy(Entity entity){return knownProxyIds.contains(entity.getUUID());}
     public static double[] position(UUID id){return positions.get(id);}
     public static boolean hasPositions(){return !positions.isEmpty();}
+    static void seated(Entity entity){positions.remove(entity.getUUID());}
     /** combat-diag: at most 30 lines per second (fire/poison tick every 0.5 s). */
     private static boolean diag(){
         long second=System.nanoTime()/1_000_000_000L;
@@ -77,6 +83,11 @@ public final class CombatBridge {
         float after=entity.getHealth();
         // Fatal damage is deferred until the host confirms its native death/immune rules.
         float delta=before-(after<=.0011f?0:after);
+        if(!(entity instanceof ServerPlayer)){
+            String pid=ids.get(entity.getUUID());
+            float bonus=pid==null?0:Enchants.onProxyHit(entity,pid,kinds.getOrDefault(entity.getUUID(),""),source);
+            if(bonus>0){entity.setHealth(Math.max(.001f,entity.getHealth()-bonus));after=entity.getHealth();delta+=bonus;}
+        }
         String owner=source.getEntity()==null?"":source.getEntity() instanceof ServerPlayer?"player":ids.getOrDefault(source.getEntity().getUUID(),"");
         String reason=source.typeHolder().unwrapKey().map(k->k.location().toString()).orElse(source.getMsgId());
         if(diag()){
@@ -101,6 +112,8 @@ public final class CombatBridge {
         out.addProperty("source",source);
         Passthrough.events.accept(out.toString());
     }
+    /** Server thread only: live proxies by host enemy id (ProxyFx). */
+    static Map<String,Pig> proxies(){return targets;}
     public static void sync(JsonObject message){
         var s=server;if(s==null)return;s.execute(()->apply(message));
     }
@@ -140,6 +153,7 @@ public final class CombatBridge {
                     boolean front=facing>=0;
                     if(raised&&front){
                         var shield=p.getItemInHand(shieldHand);
+                        p.causeFoodExhaustion((float)Balance.shieldExhaustion()); // Preview107: blocking costs a tiny bit of hunger (scaled)
                         shield.hurtAndBreak(1+(int)Math.floor(amount),p,shieldHand==net.minecraft.world.InteractionHand.MAIN_HAND
                             ?net.minecraft.world.entity.EquipmentSlot.MAINHAND:net.minecraft.world.entity.EquipmentSlot.OFFHAND);
                         s.overworld().playSound(null,p.blockPosition(),net.minecraft.sounds.SoundEvents.SHIELD_BLOCK,net.minecraft.sounds.SoundSource.PLAYERS,1f,.9f+s.overworld().random.nextFloat()*.2f);
@@ -172,7 +186,8 @@ public final class CombatBridge {
     }
     private static long lastShieldTick=Long.MIN_VALUE/2;
     private static net.minecraft.world.InteractionHand shieldHand(net.minecraft.server.level.ServerPlayer p){
-        if(p.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem)return net.minecraft.world.InteractionHand.OFF_HAND;
+        // Live114: aiming a bow/crossbow/gun with right-click is not a raised off-hand shield.
+        if(p.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem&&!Balance.rangedMain(p))return net.minecraft.world.InteractionHand.OFF_HAND;
         if(p.getMainHandItem().getItem() instanceof net.minecraft.world.item.ShieldItem)return net.minecraft.world.InteractionHand.MAIN_HAND;
         return null;
     }
@@ -194,6 +209,9 @@ public final class CombatBridge {
         String next=m.get("session").getAsString();
         if(!next.equals(session)){clear();session=next;}
         received=System.nanoTime();ack=Math.max(ack,m.get("ack").getAsLong());
+        // Live112 (user: a monster became invincible after a pearl teleport): a >3 s sync pause clears this side and restarted
+        // the hit sequence at 1, while the host still held ack=27 and dropped every hit as a duplicate. Continue after the host's ack.
+        if(sequence<ack)sequence=ack;
         pending.entrySet().removeIf(e->e.getKey()<=ack);
         applying=true;
         try {
@@ -222,16 +240,22 @@ public final class CombatBridge {
                     server.overworld().addFreshEntity(mob);
                 }
                 sizes.put(mob.getUUID(),new float[]{Math.clamp(e.get("w").getAsFloat(),.1f,16f),Math.clamp(e.get("h").getAsFloat(),.1f,32f)});
+                kinds.put(mob.getUUID(),e.has("k")?e.get("k").getAsString():"");
+                if(e.has("big")&&e.get("big").getAsBoolean())big.add(mob.getUUID());else big.remove(mob.getUUID());
                 mob.refreshDimensions();
                 var pos=e.getAsJsonArray("p");double x=pos.get(0).getAsDouble(),y=pos.get(1).getAsDouble(),z=pos.get(2).getAsDouble();
                 if(!Double.isFinite(x)||!Double.isFinite(y)||!Double.isFinite(z))continue;
-                mob.teleportTo(x,y,z);mob.setDeltaMovement(0,0,0);positions.put(mob.getUUID(),new double[]{x,y,z});
+                ProxyFx.capture(id,mob.getDeltaMovement()); // D1: knockback is read before the per-frame reset
+                // Live112 polish: a proxy seated in a boat/minecart stays in it (the host freezes the real monster).
+                if(!mob.isPassenger()){mob.teleportTo(x,y,z);positions.put(mob.getUUID(),new double[]{x,y,z});}
+                else seated(mob);
+                mob.setDeltaMovement(0,0,0);
                 mob.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Math.clamp(max,1,1024));
                 mob.setHealth(Math.clamp(hp-outstanding(id),.001f,mob.getMaxHealth()));
                 observed.put(mob.getUUID(),mob.getHealth());
             }
             for(var iter=targets.entrySet().iterator();iter.hasNext();){var e=iter.next();if(!keep.contains(e.getKey())){
-                var mob=e.getValue();ids.remove(mob.getUUID());sizes.remove(mob.getUUID());observed.remove(mob.getUUID());positions.remove(mob.getUUID());mob.discard();iter.remove();
+                var mob=e.getValue();ids.remove(mob.getUUID());sizes.remove(mob.getUUID());kinds.remove(mob.getUUID());big.remove(mob.getUUID());observed.remove(mob.getUUID());positions.remove(mob.getUUID());mob.discard();iter.remove();
             }}
         }finally{applying=false;}
     }
@@ -295,7 +319,8 @@ public final class CombatBridge {
         out.add("targets",list);return out;
     }
     public static void clear(){
-        for(var mob:targets.values())mob.discard();targets.clear();ids.clear();sizes.clear();observed.clear();pending.clear();positions.clear();
+        ProxyFx.clear();
+        for(var mob:targets.values())mob.discard();targets.clear();ids.clear();sizes.clear();kinds.clear();big.clear();observed.clear();pending.clear();positions.clear();
         session="";sequence=ack=lastHostHealth=0;
     }
     public static void report(org.java_websocket.WebSocket conn,JsonObject request){

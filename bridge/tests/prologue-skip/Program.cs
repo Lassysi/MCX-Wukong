@@ -88,8 +88,9 @@ namespace DqjCombat
 }
 namespace UnrealEngine.Engine
 {
-    public sealed class UWorld{}
-    public sealed class APlayerState{public bool IsDestroyed,IsPendingKill;public UWorld World;}
+    public sealed class UWorld:UnrealEngine.Runtime.UObject{}
+    public class AActor:UnrealEngine.Runtime.UObject{public UWorld World;}
+    public sealed class APlayerState:AActor{}
     public sealed class APlayerController{}
     public static class UGameplayStatics{public static APlayerState GetPlayerState(UWorld world,int index){return Test.State;}}
 }
@@ -141,3 +142,5 @@ namespace b1
         public Action Evt_PostPrologueCompleted=()=>Test.Calls.Add("post");
     }
 }
+
+namespace UnrealEngine.Runtime{public class UObject{public System.IntPtr Address=new System.IntPtr(1);public bool IsDestroyed,IsPendingKill;}}

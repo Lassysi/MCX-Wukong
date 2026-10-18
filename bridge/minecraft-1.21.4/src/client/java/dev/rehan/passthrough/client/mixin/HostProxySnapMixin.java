@@ -17,6 +17,7 @@ abstract class HostProxySnapMixin {
         var level=Minecraft.getInstance().level;
         if(level==null||!CombatBridge.hasPositions())return;
         for(var entity:level.entitiesForRendering()){
+            if(entity.isPassenger())continue;
             double[] p=CombatBridge.position(entity.getUUID());
             if(p!=null){entity.setPos(p[0],p[1],p[2]);entity.setOldPosAndRot();}
         }

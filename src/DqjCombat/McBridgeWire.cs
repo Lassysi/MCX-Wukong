@@ -118,7 +118,7 @@ namespace DqjCombat
                 if(travelEvents.Count>=32)throw new IOException("Travel event queue exceeded capacity");
                 travelEvents.Enqueue(data);return;
             }
-            if(kind=="health_delta"||kind=="block_cells"||kind=="block_reset"||kind=="target_block"){
+            if(kind=="health_delta"||kind=="block_cells"||kind=="block_reset"||kind=="target_block"||kind=="mine"||kind=="explosion"||kind=="pearl"||kind=="proxy_fx"||kind=="player_fx"||kind=="player_cure"){
                 if(events.Count>=1024)throw new IOException("World event queue exceeded capacity; reconnect for full resync");
                 events.Enqueue(data);return;
             }

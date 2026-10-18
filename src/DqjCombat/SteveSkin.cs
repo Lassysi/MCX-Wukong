@@ -41,6 +41,7 @@ namespace DqjCombat
         private FName pelvis, neck, head;
         private double nextScan;
         private bool loggedError;
+        private float bodyScale=1f;
         private bool cinematic,tickLeased,nativeView,catalogueDue=true,loggedCatalogue;
         private EVisibilityBasedAnimTickOption originalAnimTick;
         internal bool Active { get; private set; }
@@ -90,6 +91,12 @@ namespace DqjCombat
                 throw new InvalidOperationException("required bones not found");
             pelvis = new FName(sPelvis); neck = new FName(sNeck); head = new FName(sHead);
             shoulderL = new FName(armL); shoulderR = new FName(armR);
+            // Preview102: transformation forms (Erlang phase-2 giant monkey) have a much larger skeleton. Steve's leg is
+            // 12 px = 70 cm; only a body clearly larger than the normal Wukong (> 1.6x) scales the parts up with it.
+            try{var leg=mesh.GetSocketLocation(new FName(legL))-mesh.GetSocketLocation(new FName(footL));
+                double ratio=Math.Sqrt(leg.X*leg.X+leg.Y*leg.Y+leg.Z*leg.Z)/(12*Scale);
+                if(ratio>1.6&&ratio<8){bodyScale=(float)ratio;Log.Write("steve-skin","large body: leg ratio="+ratio.ToString("0.00")+"; Steve parts scaled with it");}}
+            catch{}
 
             var bundle = SteveMeshBundle.Read(meshPath, ExpectedParts);
             try
@@ -220,7 +227,7 @@ namespace DqjCombat
             var profile=new CinematicSkinProfile();
             if(cinematic)try{profile=CinematicSkinProfile.Load(System.IO.Path.Combine(Log.Dir,"cg-skin-scale.txt"));}
                 catch(Exception e){Log.Write("cg-skin","scale config ignored: "+e.Message);}
-            foreach(var part in parts){var s=part.BaseScale;float width=cinematic?profile.Width:1f,height=cinematic?profile.Height:1f;
+            foreach(var part in parts){var s=part.BaseScale;float width=(cinematic?profile.Width:1f)*bodyScale,height=(cinematic?profile.Height:1f)*bodyScale;
                 part.Component.SetRelativeScale3D(new FVector(s.X*width,s.Y*width,s.Z*height));}
             if(cinematic)Log.Write("cg-skin","visual scale width="+profile.Width+" height="+profile.Height+" actor="+owner.GetName());
         }

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "dqj_capture_lease_test",
+  "version": "1.0.0",
+  "name": "Isolated capture lease tests",
+  "environment": "server",
+  "entrypoints": { "fabric-gametest": ["dev.rehan.passthrough.CaptureLeaseTests"] },
+  "depends": { "fabric-gametest-api-v1": "*", "dqjmcbridge": "*" }
+}

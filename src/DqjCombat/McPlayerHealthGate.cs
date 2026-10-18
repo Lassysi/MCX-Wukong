@@ -63,6 +63,8 @@ namespace DqjCombat
                 float max=BGUFunctionLibraryCS.BGUGetFloatAttr(player,EBGUAttrFloat.HpMax);
                 if(now-DecoyMovedAt<1.5&&max>0&&-delta>=.9f*max){Log.Write("world-health","source-less native kill ("+delta+") right after a decoy move dropped");return;}
             }
+            if(delta<0&&StatusTickDropped(id,delta,attacker==player))return;
+            float weak;if(delta<0&&id.Length>0&&WeakScale.TryGetValue(id,out weak))delta*=weak;
             // C1: attacker position lets MC apply shield rules even when the attacker
             // (projectile, spawned AoE actor) has no tracked proxy.
             string position="";
@@ -79,6 +81,39 @@ namespace DqjCombat
             }
             wire.Send("{\"t\":\"host_health\",\"session\":\""+session+"\",\"hn\":"+(++sequence)+",\"amount\":"+F(-delta/Unit)+",\"source\":\""+id+"\""+position+"}");
             Log.Write("world-health","host HP intent="+delta+" routed to MC; hn="+sequence+" source="+id);
+        }
+        // Preview107 (user: one fire/poison hit starts a damage-over-time drain; Steve keeps losing HP and the camera shakes):
+        // a native status tick (burn/poison/freeze DOT) is a small HP loss (<= 4% max) repeating from the same source at a
+        // steady 0.7-2.5 s rhythm with about the same amount, or one credited to the player itself. Such ticks only apply
+        // while the player is really swarmed (>= 8 direct hits in the last 20 s); otherwise they are dropped, so neither
+        // MC nor native HP falls and MC plays no hurt shake. The first tick of a new effect can still land.
+        private readonly Dictionary<string,double[]> lastTick=new Dictionary<string,double[]>();
+        private readonly Queue<double> directHits=new Queue<double>();
+        private int droppedTicks;
+        // Potions & items D1: weakness on an enemy scales its hits on the player; fire resistance and milk/honey block status ticks.
+        internal static readonly Dictionary<string,float> WeakScale=new Dictionary<string,float>();
+        internal static bool FireResistant;internal static double CureUntil=-100;
+        internal static int SwarmHits=20;internal static double SwarmWindow=20,TickShare=.04;
+        internal static bool LooksLikeStatusTick(double interval,float previousAmount,float amount,bool selfCredited,float share)
+        {
+            if(share>TickShare)return false;
+            return selfCredited||interval>=.7&&interval<=2.5&&Math.Abs(previousAmount-amount)<=2;
+        }
+        private bool StatusTickDropped(string id,float delta,bool selfCredited)
+        {
+            double now=Clock();
+            bool shielded=FireResistant||now<CureUntil; /* D1: fire resistance / milk / honey block native status ticks */float max=BGUFunctionLibraryCS.BGUGetFloatAttr(player,EBGUAttrFloat.HpMax);
+            float amount=-delta,share=max>0?amount/max:1;
+            double[] previous;bool tick=false;
+            if(lastTick.TryGetValue(id,out previous))tick=LooksLikeStatusTick(now-previous[0],(float)previous[1],amount,selfCredited,share);
+            else tick=selfCredited&&share<=TickShare;
+            lastTick[id]=new[]{now,amount};if(lastTick.Count>256)lastTick.Clear();
+            while(directHits.Count>0&&now-directHits.Peek()>SwarmWindow)directHits.Dequeue();
+            if(!tick){if(id.Length>0)directHits.Enqueue(now);return false;}
+            if(directHits.Count>=SwarmHits&&!shielded)return false;
+            droppedTicks++;
+            if(droppedTicks<=3||droppedTicks%25==0)Log.Write("world-health","status tick dropped (-"+amount+" from "+(id.Length==0?"none":id)+"); applies only after "+SwarmHits+" direct hits in "+SwarmWindow+" s; total dropped="+droppedTicks);
+            return true;
         }
         // MC feet Y while the decoy is active, NaN otherwise (set by McBridgeHost every frame).
         internal static double ElevatedFeetY=double.NaN;

@@ -44,6 +44,17 @@ internal static class Test
         Movie=true;session.Update(9,world,controller,null,false);session.Update(10,new UWorld(),controller,null,false);
         Check(Created==4&&Disposed==4,"world changes discard old appearance ownership");
         session.Clear();session.Clear();Check(Disposed==4,"loading/unload cleanup is idempotent");
+        // Preview102: an unnamed sequence copy carrying Wukong's mesh is the hero; a same-world NPC with another mesh is not.
+        session.Clear();int before=Created;var w2=new UWorld();
+        var copy=Actor(w2,"SkeletalMeshActor");Components[Components.Count-1].SkeletalMesh.Path="/Game/00Main/Art/Character/Player/Wukong/SK_Wukong";
+        var npc=Actor(w2,"SkeletalMeshActor");
+        session.Update(11,w2,controller,null,false);
+        Check(Created==before+1&&Skins[Skins.Count-1].Owner==copy,"Preview102: Wukong-mesh sequence copy replaced, other skeletal actors kept native");
+        var heroChar=new ACharacter{World=w2,Type="Unit_Player_Wukong_C",Name="hero"};var heroMesh=new USkeletalMesh{Skeleton=new USkeleton()};
+        heroChar.Mesh=new USkeletalMeshComponent{Owner=heroChar,Supported=true,SkeletalMesh=heroMesh};
+        var sameSkeleton=Actor(w2,"SkeletalMeshActor");Components[Components.Count-1].SkeletalMesh=new USkeletalMesh{Skeleton=heroMesh.Skeleton};
+        session.Update(12,w2,controller,heroChar,false);
+        Check(Skins[Skins.Count-1].Owner==sameSkeleton,"Preview102: copy on the controlled hero's skeleton is replaced");
         Console.WriteLine("STORY WORLD SESSION LINKED-CODE PASS checks="+checks+" (stub native actors; no visual acceptance)");return 0;
     }
 }
@@ -74,7 +85,10 @@ namespace UnrealEngine.Engine
     public class UWorld:UnrealEngine.Runtime.UObject{}
     public class AActor:UnrealEngine.Runtime.UObject{public UWorld World;public string Name,Type;public string GetName()=>Name;public ActorClass GetClass()=>new ActorClass(Type);}
     public sealed class ActorClass{private string name;public ActorClass(string n){name=n;}public string GetName()=>name;}
-    public class USkeletalMeshComponent:UnrealEngine.Runtime.UObject{public AActor Owner;public bool Supported;public object SkeletalMesh=new object();public AActor GetOwner()=>Owner;public int GetNumBones()=>Supported?100:47;}
+    public class USkeletalMeshComponent:UnrealEngine.Runtime.UObject{public AActor Owner;public bool Supported;public USkeletalMesh SkeletalMesh=new USkeletalMesh();public bool HiddenInGame;public AActor GetOwner()=>Owner;public int GetNumBones()=>Supported?100:47;}
+    public class USkeleton:UnrealEngine.Runtime.UObject{}
+    public class USkeletalMesh:UnrealEngine.Runtime.UObject{public USkeleton Skeleton;public string Path="/Game/Stub/NPC";public string GetPathName()=>Path;}
+    public class ACharacter:AActor{public USkeletalMeshComponent Mesh;}
     public class APlayerController:UnrealEngine.Runtime.UObject{public bool IsInputKeyDown(UnrealEngine.InputCore.FKey key)=>false;}
 }
 namespace b1

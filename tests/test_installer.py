@@ -62,6 +62,28 @@ class InstallerTests(unittest.TestCase):
         self.assertEqual((self.mc/'saves/平时的世界/user.data').read_bytes(),b'keep-world')
         self.assertTrue((self.mc/'saves/MCX-Wukong/level.dat').exists())
         self.assertTrue((self.native/'CSharpLoader/Mods/DqjCombat/dqj-combat.log').exists())
+    def test_upgrade_world_is_backed_up_without_changing_inventory_or_builds(self):
+        world=self.mc/'saves/MCX-Wukong';(world/'playerdata').mkdir(parents=True);(world/'region').mkdir()
+        data={'mcx-world.json':b'{"version":1}','level.dat':b'existing-progress','playerdata/player.dat':b'keep-inventory','region/r.0.0.mca':b'keep-builds'}
+        for rel,raw in data.items():(world/rel).write_bytes(raw)
+        result=self.install();self.assertFalse(result['worldCreated'])
+        backup=self.native/result['backup']/'minecraft-world-before-install.zip'
+        with zipfile.ZipFile(backup) as z:
+            self.assertEqual(set(z.namelist()),set(data))
+            for rel,raw in data.items():self.assertEqual(z.read(rel),raw)
+        with patch.object(setup,'check_closed'):setup.uninstall(self.bundle,self.game,self.mc,log=lambda _:None)
+        for rel,raw in data.items():self.assertEqual((world/rel).read_bytes(),raw)
+    def test_changed_world_during_backup_stops_before_install(self):
+        world=self.mc/'saves/MCX-Wukong';world.mkdir();(world/'mcx-world.json').write_bytes(b'{}');progress=world/'level.dat';progress.write_bytes(b'old-progress')
+        original=zipfile.ZipFile.write
+        def changing_write(z,filename,*args,**kwargs):
+            result=original(z,filename,*args,**kwargs)
+            if Path(filename)==progress:progress.write_bytes(b'new-progress')
+            return result
+        with patch.object(zipfile.ZipFile,'write',changing_write),self.assertRaises(RuntimeError):self.install()
+        self.assertFalse((self.native/setup.JOURNAL).exists())
+        self.assertFalse((self.native/'CSharpLoader/Mods/DqjCombat/DqjCombat.dll').exists())
+        self.assertEqual(progress.read_bytes(),b'new-progress')
     def test_modified_payload_rejects_before_install(self):
         (self.bundle/'payload/host.dll').write_bytes(b'tampered')
         with self.assertRaises(RuntimeError):self.install()

@@ -32,7 +32,7 @@ Minecraft must be inside the bridge world and Black Myth must have loaded a save
 
 **How do I get guns?**
 
-The pack includes Gun Core and Modern Guns. After takeover, use `/gamemode creative` to find items in the creative inventory, then `/gamemode survival` to return. See [Modern Guns](https://modrinth.com/datapack/modern-guns) for the author's item and crafting information.
+Near an activated shrine, right-click with an empty main hand or emeralds to buy chapter-dependent guns and matching ammunition. You can also use `/gamemode creative` to find items in the creative inventory, then `/gamemode survival` to return. See [Modern Guns](https://modrinth.com/datapack/modern-guns) for the author's item and crafting information.
 
 **Are commands and creative mode available?**
 
@@ -48,7 +48,7 @@ The public package uses a project-drawn skin. Select a classic 64×64 PNG in set
 
 **Are my saves and builds kept?**
 
-Setup creates a separate world and backs up Black Myth saves under `b1/Binaries/Win64/MCX-Wukong-backups`. Uninstall keeps progress and Minecraft builds.
+Setup creates a separate world only when absent and backs up Black Myth saves and existing marked MCX worlds under `b1/Binaries/Win64/MCX-Wukong-backups`. Uninstall keeps progress and Minecraft builds.
 
 **What do H and E do?**
 
@@ -57,3 +57,15 @@ H is for native interactions. Hold E to try skipping a story scene. Play with Bl
 **How do I report a problem?**
 
 Include the public version, location, reproduction steps and relevant error text. Keep account files, personal saves and full crash dumps private.
+
+**How do I use the new shop, repairs and enchanting?**
+
+Activate a shrine with H. Nearby, right-click with an empty main hand or emeralds to open the shop. Rest with H to spend emeralds on repairs. For enchanting, hold equipment in the main hand and an enchanted book in the offhand, then right-click near the shrine. Guns and matching ammunition are sold by chapter. See [usage](USAGE.md).
+
+**How do I keep my saves when upgrading?**
+
+Back up both games, uninstall with the old setup tool, import the new modpack into a new instance, copy the old MCX world, then install the new version. Do not copy old mods or installation records. See [upgrade](UPGRADE.md).
+
+**Why does a bow not fire, and why does right-click not raise my shield?**
+
+Check arrows or matching ammunition and load the crossbow first. A ranged main-hand weapon takes priority over shield use. Switch to a melee weapon to use the shield.
