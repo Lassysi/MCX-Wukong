@@ -1,16 +1,13 @@
-# Known issues and validation — v0.3.0
+# Known issues — v0.3.0
 
 English | [简体中文](KNOWN-ISSUES.zh-CN.md)
 
-Public test release, not an all-chapter completion claim. The final source is based on Preview125; earlier successful tests do not establish that every final interaction has been accepted in native gameplay. Build/test results are recorded in `validation.json`.
+This is a public test release; not every chapter, boss or fresh-install environment has been tested.
 
-- Pending broader live acceptance: chapter-3 slide/scene transition, extended high flight and grounded region handover, captures of the high-HP monk, mapping EliteBar to bottom-screen boss/chief bars, low-health pearl landings, F8 Ring-of-Fire story progression, worn-shield damage and hunger balance.
-- Large-enemy hit assistance is generic but has not been checked against every boss. Oversized boxes deliberately favor hit accessibility; shared-root checks prevent per-part damage multiplication in isolated tests.
-- Kill-volume damage filtering is a heuristic for large attacker-less losses while MC owns the health gate. It is not immunity to every environmental source. Normal enemy damage and MC fall/void/lava damage remain.
-- Some native cutscenes, transformations, scripted moves and story objects keep native control or appearance. Hold-E skipping only works for supported scenes. F8 does not bypass quest requirements or cooldowns.
-- The public v0.3.0 fresh installation and full dual-game playthrough have not been completed in this packaging session. Do not describe isolated GameTests or loader rewriting as full gameplay acceptance.
-- CSharpLoader must be downloaded separately from its author. There is no promised Melty one-click release. Both licensed games and the exact supported versions are required.
-- Gun Core/Modern Guns include two pre-existing debug give functions referencing absent loot tables. Production shop paths and ammunition are tested separately; third-party JARs are unchanged. M202 remains excluded.
-- Skin replacement requires a classic 64×64 PNG and reinstall. Dynamic skin hot-swapping, slim-arm skins and universal native cutscene coverage are not promised.
-- Minimum hardware and performance across other PCs have not been measured. See [performance](PERFORMANCE.md); streaming recommendations are starting points, not benchmarks.
-- Use a dedicated MCX world paired with the correct native save. Do not update pinned third-party mods independently or copy an old world over later progress.
+- More playtesting is needed for chapter-3 slides, long/high flight, grounded region switches, monk capture, F8 story spells, low-health pearl landings and worn shields. Native EliteBar data is treated as a chief/boss bar; that mapping still needs confirmation.
+- Some cutscenes, transformations and scripted moves retain native control or appearance. Hold-E skipping only works in supported scenes. F8 does not bypass quest requirements.
+- Large-boss hit assistance may need adjustment for individual enemies. The native kill-zone filter does not prevent all environmental damage; ordinary attacks and MC fall/void/lava damage remain.
+- Gun Core/Modern Guns have two pre-existing debug functions referencing missing loot tables; the shop uses tested paths. M202 is excluded. Skin changes need a classic 64×64 PNG and reinstall; slim-arm skins and live swapping are unsupported.
+- Other game/mod versions and minimum hardware requirements are unverified. Use the pinned dependencies and a dedicated MCX world paired with the right native save.
+
+Build and isolated test results are in [validation.json](../validation.json). They do not replace a full dual-game playthrough. [FAQ](FAQ.md) · [Performance](PERFORMANCE.md)

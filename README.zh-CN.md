@@ -2,93 +2,42 @@
 
 [English](README.md) | 简体中文
 
-将 Minecraft 的移动、视角、背包、装备和方块系统接入《黑神话：悟空》，保留黑神话的地图、怪物、Boss 和主线流程。需要在同一台电脑上同时运行两个游戏。
+用 Minecraft 的移动、装备和建造玩法游玩《黑神话：悟空》。保留悟空的地图、敌人和剧情，两款游戏需在同一台电脑上同时运行。
 
-**[下载 v0.3.0 玩家包](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip)** · [版本页面](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.3.0) · [首次安装](docs/INSTALL.zh-CN.md) · [旧版升级](docs/UPGRADE.zh-CN.md)
+**[下载 v0.3.0 玩家包](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip)** · [本次更新](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.3.0) · [安装](docs/INSTALL.zh-CN.md) · [旧版升级](docs/UPGRADE.zh-CN.md)
 
-v0.3.0 为公开测试版。部分实机剧情、章节切换和全新环境安装仍需进一步验证，详见[已知问题](docs/KNOWN-ISSUES.zh-CN.md)。
+## 玩法
 
-## 主要功能
+- 用剑、弓、枪械、TNT 和药水战斗，搭方块建造掩体和平台。
+- 在土地庙购买、维修和附魔装备；获得灵蕴时额外赚取绿宝石。
+- 用鞘翅飞行、末影珍珠传送，或用船和矿车困住普通怪物。
+- 自选一张皮肤，两端共用；剧情需要悟空技能时，按 F8 切回原生操作。
 
-- 使用 MC 的移动、视角、背包和装备系统；武器与护甲属性参与伤害和防御计算。
-- 放置、拆除方块，搭建掩体和平台。普通建筑方块失去下方支撑后会下坠，怪物累计攻击约三次可破坏方块。
-- 使用剑斧、弓弩、枪械、TNT、岩浆和伤害药水攻击黑神话怪物，也可用刷怪蛋召唤生物助战。
-- 盾牌抵挡正面攻击；支持食物、治疗效果、末影珍珠传送和鞘翅飞行。
-- 保留土地庙、传送、采集和开箱等原生交互，支持 MC 指令和创造模式。
-- 新增灵蕴收益兑换绿宝石、土地庙商店、主动维修交易和附魔书应用。
-- 新增部分药水、地形减速与附魔对黑神话敌人的效果，以及可破坏场景物件的交互。
-- 可导入自选皮肤，两端使用同一张 PNG。新存档默认跳过序章及序章战斗，后续实机 CG 可长按 E 尝试跳过。
+## 运行要求
 
-具体操作、限制和数值见[使用说明](docs/USAGE.zh-CN.md)。尚未完成全部章节、Boss、物品和组合的验证。
+Windows 64 位、**黑神话 Steam build 21393610**、**Minecraft Java 1.21.4**、**Fabric 0.19.5**、**Java 21**。[CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) 需单独下载，仅支持本机单人。
 
-## 前置要求
+## 开始游玩
 
-| 内容 | 要求 |
+1. 解压 **Players.zip**，按作者说明安装 CSharpLoader。
+2. 用 [Prism Launcher](https://prismlauncher.org/) 导入随包 `.mrpack`，登录账号，启动到 MC 主菜单一次后退出。
+3. 关闭两款游戏，运行 `MCX-Wukong-Setup.exe`，选择游戏目录及原版 1.21.4 客户端 JAR。皮肤可选填。
+4. 进入 **MCX-Wukong** 世界，保持 MC 运行且不最小化，再启动黑神话，在黑神话窗口操作。
+
+联动后输入 `/function mcx:starter` 可领取一次初始装备。每份黑神话存档使用对应的专用 MCX 世界，结束时先退出黑神话，再退出 MC。旧版用户请按[升级说明](docs/UPGRADE.zh-CN.md)操作。
+
+## 按键
+
+| 操作 | 按键 |
 |---|---|
-| 系统 | Windows 64 位；目前参考环境为 Windows 11 |
-| 黑神话：悟空 | Steam PC 版，build **21393610** |
-| Minecraft | **Java 版 1.21.4**，使用自己的 Java 版账号 |
-| Fabric Loader | **0.19.5**，导入随包整合包时配置 |
-| Java | 启动器中选择 **64 位 Java 21** |
-| 黑神话加载器 | **CSharpLoader 0.1.0**，从作者原站单独下载 |
-| 其他组件 | 玩家包包含 ReShade 6.8.0 和联动组件；启动器下载指定 MC 模组 |
-| MC 启动器 | 需支持 `.mrpack` 导入；安装说明以 Prism Launcher 为例 |
+| 移动、战斗、方块、背包 | MC 常规操作；E 打开背包 |
+| 采集、开箱、土地庙 | H |
+| 黑神话地图／菜单 | F6／Esc |
+| 切换 MC／悟空原生控制 | F8 |
+| 尝试跳过支持的 CG | 长按 E |
 
-仅支持本机单人联动，不支持基岩版和多人游戏。其他游戏版本未验证，安装器会检查版本。不能使用原版 MC 或缺少指定模组的实例。
+**公开测试版：**部分剧情衔接、高空飞行和捕捉场景仍待实测，详见[已知问题](docs/KNOWN-ISSUES.zh-CN.md)。
 
-电脑需要同时运行两个游戏，暂未测定最低硬件要求。MC 可先分配 4 GB 内存，初始使用 1280×720 窗口、渲染距离 6，其余资源留给黑神话和系统。
+[使用说明](docs/USAGE.zh-CN.md) · [数值与商店](docs/BALANCE.zh-CN.md) · [皮肤](docs/SKINS.zh-CN.md) · [常见问题](docs/FAQ.zh-CN.md) · [性能](docs/PERFORMANCE.zh-CN.md) · [更新日志](CHANGELOG.zh-CN.md) · [编译](docs/BUILD.zh-CN.md)
 
-## 安装与启动
-
-1. 下载并完整解压上方 **Players.zip**。GitHub 的 `Source code` 不是玩家安装包。
-2. 按作者说明，将 [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) 安装到黑神话 `b1/Binaries/Win64`。
-3. 用 [Prism Launcher](https://prismlauncher.org/) 等支持整合包导入的启动器，导入 `MCX-Wukong-v0.3.0.mrpack`。登录自己的 MC 账号，启动到主菜单一次后正常退出。
-4. 关闭两个游戏。打开 `MCX-Wukong-Setup.exe`，选择黑神话根目录、MC 实例游戏目录，以及原版 MC 1.21.4 客户端 JAR。
-5. 第四项可选择 **64×64、经典四像素手臂 PNG**；留空使用项目自绘皮肤。点击“安装”。玩家无需安装 Python、JDK 或 .NET SDK。
-6. 启动 MC，进入安装器创建的 **MCX-Wukong** 世界；保持 MC 窗口运行且不最小化，再启动黑神话。日常操作在黑神话窗口中进行。
-7. 等待联动接管，按 T 输入 `/function mcx:starter` 可领取一次基础装备。
-
-首次导入需要联网。本项目联动 JAR 已随包提供，其余 8 个指定模组由启动器下载。无需自己逐个查找，也不要自行更新版本。详细目录示例、Java 设置和启动步骤见[首次安装](docs/INSTALL.zh-CN.md)。
-
-## 常用操作
-
-| 操作 | 按键或方式 |
-|---|---|
-| 移动、攻击、放置、背包 | MC 常用操作；E 打开背包 |
-| 采集、开箱、土地庙原生交互 | H |
-| 黑神话地图 / 菜单 | F6 / Esc |
-| 尝试跳过实机 CG | 长按 E；部分剧情不支持 |
-| MC 聊天 / 指令 | T / 斜杠 |
-| 土地庙商店 | 靠近已激活土地庙，主手空手或拿绿宝石，右键 |
-| 土地庙附魔 | 主手拿装备、副手拿附魔书，在已激活土地庙附近右键 |
-
-金蝉等剧情变身由黑神话接管，等待原生流程结束。剧情或章节加载期间不要强行切换世界。
-
-## 存档与卸载
-
-每次使用同一个 MC 实例与联动世界，读取对应黑神话存档。不要用日常 MC 生存世界，也不建议让多个黑神话存档共用联动世界。
-
-结束时先让黑神话正常保存并退出，再让 MC 保存退出。卸载时关闭两个游戏，使用同版本安装器选择原来的两个目录，点击“卸载”。存档、建筑、备份和第三方加载器会保留。
-
-## 文档
-
-- [使用说明](docs/USAGE.zh-CN.md)
-- [旧版升级](docs/UPGRADE.zh-CN.md)
-- [自定义皮肤](docs/SKINS.zh-CN.md)
-- [常见问题](docs/FAQ.zh-CN.md)
-- [已知问题](docs/KNOWN-ISSUES.zh-CN.md)
-- [更新记录](CHANGELOG.zh-CN.md)
-- [编译源码](docs/BUILD.zh-CN.md)
-- [第三方说明](THIRD-PARTY-NOTICES.zh-CN.md)
-
-原创代码采用 MIT 许可，第三方组件按各自许可使用。本项目为非官方项目，与 Mojang、Microsoft 或游戏科学无隶属关系。
-
-## v0.3.0 更新
-
-F8 原生控制切换、大型 Boss 判定及后退修复、剧情传送／飞行／滑坡恢复、土地庙主动维修及商店重整。
-
-- [完整更新说明](docs/RELEASE-v0.3.0.md)
-- [数值和价格](docs/BALANCE.zh-CN.md)
-- [性能与直播](docs/PERFORMANCE.zh-CN.md)
-
-休息不再扣绿宝石自动维修；耐久与饥饿恢复原版速率。旧说明如有冲突，以本版使用说明和更新日志为准。
+原创代码采用 MIT 许可，[第三方组件](THIRD-PARTY-NOTICES.zh-CN.md)按各自许可使用。非官方项目，与 Mojang、Microsoft、游戏科学无隶属关系。
