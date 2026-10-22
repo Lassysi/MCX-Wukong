@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "release": "v0.2.0",
+  "release": "v0.3.0",
   "files": [
     {
       "path": ".gitattributes",
@@ -19,13 +19,13 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 1037,
-      "sha256": "410f37a55768309e67fbce2b579762cb345cc040543b573624f3f6110212ccf9"
+      "bytes": 6949,
+      "sha256": "fbd9d16ca7a5f77ff02b5720e120e88552572399487099a7abc1d1da84add221"
     },
     {
       "path": "CHANGELOG.zh-CN.md",
-      "bytes": 912,
-      "sha256": "8133d5858d0786590675e02ffa1c35223197034aff0b170f26346a81232d6824"
+      "bytes": 6041,
+      "sha256": "314d417d32889f1c787ff9c8846d735a7888771192e90d548606be304bc4a6d1"
     },
     {
       "path": "GITHUB-DESCRIPTION.txt",
@@ -119,13 +119,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 5892,
-      "sha256": "579d79da1c14d2cc708395e100efd9f3665e47192f2478ac7b81d48bddb3b7c0"
+      "bytes": 6447,
+      "sha256": "f5df2c3574e38b3543aca1c86d674ae91bb878ccb796366461f5ca2ecdd8e4c4"
     },
     {
       "path": "README.zh-CN.md",
-      "bytes": 5602,
-      "sha256": "f888164295f2a5b8cb9d24de0d45f9a796ba2b9e1b2a13b569c7f68ea1f55c9f"
+      "bytes": 6050,
+      "sha256": "2e1d96645333bb94db2df21e121cdae83143ad00197fe2766c9c95655c77a36c"
     },
     {
       "path": "THIRD-PARTY-NOTICES.md",
@@ -260,7 +260,7 @@
     {
       "path": "bridge/minecraft-1.21.4/gradle.properties",
       "bytes": 223,
-      "sha256": "2c91529f6c8685e6c74c6a9b6f077eaaaa8caefc0c14ba63a8222846c4248376"
+      "sha256": "6fcae3ebbc67bcd7743a8ea2a5ba9213257db69da269e4915ad370742557975e"
     },
     {
       "path": "bridge/minecraft-1.21.4/gradle/wrapper/gradle-wrapper.jar",
@@ -329,8 +329,8 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/client/java/dev/rehan/passthrough/client/HostLink.java",
-      "bytes": 4644,
-      "sha256": "89416c0d283efa41bb317d044697af4625de2bdcc797750a70e66347db122fda"
+      "bytes": 5413,
+      "sha256": "93d5cb82f6ea333d9d6cd4190cc8fc7248f56ac404e2bb71fa12058f63034392"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/client/java/dev/rehan/passthrough/client/HostRayDiagnostics.java",
@@ -508,6 +508,11 @@
       "sha256": "777d2fa99d1ff8bad8ebc4c4c039c8239fccdc180419156a7315dfa5169f0d67"
     },
     {
+      "path": "bridge/minecraft-1.21.4/src/client/java/dev/rehan/passthrough/client/mixin/NativePauseMixin.java",
+      "bytes": 857,
+      "sha256": "9a083fb732569a863ddcfe03b22bb14ea43b0e89777969fd7effca552a72f372"
+    },
+    {
       "path": "bridge/minecraft-1.21.4/src/client/java/dev/rehan/passthrough/client/mixin/OverlayColorMaskMixin.java",
       "bytes": 1597,
       "sha256": "27929aa86a3671316ac87c9f677f7d6c0c15a24326f95dcf54d0f011a23f9615"
@@ -529,8 +534,8 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/client/resources/dqjbridge.client.mixins.json",
-      "bytes": 869,
-      "sha256": "b9b4b7161cf84c324a148a65c8a62b23a2285d5ac70008f9c262fbcc815763d8"
+      "bytes": 1075,
+      "sha256": "ad23557229cd8a97560edfa738820081b16b970410ec09b945ade52df7ce0583"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/Allies.java",
@@ -539,23 +544,33 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/Balance.java",
-      "bytes": 12227,
-      "sha256": "dfc25057071bde01b642a552a3863d0b075d7a6dbd69d59aa70a21155fb2a9a5"
+      "bytes": 18255,
+      "sha256": "f3f2f54747247fb9f198d4ce995c5443fd8d71937e236a8319844a07a54d5da6"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/BlockGravity.java",
-      "bytes": 10074,
-      "sha256": "ee6eacc394fa56280322e5b9599b374a8a6cb72893cb659d263d4399985a8957"
+      "bytes": 10822,
+      "sha256": "a11dfd6b81a146ec1b0d6f89e183bd3a63c7d470929cf3b117d10b9f130fb541"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/CombatBridge.java",
-      "bytes": 24493,
-      "sha256": "f495ba07c6a610ee1a230833d83a890e7fdfadba5ef0b733a108e63452d5dace"
+      "bytes": 26471,
+      "sha256": "ee9186d71b31e1a078462db22560f9249017106226e907a49a3169fdf6028de8"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/Enchants.java",
       "bytes": 4821,
       "sha256": "c6b7fbbe473f3c4057c945cd1c3770468d098c9bda8d9956c5da41dfd625bbe4"
+    },
+    {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/EquipmentBalance.java",
+      "bytes": 3440,
+      "sha256": "abe8449e42ac649ee3a3996ef531b60cd25e3a530a61103a85b630bdfaae840f"
+    },
+    {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/GoldenApple.java",
+      "bytes": 3437,
+      "sha256": "9f53dc202fa35b09f55130693703c0389bb14a2bce99eee326f261bd6fda128e"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/GroundSpawn.java",
@@ -564,8 +579,8 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/HostBlockAnchors.java",
-      "bytes": 22709,
-      "sha256": "dd203ff023a9f4bff4d06d19a865a6831245c844e3bd51bd0fe133dbbdce335d"
+      "bytes": 22924,
+      "sha256": "7d142c22f0db6b1229207ba4098a83a907bd0784a573b5f993caad543d82774e"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/HostTerrainTarget.java",
@@ -573,9 +588,19 @@
       "sha256": "a7f10cb8eba97b2bd8e9cd33cd1065b6975f83fc13e9f9d558d2d34072ac9631"
     },
     {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/MultipartTargets.java",
+      "bytes": 1682,
+      "sha256": "07e9d3cf19a9911746f48f05e0dca068160b6cc80990a1ba16da0a1055e8acd6"
+    },
+    {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/NativePause.java",
+      "bytes": 3152,
+      "sha256": "ecbbf8ee96ed3fb13de24c3442ed69c35f371a37d77056e26e108ecc59345bad"
+    },
+    {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/Passthrough.java",
-      "bytes": 1195,
-      "sha256": "517b8134a8decda7ae35153f34224a95862445e870b46546f1564ad3fbf2de2d"
+      "bytes": 1259,
+      "sha256": "69d5a9ffeb7e7fcf0e3c982ab23f81ac517922d6f7e81922fbfeae6e92221964"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/Pearls.java",
@@ -594,13 +619,13 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/ProxyFx.java",
-      "bytes": 9363,
-      "sha256": "01654f3a031f1f63eb086f5f11adaf4a0dd253241c013cc74283bb066bd1e999"
+      "bytes": 11210,
+      "sha256": "ecc7c532a3a9f8a07f678a330be449ef73f38df8ea8f883bcd62ac572e8e526f"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/ShrineShop.java",
-      "bytes": 19521,
-      "sha256": "5fbdaedd72eab80167703b4cd254b783a00823d4c39e5f954812b4140beb14f3"
+      "bytes": 23329,
+      "sha256": "50f21de2dbc2a9f49780f0d184ab9e3f93965e3bd2eb0f5f28e71579611047b1"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/TerrainLease.java",
@@ -609,8 +634,8 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/WorldBridge.java",
-      "bytes": 19260,
-      "sha256": "c00c18c662d47df0122166eb49481e1b993e00b57756ca8f64c038f32b2e09b0"
+      "bytes": 19435,
+      "sha256": "376dc93062bc636787b3a1eba322787f8e8d3cc8c31f2e8684a5b76ff1b33480"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/AllySpawnEggMixin.java",
@@ -618,9 +643,14 @@
       "sha256": "32dbdd9d7c7370ecbdcae26522502a79658b3623cdb103a259a1d0207d78f91e"
     },
     {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/CaptureVehicleGuardMixin.java",
+      "bytes": 1164,
+      "sha256": "2264997fb2509b81fbfc8ecdf251ff295cc9d9dd54044a5d476b4233af683629"
+    },
+    {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/ConsumeHooksMixin.java",
-      "bytes": 2099,
-      "sha256": "ef8b528101f0fba40e97e3e126c3a196f84f105f5696f2d7f70ab8844511285a"
+      "bytes": 2051,
+      "sha256": "b898cb569c3f2141e36c5db0cd93eaac577f850a31565b6d0b2babbb6d56633a"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/ExplosionMixin.java",
@@ -688,6 +718,16 @@
       "sha256": "2ef189083fdeacaab51c915a1ceb69f8f6a53a0ca0b33df93bcaa6219ab330a2"
     },
     {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/HostProxyPushMixin.java",
+      "bytes": 783,
+      "sha256": "4545b7f0b1902f480b9d6c54a41a72066eff9e30c3216fe51ea7107d05472bec"
+    },
+    {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/HostProxyPushabilityMixin.java",
+      "bytes": 768,
+      "sha256": "97544ba77bc455ca1cdc1b21bb0b06ecf828f9e08e2e90f444c64ff54e99d46a"
+    },
+    {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/HostSurfaceMixin.java",
       "bytes": 3629,
       "sha256": "388c3c44f9a9291791d0c05ba88c63a8396e6fbfdadf9de70b15a3b0bc0ce183"
@@ -704,8 +744,18 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/HostUnbreakableMixin.java",
-      "bytes": 1445,
-      "sha256": "2f7422e5cce955d6acab72939333eab264827b62e27689d69b1a3cbb91bc0814"
+      "bytes": 1715,
+      "sha256": "ae4a31381b622941e6fe9d1557a415613d761c5657449706a20801145579b4fb"
+    },
+    {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/InfinityArrowsMixin.java",
+      "bytes": 1649,
+      "sha256": "df556e71ac332f7a07cd6ffe99cf812350f6a72988c8dc5847957ac16abf1068"
+    },
+    {
+      "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/LargeProxyQueryMixin.java",
+      "bytes": 1303,
+      "sha256": "7420e48b7972bfb335160dc84d83987f3dc8fbc0667d9f0022540d260dfd7db7"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/LevelMixin.java",
@@ -714,8 +764,8 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/LivingEntityBridgeMixin.java",
-      "bytes": 2764,
-      "sha256": "d5217e3fbd7043411a74c627f18fb5fe8c9c8360cbfb1ab43d4c555dc76005d3"
+      "bytes": 3925,
+      "sha256": "7f21af5ea6b17231baed254a52dd7dc562565ece6dc6fc3f1a09b2cd549bdb3f"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/java/dev/rehan/passthrough/mixin/MobGoalAccess.java",
@@ -759,8 +809,8 @@
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/resources/dqjbridge.common.mixins.json",
-      "bytes": 811,
-      "sha256": "0f5e3ebbbf1c182819f280609cf005070e4f80dd17627bdd9178d48bc4764d89"
+      "bytes": 957,
+      "sha256": "166df4eabbd3e2cd696bfc0ea3ac4cc39982ab909155a595c88d6cbe39793a01"
     },
     {
       "path": "bridge/minecraft-1.21.4/src/main/resources/fabric.mod.json",
@@ -783,19 +833,74 @@
       "sha256": "ade32920c75dbcaab4e06b17026bde1363569e43a624fe32e4c7962e10e8f35d"
     },
     {
+      "path": "bridge/tests/apple-protection/AppleProtectionTests.csproj",
+      "bytes": 677,
+      "sha256": "96476bf1e490370250eaaf0684c29498e927883071203a2ab7a5b614dec7c23a"
+    },
+    {
+      "path": "bridge/tests/apple-protection/Program.cs",
+      "bytes": 4334,
+      "sha256": "2bebd2a19843b47f1a8658e97886fb2d6e836de7a53833dbcb8179cb6c52ada9"
+    },
+    {
+      "path": "bridge/tests/block-support/block-support.init.gradle",
+      "bytes": 1105,
+      "sha256": "d3957b7aa6ed46ba48a29bd5d4e174e3dac691fdaf614378b9862bfe13e6e5e0"
+    },
+    {
+      "path": "bridge/tests/block-support/java/dev/rehan/passthrough/BlockSupportTests.java",
+      "bytes": 7186,
+      "sha256": "d08d57d77e4920e8f87b58e4b7ec15838dc5301d91ec123076498d33283a5ba3"
+    },
+    {
+      "path": "bridge/tests/block-support/resources/fabric.mod.json",
+      "bytes": 307,
+      "sha256": "f9ed830c467342e250bdfed8e83d21ebcece77b352505b4b1160ef836243f1a0"
+    },
+    {
+      "path": "bridge/tests/body-segments/BodySegmentsTests.csproj",
+      "bytes": 391,
+      "sha256": "af3ff7b0cc8d4b17f84bb5d2ffc6aa6df73829005b61c8ece20bd76a17708e38"
+    },
+    {
+      "path": "bridge/tests/body-segments/Program.cs",
+      "bytes": 6361,
+      "sha256": "17bf07dec3af2aef4a88bc57227002a91110e594632fcc8f0bd6bfe89a0bfa3c"
+    },
+    {
+      "path": "bridge/tests/boundary-damage/BoundaryDamageTests.csproj",
+      "bytes": 395,
+      "sha256": "496bec3d708fb6abd1c54373e22d32eac91843e3c2f575e5d4ea8ea5bcd086d4"
+    },
+    {
+      "path": "bridge/tests/boundary-damage/Program.cs",
+      "bytes": 1144,
+      "sha256": "ae57cd59d839a6ed788829c633adb38bb7562c5e77d50d5c7519d2a558a9243d"
+    },
+    {
       "path": "bridge/tests/capture-lease/capture-test.init.gradle",
-      "bytes": 1119,
-      "sha256": "1dc5b4f08cb74d8d9487d14884cf0bb3ace0962033d32228224b7f8fe4238a8c"
+      "bytes": 1124,
+      "sha256": "19f0c542290bcef7d994ef757dd2697db376fca52bcd3a09e05e10c748a419ec"
     },
     {
       "path": "bridge/tests/capture-lease/java/dev/rehan/passthrough/CaptureLeaseTests.java",
-      "bytes": 5011,
-      "sha256": "576644b29078277d4d54f7568e8e0a03d3b4fc60d2b6592f34b058fddd7c2459"
+      "bytes": 6125,
+      "sha256": "143987404f78dac845d8491b5f7dcbcfea3e8710ca6974e8f09e95bc8aae8ed3"
     },
     {
       "path": "bridge/tests/capture-lease/resources/fabric.mod.json",
       "bytes": 303,
       "sha256": "2c7de6fc6ca844205b01dc3b6ad6bf23e83b8de5d0c4e19d5271650c2219ed96"
+    },
+    {
+      "path": "bridge/tests/combat-authority/CombatAuthority.csproj",
+      "bytes": 583,
+      "sha256": "7e8c4d513b57e8920edc6a9cb5c5391d08ab4359a4c1f6484f106252979ceb2e"
+    },
+    {
+      "path": "bridge/tests/combat-authority/Program.cs",
+      "bytes": 3083,
+      "sha256": "917b95c9ad776329f9a1fc9bbfa2e71846d41b4453a996899d68425ab5302e1b"
     },
     {
       "path": "bridge/tests/cutscene-skin-scope/CutsceneSkinScope.csproj",
@@ -818,6 +923,36 @@
       "sha256": "6e4c3dd4c4d0a012b6d5180fb1cf796c27146a672f6af59efeb989fdea6d2432"
     },
     {
+      "path": "bridge/tests/equipment-shop/equipment-shop.init.gradle",
+      "bytes": 1112,
+      "sha256": "06e66787815bc6c950ddc829b1481646f06b3db471d0fea7ab8d247e869ab13b"
+    },
+    {
+      "path": "bridge/tests/equipment-shop/java/dev/rehan/passthrough/EquipmentShopTests.java",
+      "bytes": 20780,
+      "sha256": "8e216eb492353983c12cca1a5229352e7a7001c35929303341654daba7610445"
+    },
+    {
+      "path": "bridge/tests/equipment-shop/resources/fabric.mod.json",
+      "bytes": 333,
+      "sha256": "c99af282b83c09cd3bca8fe9b686c12b830549ee3e59857cae5f300eae735356"
+    },
+    {
+      "path": "bridge/tests/golden-apple/java/dev/rehan/passthrough/GoldenAppleTests.java",
+      "bytes": 10882,
+      "sha256": "42d0d24747896d9ea69d316a01877565294139e942fb8329118aa5b1401719c3"
+    },
+    {
+      "path": "bridge/tests/golden-apple/java/dev/rehan/passthrough/MultipartTargetTests.java",
+      "bytes": 7679,
+      "sha256": "d8f41226a7c9220cd8971c0dbcc622a7d16be6dec17faf0e30440fb1241191e3"
+    },
+    {
+      "path": "bridge/tests/golden-apple/resources/fabric.mod.json",
+      "bytes": 356,
+      "sha256": "7d9de193d30d7b5c553db6c68cca1f8a335501d9b3db1ffb3aab8bbef723154b"
+    },
+    {
       "path": "bridge/tests/ground-prepare/GroundPrepare.csproj",
       "bytes": 477,
       "sha256": "dfc05c36e682918eefafa9b73667af6458481d79ae01aa33797c421963b18124"
@@ -831,6 +966,16 @@
       "path": "bridge/tests/host-projection/HostProjection.csproj",
       "bytes": 405,
       "sha256": "2e6a5e520609dd02b9e68527d40d00979421f8037c7f4f68b437667a22b0e8ce"
+    },
+    {
+      "path": "bridge/tests/manual-control/ManualControl.csproj",
+      "bytes": 358,
+      "sha256": "cf4e918366f697504f5ba6f46a2f35853e35d21608e352546766d18ffa3ea475"
+    },
+    {
+      "path": "bridge/tests/manual-control/Program.cs",
+      "bytes": 2331,
+      "sha256": "fd83e11cf3a2b48054e0c36a2d02523928b24a7f6a3faa4cd4b344ca49484556"
     },
     {
       "path": "bridge/tests/native-input-compat/NativeInputCompat.csproj",
@@ -869,8 +1014,8 @@
     },
     {
       "path": "bridge/tests/native-manual-skip/Program.cs",
-      "bytes": 7589,
-      "sha256": "a4f41aebc3c497b558c85f992dfc0831a560ab03d125863f32daadf414a8b358"
+      "bytes": 8145,
+      "sha256": "de1ec249abcecff232d58232cc8cbddacca048c6e563e06191547333aaaebd6e"
     },
     {
       "path": "bridge/tests/native-ray/NativeRay.csproj",
@@ -903,6 +1048,16 @@
       "sha256": "699a68a38699add8bcddc401584b701808a5eba6005b03df18a5cf8d10515628"
     },
     {
+      "path": "bridge/tests/proxy-push/java/dev/rehan/passthrough/ProxyPushTests.java",
+      "bytes": 7237,
+      "sha256": "5e2ecff5eb297938c6d619b7add591863d027b395d83319e8959b173d1ecd969"
+    },
+    {
+      "path": "bridge/tests/proxy-push/resources/fabric.mod.json",
+      "bytes": 299,
+      "sha256": "09d65e94435ee251485ea1e8ffbf94b829f8a40fe0c263716e654ad870b1a81c"
+    },
+    {
       "path": "bridge/tests/story-presentation/Program.cs",
       "bytes": 7934,
       "sha256": "5581884037060e8848d891ed1f425f7070511051e2f359e2d940b3bdfd63f366"
@@ -914,8 +1069,8 @@
     },
     {
       "path": "bridge/tests/world-coordinates/Program.cs",
-      "bytes": 5311,
-      "sha256": "9cc918bd68a7bbe6aa11b864a1e50257617a53f7fe632149cf4e2371f1520943"
+      "bytes": 7332,
+      "sha256": "55da980b6d102eee45e8b2f8812be2f5ce369f0ea6de13a4f74febc54f3f04a3"
     },
     {
       "path": "bridge/tests/world-coordinates/WorldCoordinates.csproj",
@@ -933,6 +1088,16 @@
       "sha256": "4408d667251aad36d9ee77191fac024cba3fc1f94e8d74142c2b3bc36952308f"
     },
     {
+      "path": "docs/BALANCE.md",
+      "bytes": 2050,
+      "sha256": "58f1f713c92f5de10c5b5780b7a3faf09196add5a6972f6a8fb3f9a7f5d64531"
+    },
+    {
+      "path": "docs/BALANCE.zh-CN.md",
+      "bytes": 1939,
+      "sha256": "18b0a99c2f186f858267e47736a75cefa6b7f9ca3913a9511d0fd4a2e2f025f7"
+    },
+    {
       "path": "docs/BUILD.md",
       "bytes": 2277,
       "sha256": "2c2787515c81a1ca221fef41a73b03aad9879d98d327da9c77fbb6da71b5c658"
@@ -944,33 +1109,58 @@
     },
     {
       "path": "docs/FAQ.md",
-      "bytes": 4336,
-      "sha256": "13c680b97e392f576bf6c51c34437e7c8b1ca8360176d79f8bd96f75da230668"
+      "bytes": 4411,
+      "sha256": "7dec5e9deac3f020cc826a820671d98bd9b087fad1ff37f8759058ff5661d5e5"
     },
     {
       "path": "docs/FAQ.zh-CN.md",
-      "bytes": 4075,
-      "sha256": "44b41b198fb8efec596ccd2e9f3dd9027f768c8d0bccfaa97ae600c8ec6c8685"
+      "bytes": 4175,
+      "sha256": "5072ba036c1ea2a01b866609317bafe38b9a9253a383fa04a3b35dda36bd579d"
     },
     {
       "path": "docs/INSTALL.md",
-      "bytes": 7567,
-      "sha256": "04366f1ba081101486786e16f56a916a25f40e56cb0b7e04363b924d8e28d624"
+      "bytes": 7882,
+      "sha256": "01301fe17e7f22a4b916e9668a20a01517d4409becadb50aeda79794249433c7"
     },
     {
       "path": "docs/INSTALL.zh-CN.md",
-      "bytes": 7464,
-      "sha256": "2754e47800543f43399a249688a741ed564df3bd410b16b09f7bd5dde9eb526e"
+      "bytes": 7768,
+      "sha256": "e0c7578e6fe2ecdd845bbf59da6a95f29dea3152db995c29bb892e0ad1c49822"
     },
     {
       "path": "docs/KNOWN-ISSUES.md",
-      "bytes": 1858,
-      "sha256": "d0af64f2e7983d3262b2ec63f4830912ca2e62825324264ccab6cb5d6197a46f"
+      "bytes": 2390,
+      "sha256": "f7af6fd944a872d1eed7144395284989d9d7397411ce04757be2db59ea194083"
     },
     {
       "path": "docs/KNOWN-ISSUES.zh-CN.md",
-      "bytes": 1597,
-      "sha256": "c11ea68ddb40c1d06efc62b53a16babd609d37a0e9b13bde69dd38f07f507afe"
+      "bytes": 1872,
+      "sha256": "1e8884941d867c386cf05c27dd72a175a9984598b0d257220b2f077b353f1db5"
+    },
+    {
+      "path": "docs/PERFORMANCE.md",
+      "bytes": 1525,
+      "sha256": "4a36ba9bfdb11f8015300f5100a2589f7b15651c1fa436459868e1ffa79e1b6b"
+    },
+    {
+      "path": "docs/PERFORMANCE.zh-CN.md",
+      "bytes": 1287,
+      "sha256": "c1c647b2dd9fc20e6cf562050954e8d98df428482d49ba161023af2e3bc91505"
+    },
+    {
+      "path": "docs/RELEASE-v0.3.0.md",
+      "bytes": 11433,
+      "sha256": "83af2ae274101fc738f589761d0b1db5660f953e9c6f0a7030c765704c17601b"
+    },
+    {
+      "path": "docs/SHOP.md",
+      "bytes": 10211,
+      "sha256": "d94d8aa604b914ddea5a9af918b76ba6301712a43ae7409c579f466a05057964"
+    },
+    {
+      "path": "docs/SHOP.zh-CN.md",
+      "bytes": 10178,
+      "sha256": "7a731c752132911c539be33b88b10bf44cf29c6f07855b748754f82d2fbcacf6"
     },
     {
       "path": "docs/SKINS.md",
@@ -985,22 +1175,22 @@
     {
       "path": "docs/UPGRADE.md",
       "bytes": 2320,
-      "sha256": "6471bcec021676467500c5757f07561da8b085db6c86f320a697138351fdc01b"
+      "sha256": "e94a7db0cfb5902c79e2f66c345123a39280cc03ff7b728ed087b6698857c0a8"
     },
     {
       "path": "docs/UPGRADE.zh-CN.md",
       "bytes": 2155,
-      "sha256": "379b89033b6d1b39fb8eab86b29dfd7714c5836e70d5aaeb80caf7c342c265a2"
+      "sha256": "9d4fa6aae9c2da8199401265a2146a4b6858c8e76a962924e967d8ba67ccab50"
     },
     {
       "path": "docs/USAGE.md",
-      "bytes": 4782,
-      "sha256": "e8d95aa58bd171eb954dc8b39eef068ef6c04a2e1d9ab0a919f1f2cfd42b68d0"
+      "bytes": 5582,
+      "sha256": "3b8b9af9fc086e5c4bbc8745d57c0a6bfb6589e0601bde576bd999b5f752e7ec"
     },
     {
       "path": "docs/USAGE.zh-CN.md",
-      "bytes": 4232,
-      "sha256": "244b5a8170c467fd88be7b3ad356e43aa8a4c32fe2415fcfaecb85544497f9b9"
+      "bytes": 4641,
+      "sha256": "164ce7bc25463e06cd3d2e3b48e80d7d6c4cf840fbb9237d5ab8302861636de5"
     },
     {
       "path": "pack/dependencies.lock.json",
@@ -1009,13 +1199,13 @@
     },
     {
       "path": "pack/overrides/config/dqj-balance.json",
-      "bytes": 1217,
-      "sha256": "b86b0bd1374fe70e9fd53e3d578794f7353b406c838ffcb8ba2a60386e57d75b"
+      "bytes": 1545,
+      "sha256": "8fa27702dcec20e40401482e3be3aaf206d6b5cd5118502b3712a14ec1cdec26"
     },
     {
       "path": "source-lock.json",
-      "bytes": 842,
-      "sha256": "71b42ce6285ff5a43a3cdde17d9a02571d1b08e207a938120e0bb7a8ae78632a"
+      "bytes": 959,
+      "sha256": "4fa25ffeeac0fe994a7d252e3d9aec23a18e4a6905b8fda298399c5564ca274d"
     },
     {
       "path": "src/DqjCombat/AppearanceVisibilityLease.cs",
@@ -1026,6 +1216,16 @@
       "path": "src/DqjCombat/Baseline.cs",
       "bytes": 5319,
       "sha256": "19fe312b452e23f17287de3af1c760d37485312970d58710de62aa1ea27f017c"
+    },
+    {
+      "path": "src/DqjCombat/BodySegments.cs",
+      "bytes": 7424,
+      "sha256": "38102838300d593232ba77f3a2aac2d53bae72dad172d297e100a45aa3dda930"
+    },
+    {
+      "path": "src/DqjCombat/BoundaryDamage.cs",
+      "bytes": 960,
+      "sha256": "4aa90aee8e445fca0520350ac171859d7af91405ed1340c1307abcf08fee36a6"
     },
     {
       "path": "src/DqjCombat/CameraFrameOrder.cs",
@@ -1055,7 +1255,7 @@
     {
       "path": "src/DqjCombat/DqjCombat.csproj",
       "bytes": 2282,
-      "sha256": "b9298be5b9aabd01485bec502b9093076e7efaec6d2a36df021de568ce8da4b9"
+      "sha256": "d647c555c1712f9bd45bb4d3821fbb2c64d9d24216a92f08393426c08ad1cea6"
     },
     {
       "path": "src/DqjCombat/DropCatalog.cs",
@@ -1074,8 +1274,8 @@
     },
     {
       "path": "src/DqjCombat/Host.cs",
-      "bytes": 9265,
-      "sha256": "20815d1959a3ab758a8b80f082dbf2720cdf2369faae5fe1703a57e77c802bff"
+      "bytes": 9505,
+      "sha256": "be4add2efede6065666b526b6e3e761e253c8b0783871619f4138669beb09456"
     },
     {
       "path": "src/DqjCombat/HostProjection.cs",
@@ -1093,14 +1293,19 @@
       "sha256": "4ec43a9e8371063dad667e2ed628a1d54d1273bd6b28e1bf00f9b1310bb7ca96"
     },
     {
+      "path": "src/DqjCombat/ManualControlMode.cs",
+      "bytes": 1326,
+      "sha256": "890281b9e7c68c49de9e2ce2b755a106119d462e22ce7de6dcec285aba5e0c8a"
+    },
+    {
       "path": "src/DqjCombat/ManualSkipHold.cs",
       "bytes": 1367,
       "sha256": "fc41c12319d46083a1caad34c0e257113f1168462d0fbfcfcab25dd8547c2f2a"
     },
     {
       "path": "src/DqjCombat/McBridgeHost.cs",
-      "bytes": 75639,
-      "sha256": "57e125b128145fa382c67bd9cdeb02cbe9e89cdd3e01fba2ea9adaac9619a039"
+      "bytes": 83338,
+      "sha256": "f7fa7b96fb7f831736dabcf0a752365ddf15bce740a34cb8d976127e8267d106"
     },
     {
       "path": "src/DqjCombat/McBridgeWire.cs",
@@ -1129,8 +1334,8 @@
     },
     {
       "path": "src/DqjCombat/McInputRouter.cs",
-      "bytes": 18168,
-      "sha256": "92e49f06cb1228b33457f3a45d228f2c65373ccb76ecedd645256e20000cd29b"
+      "bytes": 18430,
+      "sha256": "5bf1ad3dd1cc0952635794439332427c214f5c4cedaaaaa8ee4b786b17dc0b94"
     },
     {
       "path": "src/DqjCombat/McKeys.cs",
@@ -1154,8 +1359,8 @@
     },
     {
       "path": "src/DqjCombat/McPlayerHealthGate.cs",
-      "bytes": 9690,
-      "sha256": "3bedc1817b566d6ee27eb1665cad09f1962820d6ab5dd4ebf6591c76795c03b8"
+      "bytes": 10060,
+      "sha256": "83fa3cae6c6116f215a22573fd4913fb11aebc8f7d5df1352064b953ad6eef67"
     },
     {
       "path": "src/DqjCombat/McPoseDiagnostics.cs",
@@ -1164,28 +1369,33 @@
     },
     {
       "path": "src/DqjCombat/McWorldCatalog.cs",
-      "bytes": 6318,
-      "sha256": "462c43ae7d38fbe9379ce450169d9b991e7f7b0a39fc11be6bcb7e254f4f2eda"
+      "bytes": 7748,
+      "sha256": "679745c9c269adeb065214d87827a89e6024f575f7b4f2024a78e1630b9b0891"
     },
     {
       "path": "src/DqjCombat/McWorldCoordinates.cs",
-      "bytes": 1510,
-      "sha256": "0ac04222b3278d5e0e59db31af4104ba5dfda3f6d05084ef5d58d62877e61e81"
+      "bytes": 2484,
+      "sha256": "37fd3a6fe6ca95896f1168ad4a6ef7a2b4d16813d4ef9a945cccde134f584f5f"
     },
     {
       "path": "src/DqjCombat/McWorldLink.cs",
-      "bytes": 45850,
-      "sha256": "ea4abb82f33cf720f4e39adce581bdbe1bb50253532aa1686c56b5c9a4dd5455"
+      "bytes": 50090,
+      "sha256": "8c0279a4d4792fc89591401c99f45442812536ccc99a31ca01965e72f6704f07"
     },
     {
       "path": "src/DqjCombat/Mod.cs",
-      "bytes": 33101,
-      "sha256": "18ea4742a37d91ced477ea893f42acd3157c549f55b04dbf841e8833858be5b6"
+      "bytes": 33286,
+      "sha256": "152facc57a32bab7ebec7f086e20ecdc3305a1879bd9233b971b0d31db436dec"
     },
     {
       "path": "src/DqjCombat/NativeAppearanceApi.cs",
       "bytes": 1833,
       "sha256": "87df195dafdf3d5867199ca47bc1246f31adac1866728819e02416312e996e52"
+    },
+    {
+      "path": "src/DqjCombat/NativeAppleProtection.cs",
+      "bytes": 4073,
+      "sha256": "4c47dd517a1400fdb10d2960381adfd55f0b97da27a40fc6bb67fedf02505104"
     },
     {
       "path": "src/DqjCombat/NativeBattleHud.cs",
@@ -1206,6 +1416,11 @@
       "path": "src/DqjCombat/NativeCameraEffects.cs",
       "bytes": 2596,
       "sha256": "d0d12a104073011608689ad8bd94037ebaf36a0d29a7b669671ed79c8b1d3266"
+    },
+    {
+      "path": "src/DqjCombat/NativeCombatAuthority.cs",
+      "bytes": 703,
+      "sha256": "d8e9ba88e8d2c45030297adf62f54c8bb202be651cfa027326611489e80ec917"
     },
     {
       "path": "src/DqjCombat/NativeCutsceneInput.cs",
@@ -1274,8 +1489,8 @@
     },
     {
       "path": "src/DqjCombat/NativeSuspensionPolicy.cs",
-      "bytes": 456,
-      "sha256": "6e6c32f5f25c158664ba9d221291601361edfa6c071bdd9701769666efdc1cf1"
+      "bytes": 869,
+      "sha256": "b3022de1672b066e3e0afa464b8265a3c1f8f931689fa2b1dcd99b61313094a9"
     },
     {
       "path": "src/DqjCombat/NativeTravelCatalogue.cs",
@@ -1284,8 +1499,8 @@
     },
     {
       "path": "src/DqjCombat/NativeTravelKey.cs",
-      "bytes": 8580,
-      "sha256": "ba48a6853e209ce211ac7ace605270dd832dd5c5ce1859550ab7cca7e4a355c0"
+      "bytes": 8896,
+      "sha256": "18fed4d24c56c263b7d116b043b991e67a9e824743130b8a0b2aa6d4b8be56b2"
     },
     {
       "path": "src/DqjCombat/NativeTravelText.cs",
@@ -1353,6 +1568,11 @@
       "sha256": "9c3a089e8e23e02b0c5ce9e41fff437b94af1987d1f669049f50af3c6d4a7eac"
     },
     {
+      "path": "tests/test_release030.py",
+      "bytes": 1949,
+      "sha256": "6982c1aa25f1434511765577ed01391cea1b64fab2cd340a04862ab5e01720e0"
+    },
+    {
       "path": "tools/CecilCheck/CecilCheck.csproj",
       "bytes": 756,
       "sha256": "500d2df00bd0acbd93e45dfbad7986be9573d906974c4560e7960baef68a9eed"
@@ -1389,18 +1609,18 @@
     },
     {
       "path": "tools/package_release.py",
-      "bytes": 7506,
-      "sha256": "df924115404468b82e194130e6b8552196fde690d37f76a26c4de968b4b1dd72"
+      "bytes": 7617,
+      "sha256": "93fe117162e22bc2efcbfcc1a7efd8fa70fbd9159d148bc17c16000c91909e87"
     },
     {
       "path": "tools/player_setup.py",
-      "bytes": 17528,
-      "sha256": "0564a5c4469a39a10a19d3ade9a08ada48cb3aa3be47626988512fa8ff9a2584"
+      "bytes": 19012,
+      "sha256": "18ba8ad865483e222b7a686325f018a5b6ce6d15b988632bf9161436e116b5c8"
     },
     {
       "path": "tools/release_info.py",
       "bytes": 244,
-      "sha256": "d0c78bbb94399eefa57b54753bb8c9ad30b04618f48d2dc322174364067207bc"
+      "sha256": "30e4140ef9aaec3f2212c00f047ca4883085bc5cd07b004fa0ec08eeb885343a"
     },
     {
       "path": "tools/requirements-build.txt",
@@ -1409,8 +1629,8 @@
     },
     {
       "path": "tools/run_checks.py",
-      "bytes": 1086,
-      "sha256": "817020b67b43755dd118a518da6730e6dce1ebe65a2f34e53171d44cea565f3b"
+      "bytes": 1193,
+      "sha256": "eeb50bfcfcd2966c0abcbeb067f66463488f6c3b42ccd161c20f0388834ed630"
     },
     {
       "path": "tools/update_manifest.py",
@@ -1424,8 +1644,8 @@
     },
     {
       "path": "validation.json",
-      "bytes": 1582,
-      "sha256": "ce408669d738d53f18dfa76a5f2e916bc704442ae3e8312a3f720b2f1eafa484"
+      "bytes": 2074,
+      "sha256": "5669e51c589c25be11a92dbfd86fb90e88d1fd65ced3e9fac2ed7d7d1a1bfd4b"
     }
   ]
 }

@@ -37,6 +37,7 @@ namespace DqjCombat
         internal bool GameplayActive;
         internal bool TakeoverCombat;
         internal bool TakeoverBridge;
+        internal bool NativePassthrough;
         internal Func<bool> BridgeHasScreen;
         internal Action<Action> BridgeNativeInteraction;
         private readonly Dictionary<string,bool> nativeInteractActions=new Dictionary<string,bool>();
@@ -129,6 +130,10 @@ namespace DqjCombat
 
         private void OnRaw(object[] args)
         {
+            if(NativePassthrough){
+                try{if(original!=null)original.DynamicInvoke(args);}catch(Exception e){Log.Write("route-error","manual native input: "+e.Message);}
+                return;
+            }
             seen++;
             string name = args.Length > 0 ? Convert.ToString(args[0]) : "?";
             string trigger = args.Length > 1 ? Convert.ToString(args[1]) : "?";

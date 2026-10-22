@@ -57,6 +57,9 @@ internal static class Program
         Check(!NativeSuspensionPolicy.CanExpire(90,true,false),"90-second story CG cannot hit the 45-second teleport timeout");
         Check(!NativeSuspensionPolicy.CanExpire(90,false,true),"long native interaction cannot hit teleport timeout");
         Check(NativeSuspensionPolicy.CanExpire(46,false,false)&&!NativeSuspensionPolicy.CanExpire(45,false,false),"ordinary stale teleport keeps its bounded recovery");
+        Check(NativeSuspensionPolicy.IsSlideVolume("BP_SplineFlyMoveBase_C")&&NativeSuspensionPolicy.IsSlideVolume("SplineFlyMove_C"),"Preview125: native slide volume (Live124 SplineFlyMove_C_1) hands control to Wukong");
+        Check(!NativeSuspensionPolicy.IsSlideVolume("AkAcousticPortal")&&!NativeSuspensionPolicy.IsSlideVolume("DeadZone_C")&&!NativeSuspensionPolicy.IsSlideVolume(null),"ordinary volumes do not");
+        Check(!NativeSuspensionPolicy.IgnoreStuckTeleport(true,false,true),"a slide counts as live native work, not a stuck teleport");
         Check(!NativeSuspensionPolicy.IgnoreStuckTeleport(true,true,false)&&!NativeSuspensionPolicy.IgnoreStuckTeleport(true,false,true),"stale teleport flag cannot override a new CG or interaction");
         Check(NativeSuspensionPolicy.IgnoreStuckTeleport(true,false,false),"ordinary stale teleport can still recover");
         Console.WriteLine("MANUAL SKIP AND CG SUSPENSION LINKED-CODE PASS checks="+checks+" (stub native movie; no live progression acceptance)");return 0;

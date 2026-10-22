@@ -1,0 +1,27 @@
+gradle.beforeProject { p ->
+    p.plugins.withId('net.fabricmc.fabric-loom-remap') {
+        def fixture = new File(p.rootDir, '../tests/equipment-shop')
+        p.sourceSets {
+            equipmentShop {
+                java.srcDir new File(fixture, 'java')
+                resources.srcDir new File(fixture, 'resources')
+                compileClasspath += p.sourceSets.main.compileClasspath + p.sourceSets.main.output
+                runtimeClasspath += p.sourceSets.main.runtimeClasspath + p.sourceSets.main.output
+            }
+        }
+        p.loom {
+            mods { equipmentShop { sourceSet p.sourceSets.equipmentShop } }
+            runs {
+                equipmentShop {
+                    server()
+                    name 'Isolated equipment and shop GameTest'
+                    source p.sourceSets.equipmentShop
+                    runDir '../../test-world'
+                    vmArg '-Dfabric-api.gametest'
+                    vmArg '-Dfabric-api.gametest.report-file=reports/results.xml'
+                    vmArg '-Dfile.encoding=UTF-8'
+                }
+            }
+        }
+    }
+}

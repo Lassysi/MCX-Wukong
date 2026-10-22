@@ -17,9 +17,9 @@ import net.minecraft.world.level.block.state.BlockState;
  *  supports it, so fewer blocks float. Excluded: block entities (chests, barrels keep their
  *  contents), host terrain proxies, fluids, vanilla falling blocks, barrier/bedrock and blocks
  *  without collision.
- *  Preview88 (user: no block may float): anchored blocks fall too, except those resting on Wukong
- *  terrain (kind 0: the native ground is not an MC block, so MC cannot see that support). Support of
- *  an offset block is any block in the cells under its shifted footprint. A fall keeps the offset, and
+ *  Anchored blocks use actual collision support, including measured Wukong terrain. A neighbour
+ *  occupying a sampled cell is not enough: its collision must reach the block's underside.
+ *  A fall keeps the offset, and
  *  the landed block is re-anchored onto the native ground or the anchored block below it. */
 public final class BlockGravity {
     private BlockGravity() {}
@@ -44,8 +44,12 @@ public final class BlockGravity {
     private static boolean placingSelf;
     static void changed(ServerLevel level,BlockPos pos){
         if(!placingSelf){if(lastSet.size()>4096)lastSet.clear();lastSet.put(pos.immutable(),level.getGameTime());}
+        recheck(pos);
+    }
+    static void recheck(BlockPos pos){
         if(queue.size()>8192)return;
-        queue.add(pos.immutable());queue.add(pos.above().immutable());
+        // Shifted collision can cross raw cell boundaries. Recheck neighbouring footprints too.
+        for(int x=-1;x<=1;x++)for(int z=-1;z<=1;z++)for(int y=0;y<=2;y++)queue.add(pos.offset(x,y,z).immutable());
     }
     static void tick(MinecraftServer server){
         ServerLevel level=server.overworld();
@@ -117,15 +121,15 @@ public final class BlockGravity {
         BlockState state=level.getBlockState(pos);
         if(!eligible(level,pos,state))return;
         var offset=HostBlockAnchors.offset(state,pos);
-        if(supported(level,pos,offset))return;
+        if(supported(level,pos,state))return;
         // Preview92b (live: 18 of 24 falling blocks never landed): MC only has ground where the host measured the
         // native terrain, so a fall into an unmeasured column went through the native ground into the void. Fall only
         // when something below can catch the block; otherwise ask the host to measure that column and retry.
         if(!landingBelow(level,pos)){
             int tries=waiting.merge(pos.immutable(),1,Integer::sum);
-            if(tries<=20){deferred.add(pos.immutable());
+            deferred.add(pos.immutable());
                 if(tries%4==1)Passthrough.events.accept(String.format(java.util.Locale.ROOT,"{\"t\":\"ally_ground\",\"p\":[%.3f,%.3f,%.3f]}",pos.getX()+.5,(double)pos.getY(),pos.getZ()+.5));
-                if(tries==1&&logged++<200)Passthrough.LOG.info("DQJ gravity: {} at {} has no measured ground below; waiting for host terrain",state.getBlock(),pos.toShortString());}
+                if(tries==1&&logged++<200)Passthrough.LOG.info("DQJ gravity: {} at {} has no measured ground below; waiting for host terrain",state.getBlock(),pos.toShortString());
             return;
         }
         waiting.remove(pos);
@@ -135,16 +139,25 @@ public final class BlockGravity {
         if(falling.size()<512){entity.dropItem=false;falling.add(new Fall(entity,state));}
         if(logged++<200)Passthrough.LOG.info("DQJ gravity: {} at {} falls (offset {})",state.getBlock(),pos.toShortString(),offset);
     }
-    /** Any block or host proxy in a cell under the (shifted) footprint holds the block up. */
-    private static boolean supported(ServerLevel level,BlockPos pos,net.minecraft.world.phys.Vec3 offset){
-        double bottom=pos.getY()+offset.y-.01;
-        if(bottom<level.getMinY())return true;
-        for(int sx=0;sx<=1;sx++)for(int sz=0;sz<=1;sz++){
-            var cell=BlockPos.containing(pos.getX()+offset.x+(sx==0?.02:.98),bottom,pos.getZ()+offset.z+(sz==0?.02:.98));
-            if(cell.equals(pos))continue;
-            if(WorldBridge.isHostProxy(cell))return true;
-            var s=level.getBlockState(cell);
-            if(!s.isAir()&&!FallingBlock.isFree(s))return true;
+    /** Only collision directly beneath the real shifted footprint can support a block. */
+    static boolean supported(ServerLevel level,BlockPos pos,BlockState state){
+        var shape=state.getCollisionShape(level,pos);
+        if(shape.isEmpty())return false;
+        for(var part:shape.toAabbs()){
+            var box=part.move(pos);
+            // Probe the underside, not the side or the whole grid cell. An edge touch is not support.
+            double insetX=Math.min(.01,(box.maxX-box.minX)/4),insetZ=Math.min(.01,(box.maxZ-box.minZ)/4);
+            var foot=new net.minecraft.world.phys.AABB(box.minX+insetX,box.minY-.025,box.minZ+insetZ,
+                box.maxX-insetX,box.minY-.00001,box.maxZ-insetZ);
+            // Anchors may move a shape horizontally by 1 m and vertically by [-2,1] m.
+            for(var cell:BlockPos.betweenClosed(BlockPos.containing(foot.minX-1,foot.minY-1,foot.minZ-1),
+                    BlockPos.containing(foot.maxX+1,foot.maxY+2,foot.maxZ+1))){
+                if(cell.equals(pos)||!level.isLoaded(cell))continue;
+                var below=level.getBlockState(cell);
+                if(below.isAir()||!below.getFluidState().isEmpty())continue;
+                for(var support:below.getCollisionShape(level,cell).toAabbs())
+                    if(support.move(cell).intersects(foot))return true;
+            }
         }
         return false;
     }
@@ -153,6 +166,6 @@ public final class BlockGravity {
         if(state.getBlock() instanceof FallingBlock||state.is(Blocks.BARRIER)||state.is(Blocks.BEDROCK))return false;
         if(state.getDestroySpeed(level,pos)<0||state.getCollisionShape(level,pos).isEmpty())return false;
         if(WorldBridge.isHostProxy(pos))return false;
-        return HostBlockAnchors.kind(state,pos)!=0;
+        return true;
     }
 }

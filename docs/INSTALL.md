@@ -26,11 +26,11 @@ Exit both games normally before installing or uninstalling.
 
 ## 2. Get the player package
 
-Download [MCX-Wukong-v0.2.0-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.2.0/MCX-Wukong-v0.2.0-Players.zip) and extract it into a separate folder.
+Download [MCX-Wukong-v0.3.0-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip) and extract it into a separate folder.
 
 Players need the **Players ZIP**. GitHub's automatic **Source code** downloads are for developers.
 
-The extracted folder contains `MCX-Wukong-Setup.exe`, `MCX-Wukong-v0.2.0.mrpack`, `payload`, guides and licenses. Keep these files together; run the installer from this folder.
+The extracted folder contains `MCX-Wukong-Setup.exe`, `MCX-Wukong-v0.3.0.mrpack`, `payload`, guides and licenses. Keep these files together; run the installer from this folder.
 
 ## 3. Install the Black Myth loader
 
@@ -57,7 +57,7 @@ Start with a clean Black Myth installation. Compatibility with other character, 
 These steps use [Prism Launcher](https://prismlauncher.org/). Other launchers must support `.mrpack` imports.
 
 1. Install the launcher and sign in with your own Minecraft Java account.
-2. Add an instance using Import, then select `MCX-Wukong-v0.2.0.mrpack`.
+2. Add an instance using Import, then select `MCX-Wukong-v0.3.0.mrpack`.
 3. Wait for the mods to download. Keep Minecraft 1.21.4 and Fabric Loader 0.19.5.
 4. Select **64-bit Java 21** for the instance. You can start with a 4096 MiB memory allocation.
 5. Launch to Minecraft's main menu, then exit normally. This first launch downloads the client and runtime files.
@@ -118,3 +118,5 @@ Native story transformations such as the cicada stay under Black Myth's control.
 Original-file, Black Myth save and existing MCX world backups are under `b1/Binaries/Win64/MCX-Wukong-backups`.
 
 This is a public beta. Fresh installations, skin appearance, long story scenes and chapter transitions require further in-game testing. See the [FAQ](FAQ.md) and [known issues](KNOWN-ISSUES.md).
+
+The client JAR is not the Java executable. In Prism, look under `libraries/com/mojang/minecraft/1.21.4/minecraft-1.21.4-client.jar`. Setup retries discovery when installing after a pasted instance path; select the actual client manually if discovery fails. Do not select java.exe, a Fabric installer or a mod JAR.

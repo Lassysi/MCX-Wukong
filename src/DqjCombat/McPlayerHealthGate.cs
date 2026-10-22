@@ -62,6 +62,10 @@ namespace DqjCombat
                 double now=Clock();
                 float max=BGUFunctionLibraryCS.BGUGetFloatAttr(player,EBGUAttrFloat.HpMax);
                 if(now-DecoyMovedAt<1.5&&max>0&&-delta>=.9f*max){Log.Write("world-health","source-less native kill ("+delta+") right after a decoy move dropped");return;}
+                if(BoundaryDamage.Drop(true,delta,max,Active)){
+                    if(++boundaryDropped<=50)Log.Write("world-health","map-boundary damage dropped: attacker-less "+delta+" of "+max+" max HP (kill volume / out-of-bounds; MC keeps movement and its own fall/void damage)");
+                    return;
+                }
             }
             if(delta<0&&StatusTickDropped(id,delta,attacker==player))return;
             float weak;if(delta<0&&id.Length>0&&WeakScale.TryGetValue(id,out weak))delta*=weak;
@@ -90,6 +94,7 @@ namespace DqjCombat
         private readonly Dictionary<string,double[]> lastTick=new Dictionary<string,double[]>();
         private readonly Queue<double> directHits=new Queue<double>();
         private int droppedTicks;
+        private int boundaryDropped;
         // Potions & items D1: weakness on an enemy scales its hits on the player; fire resistance and milk/honey block status ticks.
         internal static readonly Dictionary<string,float> WeakScale=new Dictionary<string,float>();
         internal static bool FireResistant;internal static double CureUntil=-100;

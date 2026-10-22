@@ -30,11 +30,11 @@ MC 基岩版无法使用本包。已有其他版本的 MC 也需要另外建一�
 
 ## 2. 下载玩家包
 
-下载 [MCX-Wukong-v0.2.0-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.2.0/MCX-Wukong-v0.2.0-Players.zip)，解压到单独文件夹。
+下载 [MCX-Wukong-v0.3.0-Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip)，解压到单独文件夹。
 
 玩家用这个 ZIP。GitHub 自动生成的 `Source code` 是源码，不是安装包。
 
-解压后应有 `MCX-Wukong-Setup.exe`、`MCX-Wukong-v0.2.0.mrpack`、`payload`、说明和许可文件。不要只取出 EXE，也不要把整个玩家包手工拖进游戏目录。
+解压后应有 `MCX-Wukong-Setup.exe`、`MCX-Wukong-v0.3.0.mrpack`、`payload`、说明和许可文件。不要只取出 EXE，也不要把整个玩家包手工拖进游戏目录。
 
 ## 3. 安装黑神话加载器
 
@@ -61,7 +61,7 @@ BlackMythWukong/
 下面以 [Prism Launcher](https://prismlauncher.org/)为例。其他启动器需要支持 `.mrpack` 导入。
 
 1. 安装启动器，添加并登录自己的 MC Java 账号。
-2. 添加实例 → 导入，选择随包的 `MCX-Wukong-v0.2.0.mrpack`。
+2. 添加实例 → 导入，选择随包的 `MCX-Wukong-v0.3.0.mrpack`。
 3. 等待 MC 模组下载完成。保留整合包指定的 Minecraft 1.21.4 和 Fabric 0.19.5。
 4. 在实例设置里选择 **64 位 Java 21**，内存可先设为 4096 MiB。
 5. 启动这个实例，等到 MC 主菜单后正常退出。首次启动会下载 MC 客户端和运行文件。
@@ -123,3 +123,5 @@ libraries/com/mojang/minecraft/1.21.4/某个客户端.jar
 安装前的原文件、黑神话存档和已有联动世界的备份保存在 `b1/Binaries/Win64/MCX-Wukong-backups`。卸载只还原程序文件，不会把你后来玩的进度退回旧存档。
 
 这是公开测试版。全新环境安装、皮肤显示、长剧情和章节切换仍需进一步实机测试。遇到问题请先查看[常见问题](FAQ.zh-CN.md)和[已知问题](KNOWN-ISSUES.zh-CN.md)。
+
+客户端 JAR 不是 Java 程序。Prism 常见路径是 `libraries/com/mojang/minecraft/1.21.4/minecraft-1.21.4-client.jar`。第二栏选择或粘贴实例后，安装时会再次尝试查找；仍找不到时用第三栏选择实际文件。不要选择 `java.exe`、Fabric 安装器或模组 JAR。

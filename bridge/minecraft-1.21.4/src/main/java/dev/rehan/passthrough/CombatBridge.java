@@ -65,6 +65,7 @@ public final class CombatBridge {
         return size==null?null:EntityDimensions.scalable(size[0],size[1]);
     }
     public static boolean isProxy(Entity entity){return knownProxyIds.contains(entity.getUUID());}
+    public static String proxyId(Entity entity){return ids.get(entity.getUUID());}
     public static double[] position(UUID id){return positions.get(id);}
     public static boolean hasPositions(){return !positions.isEmpty();}
     static void seated(Entity entity){positions.remove(entity.getUUID());}
@@ -83,7 +84,10 @@ public final class CombatBridge {
         float after=entity.getHealth();
         // Fatal damage is deferred until the host confirms its native death/immune rules.
         float delta=before-(after<=.0011f?0:after);
-        if(!(entity instanceof ServerPlayer)){
+        // Preview122 (user: attacking must cost stamina): a landed melee hit on a Wukong enemy adds exhaustion (vanilla 0.1 + this).
+        if(!(entity instanceof ServerPlayer)&&source.getEntity() instanceof ServerPlayer attacker&&source.getDirectEntity()==attacker
+            &&source.is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK))attacker.causeFoodExhaustion((float)Balance.attackExhaustion());
+        if(delta>0&&!(entity instanceof ServerPlayer)){
             String pid=ids.get(entity.getUUID());
             float bonus=pid==null?0:Enchants.onProxyHit(entity,pid,kinds.getOrDefault(entity.getUUID(),""),source);
             if(bonus>0){entity.setHealth(Math.max(.001f,entity.getHealth()-bonus));after=entity.getHealth();delta+=bonus;}
@@ -151,9 +155,19 @@ public final class CombatBridge {
                     net.minecraft.world.phys.Vec3 from=source!=null?source.position():at;
                     double facing=front(p,from);
                     boolean front=facing>=0;
-                    if(raised&&front){
+                    var shieldStack=shieldHand==null?net.minecraft.world.item.ItemStack.EMPTY:p.getItemInHand(shieldHand);
+                    boolean worn=raised&&front&&shieldStack.isDamageableItem()&&shieldStack.getDamageValue()>=shieldStack.getMaxDamage()-1;
+                    if(worn){
+                        // Preview122: a worn-out shield blocks but cannot parry: part of the hit gets through, no durability left to lose.
+                        p.causeFoodExhaustion((float)Balance.shieldExhaustion());
+                        amount=(float)(amount*Balance.wornShieldDamage());
+                        s.overworld().playSound(null,p.blockPosition(),net.minecraft.sounds.SoundEvents.SHIELD_BLOCK,net.minecraft.sounds.SoundSource.PLAYERS,.6f,.6f);
+                        if(tick-lastWornNotice>200){lastWornNotice=tick;p.displayClientMessage(net.minecraft.network.chat.Component.literal("Shield worn out: it only blocks part of each hit. Repair it at the Shrine Trader."),true);}
+                        if(diag())Passthrough.LOG.info("DQJ combat-diag host-hit worn shield blocked partly: amount now {}",amount);
+                    }
+                    if(raised&&front&&!worn){
                         var shield=p.getItemInHand(shieldHand);
-                        p.causeFoodExhaustion((float)Balance.shieldExhaustion()); // Preview107: blocking costs a tiny bit of hunger (scaled)
+                        p.causeFoodExhaustion((float)Balance.shieldExhaustion()); // Preview122: a parry costs 1.0 exhaustion
                         shield.hurtAndBreak(1+(int)Math.floor(amount),p,shieldHand==net.minecraft.world.InteractionHand.MAIN_HAND
                             ?net.minecraft.world.entity.EquipmentSlot.MAINHAND:net.minecraft.world.entity.EquipmentSlot.OFFHAND);
                         s.overworld().playSound(null,p.blockPosition(),net.minecraft.sounds.SoundEvents.SHIELD_BLOCK,net.minecraft.sounds.SoundSource.PLAYERS,1f,.9f+s.overworld().random.nextFloat()*.2f);
@@ -184,7 +198,7 @@ public final class CombatBridge {
             }
         });
     }
-    private static long lastShieldTick=Long.MIN_VALUE/2;
+    private static long lastShieldTick=Long.MIN_VALUE/2,lastWornNotice=Long.MIN_VALUE/2;
     private static net.minecraft.world.InteractionHand shieldHand(net.minecraft.server.level.ServerPlayer p){
         // Live114: aiming a bow/crossbow/gun with right-click is not a raised off-hand shield.
         if(p.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem&&!Balance.rangedMain(p))return net.minecraft.world.InteractionHand.OFF_HAND;
@@ -203,7 +217,8 @@ public final class CombatBridge {
         if(tracked(entity))emit(entity,before-entity.getHealth(),"native_heal");
     }
     private static float outstanding(String id){
-        float sum=0;for(var d:pending.values())if(d.id.equals(id))sum+=d.amount;return sum;
+        String parent=MultipartTargets.parentId(id);
+        float sum=0;for(var d:pending.values())if(MultipartTargets.parentId(d.id).equals(parent))sum+=d.amount;return sum;
     }
     private static void apply(JsonObject m){
         String next=m.get("session").getAsString();
@@ -264,6 +279,11 @@ public final class CombatBridge {
     private static void contact(net.minecraft.server.level.ServerLevel level,LivingEntity mob){
         if(mob.isRemoved()||mob.isDeadOrDying())return;
         var box=mob.getBoundingBox().deflate(1.0E-5);
+        // Enlarged aiming aids are not 1000-block environmental contact volumes.
+        if(MultipartTargets.isPart(mob)){
+            var centre=box.getCenter();
+            box=new net.minecraft.world.phys.AABB(centre.x-1,centre.y-1,centre.z-1,centre.x+1,centre.y+1,centre.z+1);
+        }
         for(var pos:net.minecraft.core.BlockPos.betweenClosed(net.minecraft.util.Mth.floor(box.minX),net.minecraft.util.Mth.floor(box.minY),net.minecraft.util.Mth.floor(box.minZ),
                 net.minecraft.util.Mth.floor(box.maxX),net.minecraft.util.Mth.floor(box.maxY),net.minecraft.util.Mth.floor(box.maxZ))){
             if(!level.isLoaded(pos))continue;
@@ -282,19 +302,20 @@ public final class CombatBridge {
         if(!session.isEmpty() && (System.nanoTime()-received>3_000_000_000L || !Passthrough.minecraftAuthority)){clear();return;}
         // Preview71 (user item 7): contact blocks act on Wukong enemies. Proxies are noPhysics, so
         // vanilla never runs their inside-block/step-on checks; run the same block hooks here.
-        if(!session.isEmpty())for(var entity:targets.values())contact(s.overworld(),entity);
+        if(!session.isEmpty()){
+            MultipartTargets.mergeEffects();
+            for(var entity:targets.values())contact(s.overworld(),entity);
+        }
         // Also catch native food regeneration and mods which directly alter health.
         for(var entity:targets.values())observe(entity);
         if(!session.isEmpty())for(var p:s.getPlayerList().getPlayers()){
-            // Preview55: Wukong has no absorption hearts; golden apples etc. turn MC
-            // absorption into real healing so the host HP follows.
-            float absorption=p.getAbsorptionAmount();
-            if(absorption>0&&Passthrough.minecraftAuthority){p.setAbsorptionAmount(0);p.heal(absorption);}
+            // Keep real gold hearts: routed native damage already passes through MC absorption.
+            GoldenApple.protectTick(p);
             observe(p);
         }
     }
     private static void observe(LivingEntity entity){
-        if(!tracked(entity))return;
+        if(!tracked(entity)||MultipartTargets.isPart(entity))return;
         Float old=observed.get(entity.getUUID());if(old!=null)emit(entity,old-entity.getHealth(),"native_health");
         observed.put(entity.getUUID(),entity.getHealth());
     }

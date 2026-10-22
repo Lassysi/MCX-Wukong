@@ -16,7 +16,7 @@ gradle.beforeProject { p ->
                     server()
                     name 'Isolated capture lease GameTest'
                     source p.sourceSets.captureLease
-                    runDir '../../.work/capture-lease-gametest'
+                    runDir '../../.work/preview117/capture-gametest'
                     vmArg '-Dfabric-api.gametest'
                     vmArg '-Dfabric-api.gametest.report-file=reports/results.xml'
                     vmArg '-Dfile.encoding=UTF-8'

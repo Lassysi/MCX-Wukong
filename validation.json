@@ -1,49 +1,66 @@
 {
-  "release": "v0.2.0",
-  "status": "pre-release",
+  "release": "v0.3.0",
+  "date": "2026-10-22",
+  "timezone": "America/Los_Angeles",
+  "status": "public-test-release",
+  "developmentBaseline": "Preview125 final",
   "host": {
     "stage6Build": "passed",
-    "cecilRewriteBytes": 275456,
+    "cecilRewriteBytes": 290816,
     "assemblyResolveErrors": 0,
-    "baselineMethodsCompared": 735,
-    "onlyBaselineIlDifference": "public version getter",
-    "sha256": "1c13910982b5ae0d372c2f0229bd35f24641f668f592c0e1da6baf8d3491f98c"
+    "sha256": "eaaf00af5bbd78a7fcf6143fadae977bbc6c1f90a7876a4a44a057771e33eb74"
   },
   "minecraft": {
     "gradleBuild": "passed",
-    "sha256": "ddf43fce14af5d69165fdc74bba8e5911237f31c3745f11f901e291aace8722d",
-    "publicChanges": [
-      "project-owned skin",
-      "marked-world startup guard",
-      "no development lab helper",
-      "Java-WebSocket MIT notice included"
-    ]
+    "sha256": "6439dee172f5f6cf6eb5b8f5387ece4bb61cf0b55b4730386a51fa5448cc7be4",
+    "gameTestGroups": {
+      "equipment-shop": {
+        "passed": 2,
+        "tests": [
+          "equipmentshoptests.ordereddamagearmorandtrade",
+          "equipmentshoptests.repairwearandstamina"
+        ]
+      },
+      "golden-apple": {
+        "passed": 3,
+        "tests": [
+          "goldenappletests.consumeandsyncrealitem",
+          "goldenappletests.infinitysparestippedarrows",
+          "multiparttargettests.dragongeometryandshareddamage"
+        ]
+      },
+      "proxy-push": {
+        "passed": 2,
+        "tests": [
+          "proxypushtests.giantpartscannotmoveanidleplayer",
+          "proxypushtests.nativecontrolfreezessteve"
+        ]
+      },
+      "capture-lease": {
+        "passed": 1,
+        "tests": [
+          "captureleasetests.boatandcartlease"
+        ]
+      }
+    },
+    "gameTestsPassed": 8
   },
   "setup": {
     "frozenBuild": "passed",
-    "sha256": "53e51c5059ccf927bfe710e60a764cfb564eb307068d06fe749181ddf29302b4"
+    "sha256": "c85819a7df1fac88f6138fb3c3b0df9fbc129cc3e693e62098a84fec59862723"
   },
   "offlineChecks": {
-    "csharpSuitesPassed": 14,
-    "installerTestsPassed": 11,
-    "fixtureTestsCover": [
-      "install and uninstall",
-      "native save preservation",
-      "existing MCX world backup without changing inventory or builds",
-      "changed save rejection before installation",
-      "wrong instance rejection",
-      "modified-file rejection",
-      "write-failure rollback",
-      "new empty-world NBT",
-      "mesh contract"
-    ]
+    "csharpSuitesPassed": 19,
+    "installerTestsPassed": 14
   },
   "liveAcceptance": {
-    "publicProfileStartup": "pending",
-    "newSkinAppearance": "pending",
+    "public030CleanInstall": "not performed",
+    "public030DualGameGameplay": "not performed",
     "allChapterPlaythrough": "not completed",
-    "newFeatureCombinations": "pending",
-    "manualCgSkip": "not all scenes supported"
+    "finalSlideFlightCapturePearl": "pending live verification",
+    "F8StorySpell": "pending live verification",
+    "allBosses": "not all tested",
+    "EliteBarClassification": "pending live confirmation"
   },
-  "scope": "Build, loader and offline checks only. No dual-game acceptance was performed for this public package."
+  "scope": "Fresh public-source build, loader rewrite and isolated fixture checks. Does not establish complete native gameplay or another-PC compatibility."
 }

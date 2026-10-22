@@ -27,13 +27,13 @@ namespace DqjCombat
             get
             {
 #if S13 && S15
-                return "0.2.0";
+                return "0.3.0";
 #elif S13
-                return "0.2.0-S13";
+                return "0.3.0-S13";
 #elif S12
-                return "0.2.0-S12";
+                return "0.3.0-S12";
 #else
-                return "0.2.0-S11";
+                return "0.3.0-S11";
 #endif
             }
         }
@@ -70,6 +70,7 @@ namespace DqjCombat
         private bool cameraTried;
         private readonly NativeCameraEffects cameraEffects = new NativeCameraEffects();
         private McBridgeHost bridge;
+        private readonly ManualControlMode manualControlMode=new ManualControlMode();
         private bool bridgeMode;
         private readonly PrologueSkip prologueSkip = new PrologueSkip();
         private readonly StoryPresentation storyPresentation = new StoryPresentation();
@@ -283,6 +284,7 @@ namespace DqjCombat
             bool ready = pawn is BGUPlayerCharacterCS&&IsComponentReady(pawn);
             bool inGameplay = GameApi.InGameplay(pawn, controller, world);
             if(bridge!=null&&bridge.ScreenOwnsCursor)inGameplay=GameApi.InGameplayWithBridgeCursor(pawn,controller,world);
+            if(bridge!=null)inGameplay=bridge.ResolveCombatGameplay(inGameplay);
             if (inGameplay != lastGameplay || now >= nextGameplayLog)
             {
                 lastGameplay = inGameplay;
@@ -294,7 +296,7 @@ namespace DqjCombat
             {
                 if(bridge==null&&ready&&pawn is BGUPlayerCharacterCS){
                     storyPresentation.ReleaseOwner(pawn);
-                    bridge=new McBridgeHost((BGUPlayerCharacterCS)pawn,controller);
+                    bridge=new McBridgeHost((BGUPlayerCharacterCS)pawn,controller,manualControlMode);
                 }
                 storyPresentation.Update(now,world,controller,bridge==null?null:bridge.PlayerSkinOwner,
                     (bridge!=null&&bridge.NativeUiActive)||(pawn is BGUPlayerCharacterCS&&GameApi.PlayerInteracting((BGUPlayerCharacterCS)pawn)));

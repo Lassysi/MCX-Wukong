@@ -19,6 +19,9 @@ namespace DqjCombat
         private readonly APlayerController controller;
         private readonly McBridgeWire wire;
         private readonly McInputRouter router;
+        private readonly ManualControlMode manualControl;
+        private bool f8Down,manualWaitLogged;
+        private double nextManualHold;
         private McWorldLink worldLink;
         private readonly NativeMapUi nativeMap=new NativeMapUi();
         private NativeShrineSession nativeShrine;
@@ -46,6 +49,7 @@ namespace DqjCombat
         private MemoryMappedViewAccessor memory;
         private readonly McPoseDiagnostics poseDiagnostics=new McPoseDiagnostics();
         private readonly NativeMovementLease movementLease=new NativeMovementLease();
+        private readonly NativeCombatAuthority combatAuthority=new NativeCombatAuthority();
         private float halfHeight;
         private static McWorldCatalog worldCatalog;
         private McWorldCoordinates coordinates;
@@ -90,6 +94,15 @@ namespace DqjCombat
         private static readonly string[] Semantic={"forward","back","left","right","jump","sneak","sprint","attack","use","inventory","drop","swap","escape","perspective","pick","chat","command"};
         internal AActor PlayerSkinOwner {get{return ordinaryPlayer?player:null;}}
         internal bool Active {get{return owning&&!beginFramePaused;}}
+        internal bool ResolveCombatGameplay(bool nativeGameplay)
+        {
+            if(!SessionLive){combatAuthority.Clear();return false;}
+            bool canSkip;
+            bool combatReady=ordinaryPlayer&&!NativeUiActive&&!GameApi.MoviePlaying(player,out canSkip)
+                &&!GameApi.PlayerInteracting(player)
+                &&GameApi.InGameplayDuringCombatSync(player,controller,nativeWorld,cursorOwned);
+            return combatAuthority.Gameplay(nativeGameplay,GameApi.PlayerAnimationSyncing(player),owning,combatReady);
+        }
         private NativeHitProbe hitProbe;
         private NativeGrabSkip grabSkip;
         private SteveSkin steveSkin;
@@ -100,9 +113,10 @@ namespace DqjCombat
             &&NativeObjectLifetime.Live(nativeWorld)&&GameApi.World()==nativeWorld&&NativeObjectLifetime.ActorWorld(player)==nativeWorld
             &&GameApi.Pawn(controller)==player;}}
         private readonly NativeInteractUnlock interactUnlock=new NativeInteractUnlock();
-        internal McBridgeHost(BGUPlayerCharacterCS player,APlayerController controller)
+        internal McBridgeHost(BGUPlayerCharacterCS player,APlayerController controller,ManualControlMode manualControl=null)
         {
             this.player=player;this.controller=controller;
+            this.manualControl=manualControl??new ManualControlMode();
             nativeWorld=NativeObjectLifetime.ActorWorld(player);
             if(nativeWorld==null)throw new InvalidOperationException("native player world is not ready");
             bool humanoid=false;
@@ -121,10 +135,11 @@ namespace DqjCombat
                 DropCatalog.ExportOnce(); // Preview105: one-time read-only drop/item export for the MC drop replacement list
                 nativeShrine=new NativeShrineSession(shrine.Read,shrine.LeaveActivatedShrineMenu,()=>nativeMap.Open(lastUpdateTime,SuspendForNativeUi));
                 router.BridgeNativeInteraction=NativeInteraction;
-                travelKeyMessages=new NativeTravelKey(RequestTravel,QueueWheel,null,QueueControl,QueuePointer);
+                travelKeyMessages=new NativeTravelKey(RequestTravel,QueueWheel,null,QueueControl,QueuePointer,this.manualControl.RequestToggle);
                 router.BridgeHasScreen=()=>cursorOwned||(wire.Latest!=null&&!string.IsNullOrEmpty(wire.Latest.Screen));
                 if(Log.Verbose)hitProbe=new NativeHitProbe(player);   // Preview79: probe only when debugging
-                // Preview75 (user): grabs/throws play as-is with Steve (grab view mode); no grab skip.
+                // Combat sync retains the MC camera, HUD, input and coordinate frame.
+                // Native damage/animation events still run; no grab skip is installed.
                 // Preview73: Steve on the Wukong skeleton. Created before the first
                 // CaptureNativeComponents so the hidden Wukong mesh is remembered as hidden.
                 try{if(ordinaryPlayer)steveSkin=new SteveSkin(player,System.IO.Path.Combine(Log.Dir,"steve.mesh"));
@@ -155,6 +170,8 @@ namespace DqjCombat
                 catch(Exception e){steveSkin=null;Log.Write("steve-skin-error","rebuild "+skinRetries+"/5 failed: "+e.GetType().Name+": "+e.Message);}
             }
             if(steveSkin!=null){steveSkin.SetNativeView(!owning||NativeUiActive);steveSkin.Update();}
+            if(HandleManualControl(now,gameplay,movie,interacting))return;
+            IdleHold(now);
             InteractionHint(now);
             if(economy!=null)economy.Update(now,controller);
             var origin=UGameplayStatics.GetWorldOriginLocation(NativeObjectLifetime.ActorWorld(player));
@@ -197,14 +214,15 @@ namespace DqjCombat
             if(gameplay&&now>=nextOverlapProbe){nextOverlapProbe=now+.5;OverlapProbe();}
             if(interacting!=nativeInteracting){nativeInteracting=interacting;Log.Write("interaction","native interaction "+(interacting?"started; MC suspended while the native animation moves the character":"ended"));}
             if(interacting)teleporting=true;
+            if(NativeSlide(now,gameplay))teleporting=true;
             // F6 remains available before a successful ground handshake, including after a refused spawn.
             if(gameplay&&!teleporting&&HandleTravelRequest())return;
             bool syncing=GameApi.PlayerAnimationSyncing(player);
-            if(syncing!=playerSyncing){playerSyncing=syncing;Log.Write("grab","player animation sync (enemy grab/execution) "+(syncing?"started":"ended")+"; MC owns="+owning);}
+            if(syncing!=playerSyncing){playerSyncing=syncing;Log.Write("grab","player animation sync (enemy grab/execution) "+(syncing?"started":"ended")+"; MC camera, input, HUD and world frame retained; owns="+owning);}
             // A teleport FSM that outlived the 45 s travel timeout is ignored until it ends,
             // so a stuck native state cannot keep MC suspended forever.
-            if(!teleporting)teleportStuck=false;else if(NativeSuspensionPolicy.IgnoreStuckTeleport(teleportStuck,movie,interacting))teleporting=false;
-            if(teleporting&&!travelPending){Log.Write("travel",movie?"native cutscene; MC suspended until it ends":interacting?"native interaction; MC suspended until it ends":"native teleport in progress; MC suspended until it finishes");SuspendForTravel(movie&&storyAllowed);}
+            if(!teleporting)teleportStuck=false;else if(NativeSuspensionPolicy.IgnoreStuckTeleport(teleportStuck,movie,interacting||slideActive))teleporting=false;
+            if(teleporting&&!travelPending){Log.Write("travel",movie?"native cutscene; MC suspended until it ends":interacting?"native interaction; MC suspended until it ends":slideActive?"native slide; MC suspended until Wukong lands":"native teleport in progress; MC suspended until it finishes");SuspendForTravel(movie&&storyAllowed);}
             if(travelPending){
                 if(!gameplay||teleporting)travelSawLoading=true;
                 // Live63: the rebirth teleport to a nearby shrine has no loading screen, so arrival
@@ -251,6 +269,9 @@ namespace DqjCombat
                 halfHeight=player.CapsuleComponent.GetScaledCapsuleHalfHeight();var nativeFoot=player.GetActorLocation()-new FVector(0,0,halfHeight);
                 FHitResult initialFloor;
                 if(!TraceFloor(nativeFoot,250,400,out initialFloor)){
+                    // Preview125: never leave Wukong hanging in the air while a takeover waits for ground; let him fall to it.
+                    try{var mode=player.CharacterMovement.MovementMode;
+                        if(mode!=EMovementMode.MOVE_Falling&&mode!=EMovementMode.MOVE_Walking){player.CharacterMovement.SetMovementMode(EMovementMode.MOVE_Falling,0);Log.Write("bridge-ground","Wukong was held in the air ("+mode+") while waiting for ground; set to falling");}}catch{}
                     if(now>=nextGroundWait){nextGroundWait=now+3;Log.Write("bridge-ground","no native support at spawn; takeover held at host position="+nativeFoot);}
                     Publish(null,false);return;
                 }
@@ -301,7 +322,16 @@ namespace DqjCombat
             }
             if(!owning){Publish(null,false);return;}
             if(frame.Health<=0||mcDead){if(McDeath(now,frame,fresh))return;}
-            if(playerSyncing||grabView){if(GrabView(now,frame))return;}
+            // Preview125 (user: flying high handed control to Black Myth and left Wukong stuck in the air; Live124 08:28:08 MC y 280.9):
+            // a handover needs ground for the new takeover, so it only happens while there is native floor under Steve. In flight MC
+            // keeps control at any height (MC has no flight ceiling; a region border only matters for blocks) until he lands.
+            if(coordinates!=null&&fresh&&frame.Health>0&&coordinates.EdgeReached(frame.X,frame.Y,frame.Z)&&now>=nextHandover&&FloorUnderPlayer()){
+                // Preview124: hand over to a new MC region around Steve before the MC world floor/ceiling or the region edge.
+                nextHandover=now+5;
+                Log.Write("world-anchor","region "+coordinates.Region+" edge reached at MC "+F(frame.X)+","+F(frame.Y)+","+F(frame.Z)+"; handing over to a region around the current position");
+                Release();prepareBlocked=false;coordinates=null;lastAccepted=null;groundEpoch=null;initialized=false;
+                Publish(null,false);return;
+            }
             if(!SafePose(frame)){
                 if(frame.Health>0&&lastAccepted!=null){BeginGroundRecovery(frame);return;}
                 groundFault=true;Log.Write("bridge-ground-error","unsafe/dead MC pose rejected; foot="+F(frame.X)+","+F(frame.Y)+","+F(frame.Z)+" hp="+F(frame.Health)+"; host retained at last accepted position");
@@ -380,6 +410,53 @@ namespace DqjCombat
             if(fresh&&Log.Verbose)LogMotion(now,frame);
             Publish(frame,true);
             if(now>=nextLog){nextLog=now+30;Log.Write("bridge","MC frame="+frame.Number+" screen="+frame.Screen+" foot="+F(frame.X)+","+F(frame.Y)+","+F(frame.Z)+" yaw="+F(frame.Yaw)+" pitch="+F(frame.Pitch)+" age="+F(age)+" peerPongs="+wire.PongCount);}
+        }
+        private double nextHandover,nextIdleHold,deadHiddenSince=-1,nextRespawnRequest;
+        // Preview124 (Live123: after control went back to Black Myth, Steve kept falling in the MC world, died out of view,
+        // and every later takeover waited for a living Steve): while Black Myth has control and no takeover is being
+        // prepared, MC holds Steve frozen (NativePause, the F8 hold). A takeover's bridge_prepare releases the hold.
+        // If Steve is dead while MC is not shown (no death screen to click), MC is asked to respawn him.
+        private void IdleHold(double now)
+        {
+            if(!wire.Connected||owning)return;
+            var frame=wire.Latest;
+            if(!initialized&&now>=nextIdleHold){nextIdleHold=now+1;wire.Send("{\"t\":\"native_control\",\"hold\":true}");}
+            if(frame!=null&&frame.Health<=0&&!mcDead){
+                if(deadHiddenSince<0)deadHiddenSince=now;
+                if(now-deadHiddenSince>3&&now>=nextRespawnRequest){
+                    nextRespawnRequest=now+5;wire.Send("{\"t\":\"respawn\"}");
+                    Log.Write("life","MC player is dead while Black Myth has control (death screen not visible); respawn requested so MC can take over again");
+                }
+            }else deadHiddenSince=-1;
+        }
+        private bool HandleManualControl(double now,bool gameplay,bool movie,bool interacting)
+        {
+            if(!travelKeyMessages.Attached){
+                bool held=Key("F8");if(held&&!f8Down)manualControl.RequestToggle();f8Down=held;
+            }
+            var frame=wire.Latest;
+            bool ready=gameplay&&!movie&&!interacting&&!NativeUiActive&&!GameApi.Loading()&&!GameApi.NativeTeleporting(player);
+            var change=manualControl.Step(ready,frame!=null&&frame.Health>0,wire.Connected);
+            if(change==ManualControlChange.EnterNative){
+                Release();ResetInput();wire.Send("{\"t\":\"input_reset\"}");
+                travelPending=rebirthPending=teleportStuck=false;nextManualHold=0;
+                Log.Write("control-mode","F8: native control enabled; original camera, HUD, movement and spells; press F8 to return to MC");
+            }
+            if(change==ManualControlChange.RejectedDead)Log.Write("control-mode","F8 ignored on MC death screen; use MC Respawn first");
+            if(change==ManualControlChange.Waiting&&!manualWaitLogged){manualWaitLogged=true;Log.Write("control-mode","F8 request pending: wait for gameplay, living MC player and connection; CG/menu/teleport retained");}
+            if(change!=ManualControlChange.Waiting)manualWaitLogged=false;
+            if(change==ManualControlChange.ResumeMinecraft){
+                router.NativePassthrough=false;ResetInput();
+                wire.Send("{\"t\":\"native_control\",\"hold\":false}");
+                prepareBlocked=false;coordinates=null;lastAccepted=null;groundEpoch=null;initialized=false;
+                travelPending=rebirthPending=teleportStuck=false;nextGroundWait=0;
+                Log.Write("control-mode","F8: return to MC requested; fresh ground handshake at the CURRENT native position, old MC pose discarded");
+            }
+            if(!manualControl.NativeActive)return false;
+            router.NativePassthrough=true;router.GameplayActive=false;
+            wire.Heartbeat("{\"t\":\"cam\",\"authority\":\"host\"}");
+            if(now>=nextManualHold){nextManualHold=now+1;wire.Send("{\"t\":\"native_control\",\"hold\":true}");}
+            Publish(null,false);return true;
         }
         private FVector ConvertPosition(double x,double y,double z)
         {
@@ -608,6 +685,11 @@ namespace DqjCombat
             Log.Write("bridge-ground-error","prepare aborted: "+(string.IsNullOrEmpty(reason)?"acknowledgement timeout":reason)+"; native movement restored, automatic retry waits for movement or a menu round trip");
             Release();blockedAt=player.GetActorLocation();prepareBlocked=true;Publish(null,false);
         }
+        private bool FloorUnderPlayer()
+        {
+            try{var foot=player.GetActorLocation()-new FVector(0,0,player.CapsuleComponent.GetScaledCapsuleHalfHeight());FHitResult hit;return TraceFloor(foot,250,400,out hit);}
+            catch{return false;}
+        }
         private bool TraceFloor(FVector at,float above,float below,out FHitResult hit)
         {
             var ignore=new List<AActor>{player};if(cameraActor!=null)ignore.Add(cameraActor);
@@ -673,6 +755,46 @@ namespace DqjCombat
                 return owner!=null&&!owner.IsDestroyed&&owner.GetOwner()==player;
             }catch{return false;}
         }
+        // Preview125 (user: Wukong's slides that lead to the next area can't be entered; Live124 08:16:06-08:17:19: the body
+        // entered SplineFlyMove_C_1, MC walked/fell down the steep chute instead, reached the region floor, then died of a
+        // 17 HP fall): a native slide/spline-move volume hands control to Wukong like a native interaction. MC (held by the
+        // idle hold) takes over again with a fresh ground handshake once Wukong has left every slide volume and stood on the
+        // ground for 1 s (30 s cap).
+        private bool slideActive;private double slideStarted,slideLanded=-1,nextSlideProbe;private string slideName,slideIgnored;
+        private bool InSlideVolume()
+        {
+            try{
+                List<AActor> overlapping;player.GetOverlappingActors(out overlapping,default(TSubclassOf<AActor>));
+                if(overlapping==null)return false;
+                foreach(var actor in overlapping){
+                    if(actor==null||actor.IsDestroyed)continue;
+                    for(var c=actor.GetClass();c!=null;c=c.GetSuperClass())if(NativeSuspensionPolicy.IsSlideVolume(c.GetName())){slideName=actor.GetName();return true;}
+                }
+            }catch{}
+            return false;
+        }
+        private bool NativeSlide(double now,bool gameplay)
+        {
+            if(!gameplay)return slideActive;
+            if(now<nextSlideProbe)return slideActive;
+            nextSlideProbe=now+.1;
+            bool inside=InSlideVolume();
+            if(!slideActive){
+                if(!inside){slideIgnored=null;return false;}
+                if(slideName==slideIgnored)return false; // capped once: ignored until the body leaves it
+                slideActive=true;slideStarted=now;slideLanded=-1;
+                Log.Write("slide","body entered native slide "+slideName+"; Wukong takes over for the slide, MC resumes after he lands");
+                return true;
+            }
+            bool walking=false;try{walking=player.CharacterMovement.MovementMode==EMovementMode.MOVE_Walking;}catch{}
+            if(inside||!walking){slideLanded=-1;}else if(slideLanded<0)slideLanded=now;
+            if((slideLanded>=0&&now-slideLanded>=1)||now-slideStarted>30){
+                slideActive=false;if(now-slideStarted>30)slideIgnored=slideName;
+                Log.Write("slide","native slide finished ("+(now-slideStarted>30?"30 s cap":"landed")+" after "+F(now-slideStarted)+" s); MC takes over again here");
+                return false;
+            }
+            return true;
+        }
         // Preview92 (user: a door event did not fire): native event/trigger volumes the hidden body overlaps are
         // logged once each, so a level event that never starts can be told apart from a trigger never entered.
         private double nextOverlapProbe;private readonly HashSet<string> overlapsSeen=new HashSet<string>();
@@ -706,7 +828,8 @@ namespace DqjCombat
         }
         private bool SafePose(McBridgeWire.Frame frame)
         {
-            if(frame.Health<=0||frame.Y<-60||frame.Y>316)return false;
+            // Preview125: MC allows flight above the build limit (320); only the world floor and absurd values are unsafe.
+            if(frame.Health<=0||frame.Y<-60||frame.Y>2000)return false;
             if(lastAccepted==null)return Math.Abs(frame.Y-spawnPoint.Y)<.2;
             double dt=Math.Max(.05,(frame.Received-lastAccepted.Received)/1000000000.0);
             double dx=frame.X-lastAccepted.X,dy=frame.Y-lastAccepted.Y,dz=frame.Z-lastAccepted.Z;
@@ -773,6 +896,7 @@ namespace DqjCombat
         }
         private void Release(bool nativeUiHandoff=false,bool keepBodyHidden=false)
         {
+            combatAuthority.Clear();
             if(steveSkin!=null)steveSkin.SetNativeView(true);
             if(!keepBodyHidden&&bodyHeld){RestoreBody();Log.Write("bridge","Wukong body restored after a held suspend");}
             nextProjectionLog=0;cameraManagerDiagnostics.Reset();frameOrder.Reset();
@@ -828,31 +952,6 @@ namespace DqjCombat
                 Log.Write("life-error","native rebirth: "+e.GetType().Name+": "+e.Message+"; falling back to ground recovery at last position");
                 return false;
             }
-            return true;
-        }
-        // Preview75 (user: grabs/throws play as-is, Steve is grabbed). While the player is in a native
-        // animation sync, MC keeps its session (HP gate: damage still goes through MC, no native death)
-        // but the native third-person camera shows Steve (skin) being grabbed/thrown; MC pose, input and
-        // overlay pause. When the sync ends MC reattaches where the native animation left the player.
-        private bool grabView;
-        private bool GrabView(double now,McBridgeWire.Frame frame)
-        {
-            if(playerSyncing){
-                if(!grabView){
-                    grabView=true;ResetInput();router.GameplayActive=false;
-                    if(controller!=null&&!controller.IsDestroyed){fovLock.Release(player,controller);controller.SetViewTargetWithBlend(player,.15f);}
-                    for(int i=0;i<meshes.Count;i++){try{if(NativeObjectLifetime.Live(meshes[i]))meshes[i].PauseAnims=paused[i];}catch{}}
-                    ReleaseNativeMovement();
-                    Log.Write("grab","player grabbed: native third-person view of Steve; MC session kept");
-                }
-                if(steveSkin!=null)steveSkin.Reveal(true);
-                if(worldLink!=null)worldLink.Update(now,frame,cameraActor);
-                wire.Heartbeat("{\"t\":\"cam\",\"authority\":\"host\"}");Publish(null,false);
-                return true;
-            }
-            grabView=false;
-            Log.Write("grab","grab ended; MC reattaches at the native landing position");
-            Release();Publish(null,false);
             return true;
         }
         // Preview97: CG-only visual enlargement, one complete replacement per actor. Interaction montages

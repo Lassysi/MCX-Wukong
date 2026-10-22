@@ -3,6 +3,11 @@
   "package": "dev.rehan.passthrough.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "CaptureVehicleGuardMixin",
+    "InfinityArrowsMixin",
+    "LargeProxyQueryMixin",
+    "HostProxyPushMixin",
+    "HostProxyPushabilityMixin",
     "LevelMixin",
     "HostUnbreakableMixin",
     "ExplosionMixin",

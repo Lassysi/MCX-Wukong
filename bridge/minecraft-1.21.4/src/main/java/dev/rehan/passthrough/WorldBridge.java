@@ -239,6 +239,8 @@ public final class WorldBridge {
                 if(!s.overworld().isLoaded(p))continue;
                 var block=s.overworld().getBlockState(p);if(block.isAir()||block.is(Blocks.BARRIER))continue;
                 if(!sentCells.add(p.asLong()))continue;
+                // Revisit existing constructions after reconnect/patch, without pretending they were just placed.
+                if(groundCommitted)BlockGravity.recheck(p);
                 cells.add(cell(s.overworld(),p));
                 if(cells.size()==8){sendCells(cells);cells=new JsonArray();}
             }

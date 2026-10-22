@@ -18,6 +18,7 @@ namespace DqjCombat
         [DllImport("user32.dll")] private static extern IntPtr GetWindowDpiAwarenessContext(IntPtr window);
         [DllImport("user32.dll")] private static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
         private readonly Action pressed;
+        private readonly Action nativeModePressed;
         private readonly Action<int> scrolled;
         private readonly Action<bool> sprintChanged;
         private readonly Action<string,bool,int,int> controlChanged;
@@ -45,9 +46,10 @@ namespace DqjCombat
             finally{if(previous!=IntPtr.Zero)try{SetThreadDpiAwarenessContext(previous);}catch{}}
         }
         internal NativeTravelKey(Action pressed,Action<int> scrolled=null,Action<bool> sprintChanged=null,
-            Action<string,bool,int,int> controlChanged=null,Action<int,int> pointerChanged=null)
+            Action<string,bool,int,int> controlChanged=null,Action<int,int> pointerChanged=null,Action nativeModePressed=null)
         {
             this.pressed=pressed;
+            this.nativeModePressed=nativeModePressed;
             this.scrolled=scrolled;
             this.sprintChanged=sprintChanged;
             this.controlChanged=controlChanged;this.pointerChanged=pointerChanged;
@@ -69,6 +71,7 @@ namespace DqjCombat
                     bool mouse=id>=0x200&&id<=0x20e;
                     if(keyboard||mouse)inputWindow=Marshal.ReadIntPtr(message,0);
                     if((id==0x100||id==0x104)&&key==0x75&&(flags&(1L<<30))==0){Log.Write("travel-key","F6 window message queued");pressed();}
+                    if((id==0x100||id==0x104)&&key==0x77&&(flags&(1L<<30))==0&&HasFocus&&nativeModePressed!=null){Log.Write("control-mode","F8 toggle queued");nativeModePressed();}
                     if(id==0x20a&&scrolled!=null){int delta=unchecked((short)((key>>16)&0xffff));if(delta!=0)scrolled(delta);}
                     if(sprintChanged!=null&&(key==0x11||key==0xa2)&&(flags&(1L<<24))==0){
                         if((id==0x100||id==0x104)&&(flags&(1L<<30))==0)sprintChanged(true);

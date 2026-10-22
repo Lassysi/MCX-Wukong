@@ -46,7 +46,8 @@ def main():
         if rel.startswith('LICENSES/'):
             dest=player/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/rel,dest)
     doc_paths=['LICENSE','README.md','README.zh-CN.md','CHANGELOG.md','CHANGELOG.zh-CN.md','THIRD-PARTY-NOTICES.md','THIRD-PARTY-NOTICES.zh-CN.md']
-    doc_paths += ['docs/'+name+lang+'.md' for name in ('INSTALL','FAQ','KNOWN-ISSUES','SKINS','USAGE','UPGRADE') for lang in ('','.zh-CN')]
+    doc_paths += ['docs/'+name+lang+'.md' for name in ('INSTALL','FAQ','KNOWN-ISSUES','SKINS','USAGE','UPGRADE','BALANCE','SHOP','PERFORMANCE') for lang in ('','.zh-CN')]
+    doc_paths += ['docs/RELEASE-v0.3.0.md','validation.json']
     for name in doc_paths:
         target=player/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,target)
     # Source and player guides share the same bilingual layout. Build guides stay in source.
@@ -64,7 +65,7 @@ def main():
         z.writestr('modrinth.index.json',json.dumps(index,indent=2))
         z.write(payload/MOD_JAR,'overrides/mods/'+MOD_JAR)
         z.write(ROOT/'pack/overrides/config/dqj-balance.json','overrides/config/dqj-balance.json')
-        z.writestr('overrides/options.txt','pauseOnLostFocus:false\nenableVsync:false\nmaxFps:120\nrenderDistance:6\nsimulationDistance:5\nfullscreen:false\noverrideWidth:1280\noverrideHeight:720\nguiScale:3\n')
+        z.writestr('overrides/options.txt','pauseOnLostFocus:false\nenableVsync:false\nmaxFps:60\nrenderDistance:6\nsimulationDistance:5\nfullscreen:false\noverrideWidth:1280\noverrideHeight:720\nguiScale:3\ntutorialStep:none\n')
     all_files=sorted(p for p in player.rglob('*') if p.is_file())
     manifest={'version':1,'release':TAG,'files':[{'path':p.relative_to(player).as_posix(),'sha256':sha(p),'bytes':p.stat().st_size} for p in all_files],'install':install,'claims':'Offline/package checks only; live public-profile acceptance pending'}
     write(player/'bundle.json',json.dumps(manifest,indent=2,ensure_ascii=False))

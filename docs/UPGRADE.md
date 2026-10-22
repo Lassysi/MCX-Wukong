@@ -2,7 +2,7 @@
 
 English | [简体中文](UPGRADE.zh-CN.md)
 
-Update both bridge components together. Keep the previous player package, uninstall with its setup tool, then install v0.2.0 in a separate new Minecraft instance. Never replace a DLL or JAR while either game is running.
+Update both bridge components together. Keep the previous player package, uninstall with its setup tool, then install v0.3.0 in a separate new Minecraft instance. Never replace a DLL or JAR while either game is running.
 
 1. Save and exit both games normally.
 2. Back up Black Myth's `b1/Saved/SaveGames` and the old instance's entire `saves/MCX-Wukong` folder. Keep the old player package and installation backups.

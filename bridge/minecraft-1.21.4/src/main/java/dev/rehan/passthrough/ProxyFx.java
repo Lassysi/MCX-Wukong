@@ -17,20 +17,33 @@ public final class ProxyFx {
     private ProxyFx() {}
     private static final Map<String,String> last=new HashMap<>();
     private static Boolean lastFireRes;
+    private static Boolean lastGuard;
+    /** A bounded heartbeat lets the native guard expire safely if the connection stops. */
+    public static void sendPlayerFlags(net.minecraft.server.level.ServerPlayer p){
+        boolean fireRes=p.hasEffect(MobEffects.FIRE_RESISTANCE);int ticks=GoldenApple.remainingTicks(p);boolean guard=ticks>0;
+        if(lastFireRes==null||lastFireRes!=fireRes||lastGuard==null||lastGuard!=guard||guard&&tick%20==0){
+            lastFireRes=fireRes;lastGuard=guard;
+            Passthrough.events.accept("{\"t\":\"player_fx\",\"fireRes\":"+fireRes+",\"appleGuardTicks\":"+ticks+"}");
+        }
+    }
     private static int tick;
     /** Strongest knockback impulse per proxy since the last report (CombatBridge resets proxy velocity every frame). */
     private static final Map<String,net.minecraft.world.phys.Vec3> knock=new HashMap<>();
     static void capture(String id,net.minecraft.world.phys.Vec3 v){
+        id=MultipartTargets.parentId(id);
         if(v.horizontalDistanceSqr()<.0225&&v.y<=.25)return;
         var old=knock.get(id);if(old==null||v.lengthSqr()>old.lengthSqr())knock.put(id,v);
     }
 
-    /** Live112 polish (user): boats and minecarts capture small monsters (not bottom-health-bar enemies) for at most 8 s,
-     *  then release them with a 10 s cooldown, so a boat can't trap a monster forever. Big enemies also break a fishing line. */
+    /** Live112 polish (user): boats and minecarts capture small monsters (not bottom-health-bar enemies); big enemies also
+     *  break a fishing line. Preview124 (user: finish it; capture as wide as reasonable, monsters wander): an empty boat or
+     *  minecart within CaptureRange blocks of a monster's hitbox pulls it in, and the capture holds until the player breaks
+     *  the vehicle (only the player can: CaptureVehicleGuardMixin) or the monster dies. A 10 s cooldown follows a release. */
     private record Seat(net.minecraft.world.entity.Entity vehicle,int since) {}
     private static final Map<java.util.UUID,Seat> seats=new HashMap<>();
     private static final Map<java.util.UUID,Integer> cooldown=new HashMap<>();
-    private static final int SeatTicks=160,CooldownTicks=200;
+    private static final int CooldownTicks=200;
+    static final double CaptureRange=4,CaptureRangeY=2;
     private static int refusedLogged;
     private static void bar(MinecraftServer s,String text){for(var p:s.getPlayerList().getPlayers())p.displayClientMessage(net.minecraft.network.chat.Component.literal(text),true);}
     private static boolean vehicle(net.minecraft.world.entity.Entity e){return e instanceof net.minecraft.world.entity.vehicle.AbstractBoat||e instanceof net.minecraft.world.entity.vehicle.AbstractMinecart;}
@@ -41,7 +54,7 @@ public final class ProxyFx {
         Integer free=cooldown.get(e.getUUID());
         return !CombatBridge.big(e)&&(free==null||tick-free>=CooldownTicks);
     }
-    static void clear(){seats.clear();cooldown.clear();knock.clear();last.clear();lastFireRes=null;}
+    static void clear(){seats.clear();cooldown.clear();knock.clear();last.clear();lastFireRes=null;lastGuard=null;}
     private static void release(String id,net.minecraft.world.entity.animal.Pig pig,String reason){
         seats.remove(pig.getUUID());cooldown.put(pig.getUUID(),tick);
         if(vehicle(pig.getVehicle()))pig.stopRiding();
@@ -54,11 +67,11 @@ public final class ProxyFx {
         Seat seat=seats.get(uuid);
         if(seat!=null){
             var v=seat.vehicle();
-            if(big||!v.isAlive()||tick-seat.since()>=SeatTicks){
-                release(id,pig,big?"big enemy":!v.isAlive()?"vehicle removed":"8 s elapsed");return false;
+            if(big||!v.isAlive()){
+                release(id,pig,big?"big enemy":"vehicle broken");return false;
             }
             if(pig.getVehicle()!=v){
-                // A transient dismount must not erase ownership or restart the 8 s timer.
+                // A transient dismount must not erase ownership.
                 if(!v.getPassengers().isEmpty()||!pig.startRiding(v,true)){
                     release(id,pig,"seat unavailable");return false;
                 }
@@ -76,9 +89,11 @@ public final class ProxyFx {
         }
         if(pig.isPassenger())return false;
         // Live113 (user: a monster next to a boat was not caught): Wukong monsters don't step onto boats like MC mobs, so an empty
-        // boat/minecart within 1.5 blocks of the hitbox pulls the monster in.
-        for(var v:level.getEntitiesOfClass(net.minecraft.world.entity.vehicle.VehicleEntity.class,pig.getBoundingBox().inflate(1.5,1,1.5)))
-            if(vehicle(v)&&v.isAlive()&&v.getPassengers().isEmpty()){
+        // boat/minecart near the hitbox pulls the monster in (Preview124: 4 blocks sideways, 2 up/down; nearest vehicle first).
+        var near=level.getEntitiesOfClass(net.minecraft.world.entity.vehicle.VehicleEntity.class,pig.getBoundingBox().inflate(CaptureRange,CaptureRangeY,CaptureRange));
+        near.sort(java.util.Comparator.comparingDouble(v->v.distanceToSqr(pig)));
+        for(var v:near)
+            if(vehicle(v)&&v.isAlive()&&v.getPassengers().isEmpty()&&seats.values().stream().noneMatch(s->s.vehicle()==v)){
                 if(pig.startRiding(v,true)){seats.put(uuid,new Seat(v,tick));CombatBridge.seated(pig);bar(server,"Monster captured!");Passthrough.LOG.info("DQJ capture: enemy {} seated in {}",id,v.getType().getDescriptionId());return true;}
                 if(refusedLogged++<10)Passthrough.LOG.info("DQJ capture: enemy {} could not board {} (vanilla refused)",id,v.getType().getDescriptionId());
             }
@@ -91,16 +106,26 @@ public final class ProxyFx {
     static void tick(MinecraftServer server){
         if(!Passthrough.active){if(!last.isEmpty()){last.clear();}lastFireRes=null;return;}
         ++tick;if(tick%5!=0&&knock.isEmpty())return;
+        MultipartTargets.mergeEffects();
         var level=server.overworld();var out=new StringBuilder();int n=0;
         var seen=new java.util.HashSet<String>();
         for(var entry:CombatBridge.proxies().entrySet()){
-            var pig=entry.getValue();if(pig==null||pig.isRemoved())continue;
+            var pig=entry.getValue();if(pig==null||pig.isRemoved()||MultipartTargets.isPart(pig))continue;
             String id=entry.getKey();seen.add(id);
             var feet=pig.blockPosition();var at=level.getBlockState(feet);var below=level.getBlockState(feet.below());
             int slow=amp(pig,MobEffects.MOVEMENT_SLOWDOWN),weak=amp(pig,MobEffects.WEAKNESS),lev=amp(pig,MobEffects.LEVITATION);
             boolean freeze=pig.getTicksFrozen()>0&&(at.is(Blocks.POWDER_SNOW)||pig.isFullyFrozen());
             boolean web=at.is(Blocks.COBWEB)||level.getBlockState(feet.above()).is(Blocks.COBWEB);
             boolean soul=below.is(Blocks.SOUL_SAND)||below.is(Blocks.SOUL_SOIL)||below.is(Blocks.HONEY_BLOCK)||at.is(Blocks.SOUL_SAND)||at.is(Blocks.HONEY_BLOCK);
+            // Report one aggregate status row. A neutral tail must never cancel an affected head.
+            for(var partEntry:CombatBridge.proxies().entrySet()){
+                if(partEntry.getKey().equals(id)||!MultipartTargets.parentId(partEntry.getKey()).equals(id))continue;
+                var part=partEntry.getValue();if(part.isRemoved())continue;
+                var pf=part.blockPosition();var pa=level.getBlockState(pf);var pb=level.getBlockState(pf.below());
+                web|=pa.is(Blocks.COBWEB)||level.getBlockState(pf.above()).is(Blocks.COBWEB);
+                soul|=pb.is(Blocks.SOUL_SAND)||pb.is(Blocks.SOUL_SOIL)||pb.is(Blocks.HONEY_BLOCK)||pa.is(Blocks.SOUL_SAND)||pa.is(Blocks.HONEY_BLOCK);
+                freeze|=part.getTicksFrozen()>0&&(pa.is(Blocks.POWDER_SNOW)||part.isFullyFrozen());
+            }
             boolean seat=capture(server,level,id,pig);
             var v=knock.remove(id);
             String kb=v==null?null:String.format(Locale.ROOT,"[%.3f,%.3f,%.3f]",v.x,v.y,v.z);
@@ -124,8 +149,7 @@ public final class ProxyFx {
         if(n>0)Passthrough.events.accept("{\"t\":\"proxy_fx\",\"e\":["+out+"]}");
         var players=server.getPlayerList().getPlayers();
         if(!players.isEmpty()){
-            boolean fireRes=players.get(0).hasEffect(MobEffects.FIRE_RESISTANCE);
-            if(lastFireRes==null||lastFireRes!=fireRes){lastFireRes=fireRes;Passthrough.events.accept("{\"t\":\"player_fx\",\"fireRes\":"+fireRes+"}");}
+            sendPlayerFlags(players.get(0));
         }
     }
 }

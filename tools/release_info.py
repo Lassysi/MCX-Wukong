@@ -1,5 +1,5 @@
 """Public release identity. Internal game filenames keep their loader contracts."""
-VERSION='0.2.0'
+VERSION='0.3.0'
 TAG='v'+VERSION
 NAME='MCX-Wukong'
 STEM=NAME+'-'+TAG

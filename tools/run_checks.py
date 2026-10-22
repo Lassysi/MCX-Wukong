@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess,sys,tempfile
 
 root=Path(__file__).resolve().parents[1]
-projects=['appearance-compat','cutscene-skin-scope','enemy-effects','ground-prepare','host-projection','native-input-compat','native-input-drag','native-lifetime','native-manual-skip','native-ray','native-travel-compat','prologue-skip','story-presentation','world-coordinates']
+projects=['appearance-compat', 'cutscene-skin-scope', 'enemy-effects', 'ground-prepare', 'host-projection', 'native-input-compat', 'native-input-drag', 'native-lifetime', 'native-manual-skip', 'native-ray', 'native-travel-compat', 'prologue-skip', 'story-presentation', 'world-coordinates', 'apple-protection', 'body-segments', 'boundary-damage', 'combat-authority', 'manual-control']
 for folder in projects:
     project=next((root/'bridge/tests'/folder).glob('*.csproj'))
     command=['dotnet','run','--project',str(project),'-c','Release']

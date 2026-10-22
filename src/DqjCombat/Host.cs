@@ -192,6 +192,8 @@ namespace DqjCombat
         {return InGameplayCore(pawn,controller,world,false);}
         internal static bool InGameplayWithBridgeCursor(AActor pawn,APlayerController controller,UWorld world)
         {return InGameplayCore(pawn,controller,world,true);}
+        internal static bool InGameplayDuringCombatSync(AActor pawn,APlayerController controller,UWorld world,bool bridgeCursor)
+        {return InGameplayCore(pawn,controller,world,bridgeCursor,true);}
         internal static string GameplayGates(APlayerController controller,UWorld world)
         {
             try{
@@ -200,13 +202,13 @@ namespace DqjCombat
                     +" battle="+(lifetime!=null&&lifetime.IsInFSMState(SGI_Global.InBattleStandAlone));
             }catch(Exception e){return "gate-error="+e.GetType().Name;}
         }
-        private static bool InGameplayCore(AActor pawn,APlayerController controller,UWorld world,bool bridgeCursor)
+        private static bool InGameplayCore(AActor pawn,APlayerController controller,UWorld world,bool bridgeCursor,bool combatSync=false)
         {
             try
             {
                 var player = pawn as BGUPlayerCharacterCS;
                 if (player == null || player.IsDestroyed || player.IsPendingKill || Paused(world)
-                    || controller.IsMoveInputIgnored() || (controller.ShowMouseCursor && !bridgeCursor)
+                    || (!combatSync&&controller.IsMoveInputIgnored()) || (controller.ShowMouseCursor && !bridgeCursor)
                     || BGUFunctionLibraryCS.BGUIsUnitDead(player)) return false;
                 // 仅有 Pawn 并不代表加载结束。旧日志在 Loading_TravelLevel 就挂上了 HUD。
                 var lifetime = BGW_GameLifeTimeMgr.Get(world);

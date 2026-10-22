@@ -82,6 +82,7 @@ namespace DqjCombat
         private bool started;
         private int voxelIndex;
         private McPlayerHealthGate healthGate;
+        private NativeAppleProtection appleProtection;
         internal McWorldLink(BGUPlayerCharacterCS player,McBridgeWire wire,Func<double,double,double,FVector> convert,Func<FVector,BridgePoint> toMc)
         {this.player=player;this.wire=wire;this.convert=convert;this.toMc=toMc;sceneBreak=new SceneBreak(player,convert);}
         private readonly SceneBreak sceneBreak;
@@ -99,6 +100,7 @@ namespace DqjCombat
             if(maximum<=0||!Finite(maximum))return;healthUnit=maximum/20f;
             if(!started){started=true;healthGate=new McPlayerHealthGate(player,wire,session,toMc);healthGate.Install();wire.Send("{\"t\":\"block_snapshot\"}");Log.Write("world-link","native MC world link session="+session+" healthUnit="+F(healthUnit));}
             healthGate.Unit=healthUnit;
+            if(appleProtection!=null)appleProtection.Tick();
             JsonData ev;int handled=0;
             while(handled++<96&&wire.TryEvent(out ev)){
                 try{
@@ -114,7 +116,11 @@ namespace DqjCombat
                         sceneBreak.Hit((string)ev["tool"],camera,ignore);}
                     else if(type=="pearl")Pearl(ev,camera);
                     else if(type=="proxy_fx")ProxyEffects(ev);
-                    else if(type=="player_fx"){McPlayerHealthGate.FireResistant=(bool)ev["fireRes"];Log.Write("items","fire resistance "+(McPlayerHealthGate.FireResistant?"on: native burn ticks blocked":"off"));}
+                    else if(type=="player_fx"){
+                        McPlayerHealthGate.FireResistant=(bool)ev["fireRes"];
+                        if(appleProtection==null)appleProtection=new NativeAppleProtection(GameApi.Events(player),McPlayerHealthGate.Clock);
+                        appleProtection.Receive(ev.Keys.Contains("appleGuardTicks")?(int)N(ev["appleGuardTicks"]):0);
+                    }
                     else if(type=="player_cure"){string kind=(string)ev["kind"];McPlayerHealthGate.CureUntil=McPlayerHealthGate.Clock()+(kind=="milk"?30:15);Log.Write("items",kind+" drunk: native status damage blocked for "+(kind=="milk"?30:15)+" s");}
                     else if(type=="explosion"){var p=ev["pos"];sceneBreak.Blast(N(p[0]),N(p[1]),N(p[2]),N(ev["r"]),(string)ev["src"]);}
                 }catch(Exception e){Log.Write("world-error",e.GetType().Name+": "+e.Message);}
@@ -138,17 +144,21 @@ namespace DqjCombat
                         Log.Write("world-damage","no MC hitbox (not enemy team): class="+actor.GetClass().GetName()+" id="+actor.GetUniqueID());
                     continue;
                 }
-                if((actor.GetActorLocation()-at).Size()>6400)continue;
+                // The dragon's root may be far away while its head/tail is right beside the player.
+                if((actor.GetActorLocation()-at).Size()>(BodySegments.KnownDragon(actor.GetClass().GetName())||BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.HpMax)>=EffectBossHp?14000:6400))continue;
                 targets[actor.GetUniqueID().ToString(CultureInfo.InvariantCulture)]=actor;
-                if(targets.Count>=128)break;
+                // Apply the wire budget after prioritising the dragon, not during unordered object discovery.
             }
         }
         private void SendEntities()
         {
             var json=new StringBuilder("{\"t\":\"host_entities\",\"session\":\"");json.Append(session).Append("\",\"ack\":").Append(ack)
                 .Append(",\"hp\":").Append(F(BGUFunctionLibraryCS.BGUGetFloatAttr(player,EBGUAttrFloat.Hp)/healthUnit)).Append(",\"entities\":[");
-            bool comma=false;
-            foreach(var pair in targets){
+            bool comma=false;int sent=0;
+            var ordered=new List<KeyValuePair<string,BGUCharacterCS>>(targets);
+            ordered.Sort((a,b)=>BodySegments.KnownDragon(b.Value.GetClass().GetName()).CompareTo(BodySegments.KnownDragon(a.Value.GetClass().GetName())));
+            foreach(var pair in ordered){
+                if(sent>=120)break; // Hard cap also applies to primary proxies, not only extra parts.
                 var actor=pair.Value;if(!Alive(actor))continue;
                 float hp=BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.Hp),max=BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.HpMax);
                 if(!Finite(hp)||!Finite(max)||max<=0)continue;
@@ -158,7 +168,7 @@ namespace DqjCombat
                 // Live110 (user: a crouching bone demon on a ledge could not be hit, not even by arrows; 0 MC hits logged): every
                 // enemy's hitbox now follows its visible body (actor bounds), not only Bosses'. Capsules of crouching or leaning
                 // creatures sit far from the body.
-                FVector feetAt;BodyProxy(pair.Key,actor,radius,half,max>=BossHpMax,out proxyRadius,out proxyHalf,out feetAt);
+                FVector feetAt;BodyProxy(pair.Key,actor,radius,half,max>=EffectBossHp,out proxyRadius,out proxyHalf,out feetAt);
                 if(sizeLogged.Add(pair.Key)){
                     // Preview67 diagnostic for Boss hitboxes: capsule vs whole-actor bounds.
                     try{FVector origin,extent;actor.GetActorBounds(false,out origin,out extent,false);
@@ -166,11 +176,23 @@ namespace DqjCombat
                     }catch(Exception e){Log.Write("target-size","id="+pair.Key+" bounds error "+e.GetType().Name);}
                 }
                 var pos=ToMc(feetAt);
-                if(comma)json.Append(',');comma=true;
+                if(comma)json.Append(',');comma=true;sent++;
                 float unit=Math.Max(healthUnit,max/1024f);targetUnits[pair.Key]=unit;
                 json.Append("{\"id\":\"").Append(pair.Key).Append("\",\"hp\":").Append(F(hp/unit))
                     .Append(",\"max\":").Append(F(max/unit)).Append(",\"w\":").Append(F(proxyRadius*.02))
-                    .Append(",\"h\":").Append(F(proxyHalf*.02)).Append(KindField(actor)).Append(max>=CaptureMaxHp?",\"big\":true":"").Append(",\"p\":[").Append(F(pos.X)).Append(',').Append(F(pos.Y)).Append(',').Append(F(pos.Z)).Append("]}");
+                    .Append(",\"h\":").Append(F(proxyHalf*.02)).Append(KindField(actor)).Append(BottomBar(actor,max)?",\"big\":true":"").Append(",\"p\":[").Append(F(pos.X)).Append(',').Append(F(pos.Y)).Append(',').Append(F(pos.Z)).Append("]}");
+                // Preview120: long bodies (Kang-Jin Loong) get extra hitboxes along their skeleton; hits map back via BodySegments.BaseId.
+                float[] bb;if(bodyBounds.TryGetValue(pair.Key,out bb)&&bb!=null){
+                    var parts=BodySegments.Points(pair.Key,actor,bb[3],bb[4],bb[5],max>=EffectBossHp,radius,half);
+                    for(int k=0;k<parts.Count&&sent<120;k++){sent++;   // MC accepts at most 128 proxies
+                        var pp=parts[k];if(!Finite(pp.X+pp.Y+pp.Z))continue;
+                        var feetPart=ToMc(pp-new FVector(0,0,BodySegments.Half));
+                        json.Append(",{\"id\":\"").Append(pair.Key).Append('#').Append(k).Append("\",\"hp\":").Append(F(hp/unit))
+                            .Append(",\"max\":").Append(F(max/unit)).Append(",\"w\":").Append(F(BodySegments.Radius*.02))
+                            .Append(",\"h\":").Append(F(BodySegments.Half*.02)).Append(KindField(actor)).Append(BottomBar(actor,max)?",\"big\":true":"")
+                            .Append(",\"p\":[").Append(F(feetPart.X)).Append(',').Append(F(feetPart.Y)).Append(',').Append(F(feetPart.Z)).Append("]}");
+                    }
+                }
             }
             wire.Send(json.Append("]}").ToString());
         }
@@ -186,7 +208,29 @@ namespace DqjCombat
         // Potions & items D1: MC effects on a proxy -> native time dilation / weakness scaling / launch (EnemyEffects).
         private static readonly float EffectBossHp=3000f;
         // Live112 polish (user): enemies with a bottom health bar (chiefs, Bosses) can't be captured in boats/minecarts or reeled in.
-        private static readonly float CaptureMaxHp=1000f;
+        // Preview125 (user: a big monk without a bottom health bar could not be caught; it has 1188 HP and the old rule was
+        // "1000 HP or more"): the game's own unit data decides. BossBar and EliteBar are the named bars at the bottom of the
+        // screen (Bosses, chiefs) -> no capture, no reeling in; EnemyBar (over the head) and None -> capturable. HP is never
+        // used (user: later ordinary mobs have more HP than the first Boss); an unreadable entry counts as capturable and is
+        // logged. Each class is logged once ("capture-kind").
+        private readonly Dictionary<int,bool> bottomBar=new Dictionary<int,bool>();
+        private readonly HashSet<string> barLogged=new HashSet<string>();
+        private bool BottomBar(BGUCharacterCS actor,float max)
+        {
+            int id=0;try{id=actor.GetFinalBattleInfoExtendID();}catch{}
+            bool big;if(id>0&&bottomBar.TryGetValue(id,out big))return big;
+            string cls=actor.GetClass().GetName();
+            try{
+                var desc=id>0?BGW_GameDB.GetUnitBattleInfoExtendDesc(id):null;
+                if(desc!=null){
+                    string bar=desc.BloodBarType.ToString();big=bar=="BossBar"||bar=="EliteBar";bottomBar[id]=big;
+                    if(barLogged.Add(cls))Log.Write("capture-kind",cls+" battleInfo="+id+" bar="+bar+" -> "+(big?"bottom health bar: no capture":"capturable"));
+                    return big;
+                }
+            }catch(Exception e){if(barLogged.Add(cls+"!"))Log.Write("capture-kind",cls+" bar lookup failed ("+e.GetType().Name+"); treated as capturable");}
+            if(barLogged.Add(cls+"?"))Log.Write("capture-kind",cls+" no battle info (id="+id+"); treated as capturable");
+            return false;
+        }
         private int fxLogged;
         private readonly Dictionary<string,FVector> captureOffsets=new Dictionary<string,FVector>();
         private void FollowCapture(string id,BGUCharacterCS actor,JsonData e)
@@ -202,7 +246,8 @@ namespace DqjCombat
                 offset=actor.GetActorLocation()-feet;
             }
             var target=seat+offset;
-            if(!Finite(target.X+target.Y+target.Z)||(target-actor.GetActorLocation()).Size()>600f)return;
+            // Preview124: capture reaches 4 blocks past the hitbox (up to ~7 m from the actor), so the seat may be up to 12 m away.
+            if(!Finite(target.X+target.Y+target.Z)||(target-actor.GetActorLocation()).Size()>1200f)return;
             captureOffsets[id]=offset;
             actor.SetActorLocation(target,false,out _,true);
             // Bounds contain world coordinates. Invalidate after moving so the next hitbox snapshot follows the actor.
@@ -211,12 +256,12 @@ namespace DqjCombat
         private void ProxyEffects(JsonData ev)
         {
             foreach(JsonData e in ev["e"]){
-                string id=(string)e["id"];BGUCharacterCS actor;
+                string id=BodySegments.BaseId((string)e["id"]);BGUCharacterCS actor;
                 if(!targets.TryGetValue(id,out actor)||!Alive(actor)){McPlayerHealthGate.WeakScale.Remove(id);continue;}
-                bool boss=BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.HpMax)>=EffectBossHp;
+                bool boss=BottomBar(actor,0); // Preview125: Boss caps follow the native health-bar type, not HP
                 int slow=(int)N(e["slow"]),weak=(int)N(e["weak"]),lev=(int)N(e["lev"]);
                 bool freeze=(bool)e["freeze"],web=(bool)e["web"],soul=(bool)e["soul"];
-                bool seat=e.Keys.Contains("seat")&&(bool)e["seat"]&&BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.HpMax)<CaptureMaxHp;
+                bool seat=e.Keys.Contains("seat")&&(bool)e["seat"]&&!BottomBar(actor,BGUFunctionLibraryCS.BGUGetFloatAttr(actor,EBGUAttrFloat.HpMax));
                 float dilation=EnemyEffects.Dilation(slow,freeze,web,soul,boss);
                 if(seat){dilation=Math.Min(dilation,.0001f);FollowCapture(id,actor,e);}
                 else captureOffsets.Remove(id);
@@ -261,7 +306,7 @@ namespace DqjCombat
             long seq=(long)N(message["seq"]);if(seq<=ack){if(staleLogged++<20)Log.Write("world-health","stale MC hit dropped: seq="+seq+" ack="+ack+" id="+(string)message["id"]);return;}
             // FIFO on one WebSocket; a sequence gap forces resync rather than silent damage loss.
             if(seq!=ack+1)throw new InvalidOperationException("MC damage sequence gap "+ack+"->"+seq);
-            string id=(string)message["id"];double amount=N(message["amount"]);
+            string id=BodySegments.BaseId((string)message["id"]);double amount=N(message["amount"]);
             if(!Finite(amount)||Math.Abs(amount)>8192){ack=seq;return;}
             BGUCharacterCS victim=null;if(id=="player")victim=player;else targets.TryGetValue(id,out victim);
             bool finishing=false;var deathRequest=default(FEffectInstReq);
@@ -557,6 +602,6 @@ namespace DqjCombat
         private void HideOutline(){if(outlineActor!=null)try{if(NativeObjectLifetime.Live(outlineActor))outlineActor.DestroyActor();}catch{}outlineActor=null;outlineKey=null;}
         private void ClearBlocks(){HideOutline();outlineBounds.Clear();foreach(var list in blocks.Values)foreach(var actor in list)try{if(NativeObjectLifetime.Live(actor))actor.DestroyActor();}catch{}blocks.Clear();
             if(nativeDrawn.Count>0){nativeDrawn.Clear();try{wire.Send("{\"t\":\"native_blocks\",\"clear\":true}");}catch{}}}
-        public void Dispose(){EnemyEffects.RestoreAll();captureOffsets.Clear();if(healthGate!=null)healthGate.Dispose();healthGate=null;ClearBlocks();targets.Clear();targetUnits.Clear();terrain.Clear();started=false;}
+        public void Dispose(){if(appleProtection!=null)appleProtection.Dispose();appleProtection=null;McPlayerHealthGate.FireResistant=false;McPlayerHealthGate.CureUntil=-100;EnemyEffects.RestoreAll();BodySegments.Forget();captureOffsets.Clear();if(healthGate!=null)healthGate.Dispose();healthGate=null;ClearBlocks();targets.Clear();targetUnits.Clear();terrain.Clear();started=false;}
     }
 }

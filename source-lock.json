@@ -1,6 +1,6 @@
 {
-  "release": "v0.2.0",
-  "hostVersion": "0.2.0",
+  "release": "v0.3.0",
+  "hostVersion": "0.3.0",
   "protocol": 16,
   "minecraft": "1.21.4",
   "fabricLoader": "0.19.5",
@@ -9,15 +9,16 @@
   "gradle": "9.7.1",
   "buildJdk": "25",
   "wukongSteamBuild": "21393610",
-  "hostBaselineSha256": "c26d5cbd9f089ac36ef79fc8d90f8bccad01c98547bc4107079f801c7761cb8f",
-  "mcCodeBaselineSha256": "89070b92eb153a623ec59e458166b221375af926cf11a66da084ff92428845d1",
+  "hostBaselineSha256": "bc9a2c6aa9ef96023adc76a19f208688ae40f3320b9e43cd517da1ac530d67dc",
+  "mcCodeBaselineSha256": "dc34ddb0ee0f7650e8f7fbca3855264169a0a97fb83472fa0ed42008dfbacc68",
   "upstream": {
     "repository": "https://github.com/rehan-remade/universal-modder",
     "commit": "2c2201437ca676fb4e5f06a18fff6e8db99eef0f",
     "path": "examples/minecraft-gta5-passthrough/mc",
     "license": "MIT"
   },
-  "liveStatus": "Public profile and combined dual-game acceptance pending; full all-chapter testing not completed",
-  "developmentBaseline": "Preview117",
-  "minecraftModVersion": "0.2.0"
+  "liveStatus": "Preview118-125 historical checks recorded; v0.3.0 clean install and native gameplay acceptance pending; not all chapters or bosses tested",
+  "developmentBaseline": "Preview125 final",
+  "minecraftModVersion": "0.3.0",
+  "githubBaselineCommit": "c7ede772e01283a59b7d96cb3766a76749f5b43d"
 }

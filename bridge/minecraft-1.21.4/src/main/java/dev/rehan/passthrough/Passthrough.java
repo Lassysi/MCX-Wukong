@@ -15,6 +15,8 @@ public final class Passthrough implements ModInitializer {
      *  integrated client; the server shield rule reads it because isUsingItem can drop for a few ticks. */
     public static volatile boolean useHeld;
     @Override public void onInitialize() {
+        GoldenApple.register();
+        NativePause.register();
         CombatBridge.register();
         Allies.register();
         ServerLifecycleEvents.SERVER_STARTED.register(WorldBridge::attach);

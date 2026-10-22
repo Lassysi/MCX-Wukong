@@ -44,7 +44,7 @@ public final class CaptureLeaseTests implements FabricGameTest {
                 if(pig==null)return;
                 if(n==15){
                     h.assertTrue(pig.getVehicle()==boat,"ordinary proxy must board a nearby boat");
-                    // Vanilla can eject a passenger; a live capture must recover before its 8 s expiry.
+                    // Vanilla can eject a passenger; a live capture must recover.
                     pig.stopRiding();
                 }
                 if(n==25)h.assertTrue(pig.getVehicle()==boat,"premature dismount must not cancel the capture");
@@ -55,8 +55,13 @@ public final class CaptureLeaseTests implements FabricGameTest {
                     double[] p=CombatBridge.position(pig.getUUID());
                     h.assertTrue(p==null||Math.abs(p[0]-pig.getX())<.01,"client must not snap a passenger to its stale host position");
                 }
-                if(n==180)h.assertFalse(pig.isPassenger(),"capture must expire after 8 s");
-                if(n==200)h.assertFalse(pig.isPassenger(),"cooldown must prevent immediate vanilla reboarding");
+                if(n==180)h.assertTrue(pig.getVehicle()==boat,"Preview124: capture holds past 8 s until the player breaks the vehicle");
+                if(n==185){
+                    boat.hurtServer(level,level.damageSources().generic(),100);boat.hurtServer(level,level.damageSources().explosion(null,null),100);
+                    h.assertTrue(boat.isAlive()&&pig.getVehicle()==boat,"monster blasts and other damage cannot break the vehicle");
+                }
+                if(n==190){var player=h.makeMockServerPlayerInLevel();boat.hurtServer(level,level.damageSources().playerAttack(player),100);h.assertFalse(boat.isAlive(),"the player can break the vehicle");}
+                if(n==195)h.assertFalse(pig.isPassenger(),"breaking the vehicle releases the monster");
                 if(n==230){
                     boat.discard();CombatBridge.clear();
                 }
@@ -74,7 +79,8 @@ public final class CaptureLeaseTests implements FabricGameTest {
             second[0].discard();CombatBridge.clear();
         });
         h.runAtTickTime(250,()->{
-            second[0]=h.spawn(EntityType.MINECART,new Vec3(2,3,2));second[0].setNoGravity(true);sync(origin);
+            // Preview124: the minecart stands 4.5 blocks from the proxy centre (3.4 from the 2.2-wide hitbox): still captured.
+            second[0]=h.spawn(EntityType.MINECART,new Vec3(6.5,3,2));second[0].setNoGravity(true);sync(origin);
         });
         for(int t=251;t<=480;t++){
             final int n=t;
@@ -82,10 +88,13 @@ public final class CaptureLeaseTests implements FabricGameTest {
                 Passthrough.active=Passthrough.minecraftAuthority=true;
                 second[0].setDeltaMovement(Vec3.ZERO);sync(origin);
                 Pig pig=CombatBridge.proxies().get("fixture");if(pig==null)return;
-                if(n==265){h.assertTrue(pig.getVehicle()==second[0],"ordinary proxy must board a minecart");pig.stopRiding();}
+                if(n==265){h.assertTrue(pig.getVehicle()==second[0],"ordinary proxy is pulled into a minecart 3.4 blocks from its hitbox");pig.stopRiding();}
                 if(n==275)h.assertTrue(pig.getVehicle()==second[0],"minecart capture survives an unexpected dismount");
-                if(n==430)h.assertFalse(pig.isPassenger(),"minecart also releases after 8 s");
-                if(n==450)h.assertFalse(pig.startRiding(second[0],true),"minecart cooldown rejects reboarding");
+                if(n==430)h.assertTrue(pig.getVehicle()==second[0],"minecart capture also holds past 8 s");
+                if(n==435){var player=h.makeMockServerPlayerInLevel();second[0].hurtServer(level,level.damageSources().playerAttack(player),100);}
+                if(n==440)h.assertFalse(pig.isPassenger(),"breaking the minecart releases the monster");
+                if(n==445){var far=h.spawn(EntityType.OAK_BOAT,new Vec3(10.5,3,2));far.setNoGravity(true);second[0]=far;}
+                if(n==470)h.assertFalse(pig.isPassenger(),"a boat 8.5 blocks away (beyond the 4-block range) does not capture");
                 if(n==480){
                     second[0].discard();CombatBridge.clear();Passthrough.active=Passthrough.minecraftAuthority=false;h.succeed();
                 }

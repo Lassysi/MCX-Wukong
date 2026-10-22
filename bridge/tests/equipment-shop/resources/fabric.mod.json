@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "dqj_equipment_shop_test",
+  "version": "1.0.0",
+  "name": "Isolated equipment and shop tests",
+  "environment": "server",
+  "entrypoints": { "fabric-gametest": ["dev.rehan.passthrough.EquipmentShopTests"] },
+  "depends": { "fabric-gametest-api-v1": "*", "dqjmcbridge": "*", "mr_modern_guns": "*" }
+}

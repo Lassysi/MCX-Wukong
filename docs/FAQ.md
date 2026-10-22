@@ -32,7 +32,7 @@ Minecraft must be inside the bridge world and Black Myth must have loaded a save
 
 **How do I get guns?**
 
-Near an activated shrine, right-click with an empty main hand or emeralds to buy chapter-dependent guns and matching ammunition. You can also use `/gamemode creative` to find items in the creative inventory, then `/gamemode survival` to return. See [Modern Guns](https://modrinth.com/datapack/modern-guns) for the author's item and crafting information.
+Near an activated shrine, right-click with an empty main hand or emeralds to buy the supported guns and matching ammunition. All base gun families are available from chapter one. You can also use `/gamemode creative` to find items in the creative inventory, then `/gamemode survival` to return. See [Modern Guns](https://modrinth.com/datapack/modern-guns) for the author's item and crafting information.
 
 **Are commands and creative mode available?**
 
@@ -60,7 +60,7 @@ Include the public version, location, reproduction steps and relevant error text
 
 **How do I use the new shop, repairs and enchanting?**
 
-Activate a shrine with H. Nearby, right-click with an empty main hand or emeralds to open the shop. Rest with H to spend emeralds on repairs. For enchanting, hold equipment in the main hand and an enchanted book in the offhand, then right-click near the shrine. Guns and matching ammunition are sold by chapter. See [usage](USAGE.md).
+Activate a shrine with H. Nearby, right-click with an empty main hand or emeralds to open the shop. Put damaged equipment in the main inventory and use the repair trades at the top; resting no longer spends emeralds. For enchanting, hold equipment in the main hand and an enchanted book in the offhand, then right-click near the shrine. See [usage](USAGE.md).
 
 **How do I keep my saves when upgrading?**
 

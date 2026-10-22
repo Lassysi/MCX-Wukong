@@ -21,8 +21,10 @@ abstract class HostUnbreakableMixin {
         ItemStack self=(ItemStack)(Object)this;
         if(Balance.isGun(self))return 0;
         double rate=Balance.wearRate();
-        if(rate>=1)return amount;
-        int kept=0;for(int i=0;i<amount;i++)if(level.random.nextDouble()<rate)kept++;
+        int kept=amount;
+        if(rate<1){kept=0;for(int i=0;i<amount;i++)if(level.random.nextDouble()<rate)kept++;}
+        // Preview122 (user: a worn-out shield still blocks but can no longer parry): shields stop at 1 durability left.
+        if(self.getItem() instanceof net.minecraft.world.item.ShieldItem)kept=Math.max(0,Math.min(kept,self.getMaxDamage()-1-self.getDamageValue()));
         return kept;
     }
 }

@@ -13,6 +13,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
 abstract class LivingEntityBridgeMixin {
+    // Wrap the whole method, outside balance scaling and before/after health observers.
+    // A blast touching 24 parts must use one enemy's vanilla hurt cooldown, not deal 24 hits.
+    @com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod(method="hurtServer")
+    private boolean dqj$partDamage(ServerLevel level,DamageSource source,float amount,
+        com.llamalad7.mixinextras.injector.wrapoperation.Operation<Boolean> original){
+        var self=(LivingEntity)(Object)this;
+        if(dev.rehan.passthrough.MultipartTargets.isPart(self)){
+            var root=dev.rehan.passthrough.MultipartTargets.root(self);
+            return root!=null&&root!=self&&root.hurtServer(level,source,amount);
+        }
+        return original.call(level,source,amount);
+    }
+    @Inject(method="canBeAffected",at=@At("HEAD"),cancellable=true)
+    private void dqj$appleGuard(net.minecraft.world.effect.MobEffectInstance effect,CallbackInfoReturnable<Boolean> cir){
+        var self=(LivingEntity)(Object)this;
+        if(self instanceof net.minecraft.server.level.ServerPlayer&&dev.rehan.passthrough.GoldenApple.blocks(self,effect))cir.setReturnValue(false);
+    }
     @Unique private final ArrayDeque<Float> dqj$before=new ArrayDeque<>();
     @Unique private final ArrayDeque<Float> dqj$beforeHeal=new ArrayDeque<>();
     // Preview89: weapon balance for hits on Wukong enemy proxies (see Balance).

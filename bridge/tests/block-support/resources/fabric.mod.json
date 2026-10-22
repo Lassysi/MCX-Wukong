@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "dqj_block_support_test",
+  "version": "1.0.0",
+  "name": "Isolated underside support tests",
+  "environment": "server",
+  "entrypoints": { "fabric-gametest": ["dev.rehan.passthrough.BlockSupportTests"] },
+  "depends": { "fabric-gametest-api-v1": "*", "dqjmcbridge": "*" }
+}

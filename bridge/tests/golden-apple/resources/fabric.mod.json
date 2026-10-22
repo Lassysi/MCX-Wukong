@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "dqj_golden_apple_test",
+  "version": "1.0.0",
+  "name": "Isolated enchanted golden apple tests",
+  "environment": "server",
+  "entrypoints": { "fabric-gametest": ["dev.rehan.passthrough.GoldenAppleTests", "dev.rehan.passthrough.MultipartTargetTests"] },
+  "depends": { "fabric-gametest-api-v1": "*", "dqjmcbridge": "*" }
+}

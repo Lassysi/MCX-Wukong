@@ -1,48 +1,51 @@
 {
   "gunShotDamage": {
-    "ak47": 4.0,
-    "winchester_model_70": 24.0,
-    "beretta_486": 4.0,
-    "m4_carbine": 4.0,
-    "p90": 0.9,
-    "spas_12": 4.5,
-    "austeyr_ef88": 1.0,
-    "m79": 4.0,
-    "luger_p08": 3.0,
-    "smith_and_wesson_model_29": 5.0,
-    "mp5": 0.8,
-    "desert_eagle": 6.0,
-    "thompson_machine_gun": 0.75,
-    "barrett_m82": 40.0,
-    "colt_python": 6.5,
-    "fn_scar": 4.5,
-    "glock_17": 3.5,
-    "m134_minigun": 1.4,
-    "remington_870": 4.0,
-    "rpg_7": 6.0,
-    "gl06": 4.0,
-    "m1a": 16.0,
-    "milkor_mgl": 4.0
+    "ak47": 6.0,
+    "winchester_model_70": 36.0,
+    "beretta_486": 9.0,
+    "m4_carbine": 6.0,
+    "m72_law": 16.0,
+    "p90": 1.35,
+    "spas_12": 10.0,
+    "austeyr_ef88": 1.5,
+    "m79": 9.0,
+    "luger_p08": 4.5,
+    "smith_and_wesson_model_29": 7.5,
+    "mp5": 1.2000000000000002,
+    "desert_eagle": 9.0,
+    "thompson_machine_gun": 1.125,
+    "barrett_m82": 60.0,
+    "colt_python": 9.75,
+    "fn_scar": 6.75,
+    "glock_17": 5.25,
+    "m134_minigun": 2.0999999999999996,
+    "remington_870": 9.0,
+    "rpg_7": 16.0,
+    "gl06": 9.0,
+    "m1a": 24.0,
+    "milkor_mgl": 9.0
   },
   "armor": {
     "perPoint": 0.0275,
     "perToughness": 0.01,
-    "max": 0.75
+    "max": 0.85
   },
   "explosion": {
-    "tntCap": 55.0,
+    "tntScale": 2.0,
+    "tntCap": 120.0,
     "creeperCap": 30.0,
-    "rocketScale": 1.5,
-    "rocketCap": 65.0,
-    "grenadeScale": 1.2,
-    "grenadeCap": 45.0
+    "rocketScale": 3.5,
+    "rocketCap": 260.0,
+    "grenadeScale": 3.0,
+    "grenadeCap": 160.0
   },
   "boss": {
-    "gunAndExplosionScale": 0.6,
+    "gunAndExplosionScale": 0.8,
     "minProxyHealth": 400.0
   },
   "durability": {
-    "wearRate": 0.2
+    "wearRate": 1.0,
+    "wornShieldDamage": 0.5
   },
   "shop": {
     "willPerEmeraldByChapter": [
@@ -55,10 +58,20 @@
     ]
   },
   "hunger": {
-    "exhaustionScale": 0.1,
-    "shieldBlockExhaustion": 0.05,
+    "exhaustionScale": 1.0,
+    "shieldBlockExhaustion": 1.0,
     "starvation": false,
     "regenDelaySeconds": 60.0,
-    "regenIntervalTicks": 80
-  }
+    "regenIntervalTicks": 80,
+    "attackExhaustion": 0.3
+  },
+  "weapons": {
+    "meleeScale": 1.0,
+    "bowScale": 1.35,
+    "crossbowScale": 1.5,
+    "tridentScale": 1.5,
+    "magicScale": 1.25,
+    "fireScale": 1.25
+  },
+  "balanceRevision": 124
 }

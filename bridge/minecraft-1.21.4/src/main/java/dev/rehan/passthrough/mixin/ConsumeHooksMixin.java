@@ -29,7 +29,7 @@ abstract class ConsumeHooksMixin {
     private void dqj$after(Level level,LivingEntity entity,CallbackInfoReturnable<ItemStack> cir){
         String kind=dqj$eating.get();dqj$eating.remove();
         if(kind==null||!Passthrough.active)return;
-        if(kind.equals("apple")){entity.setHealth(entity.getMaxHealth());Passthrough.LOG.info("DQJ items: enchanted golden apple -> full health");}
+        if(kind.equals("apple")){dev.rehan.passthrough.GoldenApple.consumed((ServerPlayer)entity);}
         else{Passthrough.events.accept("{\"t\":\"player_cure\",\"kind\":\""+kind+"\"}");Passthrough.LOG.info("DQJ items: {} -> native status cure requested",kind);}
     }
 }

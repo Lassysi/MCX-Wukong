@@ -25,7 +25,15 @@ public final class HostLink extends WebSocketServer {
             JsonObject m=JsonParser.parseString(data).getAsJsonObject();
             String type=m.get("t").getAsString();
             if (type.equals("cam")) {HostState.update(m);return;}
-            if(type.equals("bridge_prepare")){WorldBridge.prepare(m);return;}
+            if(type.equals("native_control")){dev.rehan.passthrough.NativePause.renew(m.get("hold").getAsBoolean());return;}
+            // Preview124: a takeover releases the idle hold first (the hold would pull Steve back from the new spawn).
+            if(type.equals("bridge_prepare")){dev.rehan.passthrough.NativePause.renew(false);WorldBridge.prepare(m);return;}
+            if(type.equals("respawn")){
+                // Preview124: Steve died while MC was not shown; press Respawn for the player so MC can take over again.
+                var mc=net.minecraft.client.Minecraft.getInstance();
+                mc.execute(()->{if(mc.player!=null&&mc.player.isDeadOrDying()){mc.player.respawn();mc.setScreen(null);Passthrough.LOG.info("DQJ life: respawn requested by host (Steve died out of view)");}});
+                return;
+            }
             if(type.equals("bridge_commit")){WorldBridge.commit(m.get("epoch").getAsString());return;}
             if(type.equals("bridge_release")){WorldBridge.release(m.get("epoch").getAsString());return;}
             if(type.equals("ground_surface")){

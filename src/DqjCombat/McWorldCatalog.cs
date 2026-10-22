@@ -35,7 +35,8 @@ namespace DqjCombat
                 foreach(JsonData item in root["frames"]){
                     var f=new McWorldCoordinates{World=(string)item["world"],Level=(string)item["level"],Region=Region(item["region"]),HostOrigin=Point(item["host"]),UnrealOrigin=Point(item["unrealOrigin"])};
                     Validate(f);
-                    if(!regions.Add(f.World+"/"+f.Region)||!levels.Add(f.World+"/"+f.Level))throw new InvalidDataException("Duplicate world coordinate record");
+                    // Preview121: a large map may own several regions (one per far-apart area), so only regions must be unique.
+                    if(!regions.Add(f.World+"/"+f.Region))throw new InvalidDataException("Duplicate world coordinate record");
                     parsed.Add(f);
                 }
             }
@@ -54,9 +55,25 @@ namespace DqjCombat
             if(!ValidWorld(world)||string.IsNullOrEmpty(level)||level.Length>512||!absoluteFoot.Finite||!unrealOrigin.Finite)
                 throw new InvalidOperationException("Native and MC world identities must be ready before takeover");
             Load();
-            foreach(var f in frames)if(f.World==world&&f.Level==level){f.RequireSpawn(f.ToMc(absoluteFoot));return f;}
+            // Preview121 (user: after a story cutscene that teleports to a far part of the map, MC never took over again): a
+            // map's region covers +-4 km and -114..+236 m around where it was first entered. A destination outside every
+            // region of this map (Chapter 3's LYS: refused every 3 s) now gets its own extra region centred on it. Existing
+            // regions and their blocks never move. Among regions containing the spot, the nearest origin wins.
+            McWorldCoordinates best=null;bool sameLevel=false;double bestDistance=double.MaxValue;
+            foreach(var f in frames)if(f.World==world&&f.Level==level){
+                sameLevel=true;var at=f.ToMc(absoluteFoot);if(!f.Comfortable(at))continue;
+                double d=Math.Abs(at.X-f.McX)+Math.Abs(at.Z-f.McZ)+Math.Abs(at.Y-64);
+                if(d<bestDistance){bestDistance=d;best=f;}
+            }
+            if(best!=null)return best;
             int count=0;McWorldCoordinates legacy=null;
             foreach(var f in frames)if(f.World==world){count=Math.Max(count,f.Region+1);if(f.Level.Length==0)legacy=f;}
+            if(sameLevel){
+                if(frames.Count>=1024||count>=1024)throw new InvalidOperationException("World coordinate catalog capacity reached; existing maps preserved");
+                var extra=new McWorldCoordinates{World=world,Level=level,Region=count,HostOrigin=absoluteFoot,UnrealOrigin=unrealOrigin};Validate(extra);frames.Add(extra);
+                try{extra.RequireSpawn(extra.ToMc(absoluteFoot));Save();return extra;}
+                catch{frames.Remove(extra);throw;}
+            }
             bool addedSeed=false;
             if(count==0){legacy=Seed(world);if(legacy!=null){frames.Add(legacy);count=1;addedSeed=true;}}
             McWorldCoordinates result=null;bool boundLegacy=false;

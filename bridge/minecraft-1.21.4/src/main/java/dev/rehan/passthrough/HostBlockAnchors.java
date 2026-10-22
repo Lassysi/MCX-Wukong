@@ -111,11 +111,13 @@ public final class HostBlockAnchors {
      *  proxy below it, or snaps onto the anchored block below it; no floating after a fall. */
     public static void landed(ServerLevel level,BlockPos pos,BlockState state,double x,double z){
         Data store=data;if(store==null||!world(level)||!eligible(state.getBlock()))return;
-        BlockPos below=pos.below();var under=anchor(level.getBlockState(below),below);
+        BlockPos below=pos.below();var belowState=level.getBlockState(below);var under=anchor(belowState,below);
+        var supportShape=belowState.getCollisionShape(level,below);
+        double supportDrop=supportShape.isEmpty()?0:1-supportShape.max(net.minecraft.core.Direction.Axis.Y);
         Anchor value;
-        if(under!=null)value=new Anchor(state.getBlock(),under.dx(),under.dy(),under.dz(),under.group(),1);
+        if(under!=null)value=new Anchor(state.getBlock(),under.dx(),-supportDrop,under.dz(),under.group(),1);
         else{
-            double drop=WorldBridge.isHostProxy(below)?WorldBridge.surfaceDrop(below):0;
+            double drop=WorldBridge.isHostProxy(below)?WorldBridge.surfaceDrop(below):supportDrop;
             double dx=Math.max(-.5,Math.min(.5,x-(pos.getX()+.5))),dz=Math.max(-.5,Math.min(.5,z-(pos.getZ()+.5)));
             if(Math.abs(dx)+Math.abs(drop)+Math.abs(dz)<.0005)return;
             value=new Anchor(state.getBlock(),dx,-drop,dz,UUID.randomUUID().toString().replace("-",""),WorldBridge.isHostProxy(below)?0:1);

@@ -2,59 +2,54 @@
 
 English | [简体中文](USAGE.zh-CN.md)
 
-Complete [installation](INSTALL.md) first. Keep Minecraft inside the `MCX-Wukong` world without minimizing it, and play in the Black Myth window.
+Finish [installation](INSTALL.md), enter the dedicated MCX-Wukong world, leave MC running unminimized, then play in the Black Myth window. Both games are required.
 
-## Basic controls
+## Controls and story
 
-WASD moves, the mouse controls the camera, left-click attacks or breaks blocks, right-click uses items or places blocks, E opens inventory, F swaps hands and T opens chat. H handles native gathering, chests and shrines; F6 opens the map; Esc opens the native menu. Hold E during a cutscene to try skipping it. Some scenes cannot be skipped.
-
-After the bridge takes over, `/function mcx:starter` grants basic equipment once. Commands are enabled: `/gamemode creative` enters creative mode and `/gamemode survival` returns to survival. Wait during story transformations and chapter loading.
-
-## Shrines, trading and emeralds
-
-1. Activate or interact with a native shrine using H.
-2. Near an activated shrine, right-click with an empty main hand or emeralds to open the shop.
-3. Buy chapter-dependent guns, ammunition, food, blocks, equipment, potions and enchanted books with emeralds.
-
-Newly gained Will also generates emeralds without deducting native Will. Existing Will is not converted immediately. The default rates for chapters one through six are 60 / 100 / 160 / 250 / 350 / 500 Will per emerald.
-
-Guns require matching ammunition, bows require arrows and crossbows must be loaded. A ranged main-hand weapon takes priority over shield use. Some third-party gun types still have compatibility limits.
-
-## Durability, repairs and enchanting
-
-Ordinary equipment wears at about 20% of the vanilla rate by default. Resting at a shrine with H spends emeralds from the inventory on repairs. With insufficient emeralds, only affordable repairs are performed. Guns are excluded from these repairs and enchanting and retain their ammunition system.
-
-| Equipment category | Durability restored per emerald |
+| Action | Control |
 |---|---|
-| Wood, stone, leather | 400 |
-| Iron, gold, chainmail | 200 |
-| Diamond, trident, mace | 100 |
-| Netherite, elytra | 80 |
+| Movement, camera, attacks, blocks, items | Normal Minecraft controls |
+| Inventory / swap hands / chat | E / F / T |
+| Gather, chest, shrine | H |
+| Native map / menu | F6 / Esc |
+| Switch between MC and native Wukong control | F8 |
+| Try skipping a native real-time cutscene | Hold E; only supported scenes |
+| Starter gear after the bridge connects | `/function mcx:starter`, once |
 
-To enchant, hold equipment in the main hand and an enchanted book in the offhand, then right-click near an activated shrine. A successful application consumes the book without XP or an anvil. Incompatible enchantments are skipped; equal-level combinations respect maximum levels.
+For a story that needs Wukong's own skill, press F8, use the native skill normally, then press F8 to return at the current location. Spell costs/cooldowns and quest checks stay native. Requests during CG/menu/loading/travel wait for gameplay. Respawn before using F8 on an MC death screen. Steve is frozen and protected from MC damage during native control; Wukong can still take native damage. A lost hold heartbeat releases Steve after three seconds.
 
-Integrated effects include Sharpness, Power, Fire Aspect, Flame, Thorns and Protection, plus Smite, Bane of Arthropods, Knockback and Punch adaptations for some native enemies. Looting increases emerald rewards from Will conversion, not native item drops. Efficiency reduces hits needed for native destructible scene objects. Not all Minecraft enchantments are adapted.
+Native story transformations and required slides retain native control. Do not force a return or switch MC worlds during loading. Flight stays under MC control; this is not unrestricted passage through story gates. `/gamemode survival` restores ordinary building after Adventure mode; `/gamemode creative` is optional.
 
-## Blocks and scene objects
+## Shop, ammunition and repairs
 
-Ordinary building blocks need support beneath them. Unsupported blocks fall and stack on landing. Native enemies destroy building blocks after about three hits.
+Use H to activate a native shrine. Near it, right-click with an empty main hand or emeralds to open the Shrine Trader. All base equipment tiers and the supported gun families are offered from chapter one. Guns sit beside their matching ammunition, whose tooltip identifies compatible weapons. A magazine and an individual round are different items; buy the matching kind. M202 remains excluded.
 
-Use a pickaxe or TNT/explosions on walls and pillars that Black Myth already supports destroying. Swords and empty hands can break light pots and jars. Native drops and events are retained. Story gates, quest mechanisms and indestructible objects are not forcibly removed.
+The base catalog has 170 offers, plus up to 12 repair trades for damaged carried items. Worn armor and the offhand item must be moved to the main inventory to appear. Pay emeralds and the exact damaged item to receive a repaired copy with its enchantments; resting never buys repairs automatically. Guns do not use vanilla durability or these repair trades.
 
-Ender pearls check native scene collisions and landing positions; complex terrain still needs care. Elytra and firework flight are supported.
+New Will earnings generate emeralds without spending native Will. Chapter defaults: 60 / 100 / 160 / 250 / 350 / 500 Will per emerald. Existing Will is not immediately converted. See [balance and prices](BALANCE.md).
 
-## Food and status effects
+Near the shrine, right-click with equipment in the main hand and an enchanted book in the offhand to apply compatible enchantments. The book is consumed; XP/anvils are not required. Not every Minecraft enchantment is adapted.
 
-Hunger exhaustion defaults to 10% of vanilla, with starvation damage disabled. At food level 18 or higher, after 60 seconds without damage, regeneration restores half a heart every four seconds. Food and healing effects remain usable.
+## Combat, shields and food
 
-Enchanted golden apples immediately restore full health and grant their Minecraft status effects. Milk and honey retain their Minecraft clearing effects and temporarily suppress native ongoing status damage for 30 and 15 seconds respectively. This does not remove every native debuff.
+Bridge damage follows the equipment curves in [balance](BALANCE.md), plus cooldowns, criticals, enchantments and target modifiers. Vanilla item tooltips do not display all bridge values. Ordinary MC mobs keep their normal damage rules.
 
-Some Slowness, Weakness, Levitation, knockback and terrain-slowing effects apply to ordinary native enemies. Strong enemies have reduced or restricted effects. Native burn/frost visuals and statuses are not fully synchronized.
+Weapons/tools/armor wear at the vanilla rate. A shield cannot break: when worn down, it still blocks with 50% damage passing through until repaired. Hunger uses vanilla exhaustion plus 0.3 per landed proxy melee hit and 1.0 per shield block before scaling. Starvation damage is disabled; this does not disable combat/fall damage. The goal of consuming a meaningful amount during a boss fight is not a measured guarantee for every build.
 
-## Skins, story and saves
+At food level 18+, after 60 seconds without damage, regeneration restores half a heart every four seconds. Enchanted golden apples restore full health and 16 absorption HP with a 120 s status guard, Resistance I and fire resistance. Guard refresh does not stack unlimited gold hearts; expiry, milk and death remove it. Milk/honey's temporary native-status suppression is not universal cleansing of every native effect.
 
-Import a custom skin using the fourth installer field rather than placing files inside either game. See [custom skins](SKINS.md) for the format and replacement steps.
+Infinity preserves ammunition, including tipped arrows, only when at least one arrow is present. It does not make an empty inventory shoot. Ranged main-hand use takes priority over the offhand shield.
 
-New saves skip the whole prologue by default; this can be disabled during installation. Native story transformations such as the cicada remain controlled by the native game. Some cutscenes show the original character or cannot be skipped. Let the sequence finish rather than switching worlds or replacing files.
+## Capturing enemies
 
-Use a corresponding MCX world for each Black Myth save. Save and exit Black Myth first, then save and exit Minecraft. Back up both games before updating; see [upgrade](UPGRADE.md).
+Place an empty boat or minecart near an eligible ordinary enemy: approximately four blocks horizontally and two vertically from its proxy hitbox. It stays held until you break the vehicle or it dies. While bridged only player damage breaks the vehicle; release has a ten-second recapture cooldown. BossBar/EliteBar enemies cannot be captured or reeled in. Native bar classification replaces the former HP threshold, so a high-HP ordinary enemy can qualify. EliteBar mapping and individual enemies still need live confirmation.
+
+## Building and travel
+
+Ordinary blocks require real support underneath; side contact alone does not hold an overhang. Unsupported blocks fall. Enemies can destroy ordinary cover after roughly three hits. Pickaxes and explosions affect native objects that were already destructible, retaining native drops/events; story gates are not forcibly removed.
+
+Pearl landing self-damage is disabled only while bridged, but landing/collision checks still apply. Long grounded movement can move into a fresh coordinate region without relocating earlier builds. High flight keeps MC control until a grounded handover is possible. Required native slide volumes temporarily release MC and resume it after the slide and supported landing. These paths still need broader real-game validation.
+
+## Saves and skins
+
+Use one matching MCX world per Black Myth save. Save and exit Black Myth first, then MC. Never hot-replace DLLs/JARs or restore an old world over new progress. See [upgrade](UPGRADE.md), [skins](SKINS.md) and [known issues](KNOWN-ISSUES.md).

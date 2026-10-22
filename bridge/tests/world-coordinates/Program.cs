@@ -21,6 +21,20 @@ internal static class Program
         Check(returned.Region==0&&Same(returned.ToHost(block),placed),"moving/menu return does not re-anchor a placed block");
         var second=catalog.Resolve(world,"第二回地图",new BridgePoint(80000,-6000,17000),zero);
         Check(second.Region==1&&Math.Abs(second.McX-first.McX)>8000,"different native maps receive separate MC regions");
+        // Preview121: a destination far away on the same map (cutscene teleport) gets an extra region instead of a refusal.
+        var far=catalog.Resolve(world,"第一回地图",new BridgePoint(origin.X+600000,origin.Y,origin.Z),zero);
+        Check(far.Region==2&&far.Level=="第一回地图"&&Math.Abs(far.McZ-first.McZ)+Math.Abs(far.McX-first.McX)>8000,"far destination on the same map gets its own extra region");
+        var high=catalog.Resolve(world,"第一回地图",new BridgePoint(origin.X+1000,origin.Y,origin.Z+40000),zero);
+        Check(high.Region==3,"destination 400 m higher than the region allows gets an extra region");
+        Check(catalog.Resolve(world,"第一回地图",new BridgePoint(-550,1550,150),zero).Region==0,"walking back near the first entry still uses region 0 (blocks there unchanged)");
+        Check(catalog.Resolve(world,"第一回地图",new BridgePoint(origin.X+600500,origin.Y,origin.Z),zero).Region==2,"returning near the far area reuses its extra region");
+        Check(Same(first.ToHost(block),placed),"region 0 block coordinates never move");
+        // Preview124: in-session handover before the MC world floor / region edge.
+        Check(!first.EdgeReached(first.McX,64,first.McZ)&&first.EdgeReached(first.McX,-31,first.McZ)&&first.EdgeReached(first.McX,281,first.McZ),"edge reached below MC y -30 and above 280");
+        Check(first.EdgeReached(first.McX+3900,64,first.McZ)&&!first.EdgeReached(first.McX+3800,64,first.McZ),"edge reached 200 blocks before the horizontal region border");
+        var low=catalog.Resolve(world,"第一回地图",new BridgePoint(origin.X,origin.Y,origin.Z-9500),zero);
+        Check(low.Region!=0&&Math.Abs(low.ToMc(new BridgePoint(origin.X,origin.Y,origin.Z-9500)).Y-64)<.001,"95 m below the first entry (MC y -31): handover resolves to a new region at MC y 64");
+        Check(catalog.Resolve(world,"第一回地图",new BridgePoint(origin.X+100,origin.Y,origin.Z+100),zero).Region==0,"back near the entry, region 0 is still chosen");
         var reloaded=new McWorldCatalog(Path.Combine(run,"anchors.json"),Path.Combine(run,"no-seed.json"));
         var restored=reloaded.Resolve(world,"第一回地图",origin,zero);
         Check(Same(restored.ToHost(block),placed),"fresh catalog instance reloads the same block coordinates");

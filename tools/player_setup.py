@@ -62,7 +62,7 @@ def preflight(bundle,game,mc,client,strict=True):
     allowed={Path(row['path']).name for row in expected}|{MOD_JAR}
     extras={p.name for p in (mc/'mods').glob('*.jar')}-allowed
     if extras:raise RuntimeError('Use a separate MCX instance. Extra mods found: / 请使用独立的 MCX 整合包实例。额外模组：'+', '.join(sorted(extras)))
-    client=Path(client)
+    client=resolve_client(mc,client)
     if strict and digest(client)!=compat['clientSha256']:raise RuntimeError('Select the vanilla Minecraft Java 1.21.4 client JAR, not a mod or server JAR. / 请选择原版 Minecraft Java 1.21.4 客户端 JAR，不要选择 Fabric 模组或服务端 JAR。')
     with zipfile.ZipFile(client) as z:
         if json.loads(z.read('version.json'))['id']!='1.21.4':raise RuntimeError('Minecraft client version must be 1.21.4. / Minecraft 客户端版本须为 1.21.4。')
@@ -102,7 +102,7 @@ def backup_tree(source,target):
     return True
 
 def install(bundle,game,mc,client,skin=None,skip_prologue=True,log=print,strict=True):
-    check_closed();bundle=Path(bundle);manifest,game,native,mc=preflight(bundle,game,mc,client,strict)
+    check_closed();client=resolve_client(mc,client);bundle=Path(bundle);manifest,game,native,mc=preflight(bundle,game,mc,client,strict)
     backup=native/'MCX-Wukong-backups'/uuid.uuid4().hex
     backup.mkdir(parents=True,exist_ok=False)
     journal={'version':1,'release':TAG,'state':'preparing','id':uuid.uuid4().hex,'backup':backup.relative_to(native).as_posix(),'files':[],'worldCreated':False}
@@ -150,7 +150,10 @@ def uninstall(bundle,game,mc,log=print):
     for row in journal['files']:
         if row['scope'] not in ('game','mc'):raise ValueError('Unknown installation scope')
         target=safe(native if row['scope']=='game' else mc,row['target'])
-        if target.exists() and digest(target)!=row['sha256']:raise RuntimeError('Installed file has changed. Uninstall stopped: / 文件安装后发生变化，已停止卸载：'+row['target'])
+        if target.exists() and digest(target)!=row['sha256']:
+            if row['scope']=='game' and row['target']=='ReShade.ini' and bridge_reshade_unchanged(target):
+                atomic(backup/'runtime-before-uninstall-ReShade.ini',target.read_bytes())
+            else:raise RuntimeError('Installed file has changed. Uninstall stopped: / 文件安装后发生变化，已停止卸载：'+row['target'])
         if row['previous'] and digest(safe(backup,row['previous']))!=row['previousSha256']:raise RuntimeError('Original-file backup is damaged. Uninstall stopped. / 原文件备份损坏，已停止卸载。')
     for row in reversed(journal['files']):
         target=safe(native if row['scope']=='game' else mc,row['target'])
@@ -158,6 +161,23 @@ def uninstall(bundle,game,mc,log=print):
         elif target.exists():target.unlink()
     journal['state']='uninstalled';atomic(backup/'uninstalled.json',json.dumps(journal,indent=2).encode());(native/JOURNAL).unlink()
     log('MCX removed. Game progress, Minecraft worlds and the third-party loader were kept. / 已卸载 MCX。游戏进度、MC 世界和第三方加载器均保留。')
+
+def bridge_reshade_unchanged(path):
+    """Allow ReShade's normal UI/default rewrite only if every bridge-critical value remains."""
+    import configparser
+    ini=configparser.ConfigParser(interpolation=None,strict=False)
+    try:
+        ini.read_string(Path(path).read_text(encoding='utf-8-sig'))
+        required={'GENERAL':{'EffectSearchPaths':r'.\reshade-shaders\Shaders','TextureSearchPaths':r'.\reshade-shaders\Textures','PresetPath':r'.\DqjMCBridge.ini','PerformanceMode':'0','SkipLoadingDisabledEffects':'0'},'DEPTH':{'DepthCopyBeforeClears':'1','UseAspectRatioHeuristics':'2','DrawStatsHeuristic':'1'}}
+        return all(ini.get(section,key,fallback=None)==value for section,values in required.items() for key,value in values.items())
+    except (OSError,ValueError,configparser.Error):return False
+
+def resolve_client(mc,client):
+    selected=str(client).strip() if client is not None else ''
+    if not selected:selected=find_client(mc)
+    if not selected or not Path(selected).is_file():
+        raise RuntimeError('Select the vanilla Minecraft 1.21.4 client JAR in field 3; it is not java.exe. / 请在第三栏选择原版 Minecraft 1.21.4 客户端 JAR，不是 java.exe。')
+    return Path(selected)
 
 def find_client(mc):
     root=Path(mc).resolve()

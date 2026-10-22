@@ -4,9 +4,9 @@
 
 将 Minecraft 的移动、视角、背包、装备和方块系统接入《黑神话：悟空》，保留黑神话的地图、怪物、Boss 和主线流程。需要在同一台电脑上同时运行两个游戏。
 
-**[下载 v0.2.0 玩家包](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.2.0/MCX-Wukong-v0.2.0-Players.zip)** · [版本页面](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.2.0) · [首次安装](docs/INSTALL.zh-CN.md) · [旧版升级](docs/UPGRADE.zh-CN.md)
+**[下载 v0.3.0 玩家包](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip)** · [版本页面](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.3.0) · [首次安装](docs/INSTALL.zh-CN.md) · [旧版升级](docs/UPGRADE.zh-CN.md)
 
-v0.2.0 为公开测试版。部分实机剧情、章节切换和全新环境安装仍需进一步验证，详见[已知问题](docs/KNOWN-ISSUES.zh-CN.md)。
+v0.3.0 为公开测试版。部分实机剧情、章节切换和全新环境安装仍需进一步验证，详见[已知问题](docs/KNOWN-ISSUES.zh-CN.md)。
 
 ## 主要功能
 
@@ -15,7 +15,7 @@ v0.2.0 为公开测试版。部分实机剧情、章节切换和全新环境安�
 - 使用剑斧、弓弩、枪械、TNT、岩浆和伤害药水攻击黑神话怪物，也可用刷怪蛋召唤生物助战。
 - 盾牌抵挡正面攻击；支持食物、治疗效果、末影珍珠传送和鞘翅飞行。
 - 保留土地庙、传送、采集和开箱等原生交互，支持 MC 指令和创造模式。
-- 新增灵蕴收益兑换绿宝石、土地庙商店、休息维修和附魔书应用。
+- 新增灵蕴收益兑换绿宝石、土地庙商店、主动维修交易和附魔书应用。
 - 新增部分药水、地形减速与附魔对黑神话敌人的效果，以及可破坏场景物件的交互。
 - 可导入自选皮肤，两端使用同一张 PNG。新存档默认跳过序章及序章战斗，后续实机 CG 可长按 E 尝试跳过。
 
@@ -42,7 +42,7 @@ v0.2.0 为公开测试版。部分实机剧情、章节切换和全新环境安�
 
 1. 下载并完整解压上方 **Players.zip**。GitHub 的 `Source code` 不是玩家安装包。
 2. 按作者说明，将 [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) 安装到黑神话 `b1/Binaries/Win64`。
-3. 用 [Prism Launcher](https://prismlauncher.org/) 等支持整合包导入的启动器，导入 `MCX-Wukong-v0.2.0.mrpack`。登录自己的 MC 账号，启动到主菜单一次后正常退出。
+3. 用 [Prism Launcher](https://prismlauncher.org/) 等支持整合包导入的启动器，导入 `MCX-Wukong-v0.3.0.mrpack`。登录自己的 MC 账号，启动到主菜单一次后正常退出。
 4. 关闭两个游戏。打开 `MCX-Wukong-Setup.exe`，选择黑神话根目录、MC 实例游戏目录，以及原版 MC 1.21.4 客户端 JAR。
 5. 第四项可选择 **64×64、经典四像素手臂 PNG**；留空使用项目自绘皮肤。点击“安装”。玩家无需安装 Python、JDK 或 .NET SDK。
 6. 启动 MC，进入安装器创建的 **MCX-Wukong** 世界；保持 MC 窗口运行且不最小化，再启动黑神话。日常操作在黑神话窗口中进行。
@@ -82,3 +82,13 @@ v0.2.0 为公开测试版。部分实机剧情、章节切换和全新环境安�
 - [第三方说明](THIRD-PARTY-NOTICES.zh-CN.md)
 
 原创代码采用 MIT 许可，第三方组件按各自许可使用。本项目为非官方项目，与 Mojang、Microsoft 或游戏科学无隶属关系。
+
+## v0.3.0 更新
+
+F8 原生控制切换、大型 Boss 判定及后退修复、剧情传送／飞行／滑坡恢复、土地庙主动维修及商店重整。
+
+- [完整更新说明](docs/RELEASE-v0.3.0.md)
+- [数值和价格](docs/BALANCE.zh-CN.md)
+- [性能与直播](docs/PERFORMANCE.zh-CN.md)
+
+休息不再扣绿宝石自动维修；耐久与饥饿恢复原版速率。旧说明如有冲突，以本版使用说明和更新日志为准。

@@ -30,7 +30,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 /** Preview105 (user, chapter 2 shrine): Wukong's Will becomes emeralds; resting at a shrine repairs MC gear for
  *  emeralds; at an activated shrine, right-click with an empty hand or emeralds opens a villager-style trader whose
- *  offers grow with the chapter. Quest/story items stay native: only Will is converted (Phase E material table later).
+ *  offers include every equipment tier; prices follow strength. Quest/story items stay native: only Will is converted (Phase E material table later).
  *  State comes from the host: "will" (Will gained), "shrine" (near an activated shrine), "shrine_rest", "chapter". */
 public final class ShrineShop {
     private ShrineShop() {}
@@ -77,26 +77,30 @@ public final class ShrineShop {
         if(id.contains("iron")||id.contains("chainmail")||id.contains("golden")||s.is(Items.CROSSBOW)||s.is(Items.SHIELD))return 200;
         return 400;
     }
+    /** Preview122 (user: resting must not auto-repair; repair is a shop option): rest only reminds the player. */
     public static void rest(){
         onServer(p->{
-            var inv=p.getInventory();List<ItemStack> damaged=new ArrayList<>();
-            for(var list:List.of(inv.items,inv.armor,inv.offhand))for(var s:list)
-                if(!s.isEmpty()&&s.isDamageableItem()&&s.getDamageValue()>0&&Balance.gun(s)==null)damaged.add(s);
-            if(damaged.isEmpty())return;
-            damaged.sort(Comparator.comparingDouble((ItemStack s)->(double)s.getDamageValue()/s.getMaxDamage()).reversed());
-            int have=inv.countItem(Items.EMERALD),spent=0,repaired=0,partial=0;
-            for(var s:damaged){
-                int per=pointsPerEmerald(s),need=(s.getDamageValue()+per-1)/per,left=have-spent;
-                if(left<=0)break;
-                if(need<=left){s.setDamageValue(0);spent+=need;repaired++;}
-                else{s.setDamageValue(Math.max(0,s.getDamageValue()-left*per));spent+=left;partial++;}
-            }
-            if(spent>0)inv.clearOrCountMatchingItems(st->st.is(Items.EMERALD),spent,p.inventoryMenu.getCraftSlots());
-            int unpaid=damaged.size()-repaired-partial;
-            bar(p,spent==0?"Gear is damaged - no emeralds to repair it":"Repaired "+repaired+" item"+(repaired==1?"":"s")
-                +(partial>0?" ("+partial+" partly)":"")+(unpaid>0?", "+unpaid+" left damaged":"")+", -"+spent+" emerald"+(spent==1?"":"s"));
-            Passthrough.LOG.info("DQJ shop: rest repair items={} full={} partial={} emeralds={}",damaged.size(),repaired,partial,spent);
+            int damaged=0;var inv=p.getInventory();
+            for(var list:List.of(inv.items,inv.armor,inv.offhand))for(var s:list)if(!s.isEmpty()&&s.isDamageableItem()&&s.getDamageValue()>0&&Balance.gun(s)==null)damaged++;
+            if(damaged>0)bar(p,damaged+" damaged item"+(damaged==1?"":"s")+" - repair at the Shrine Trader (right-click with an empty hand)");
         });
+    }
+    /** One repair offer per damaged vanilla item the player carries (guns never wear): emeralds + that exact item ->
+     *  the same item with full durability, enchantments and name kept. Price by tier (pointsPerEmerald). Worn armor and
+     *  the off-hand item must be moved into the inventory (or the trade slot) first. */
+    static List<MerchantOffer> repairOffers(ServerPlayer p){
+        var out=new ArrayList<MerchantOffer>();var inv=p.getInventory();var seen=new ArrayList<ItemStack>();
+        for(var list:List.of(inv.armor,inv.offhand,inv.items))for(var s:list){
+            if(s.isEmpty()||!s.isDamageableItem()||s.getDamageValue()<=0||Balance.gun(s)!=null)continue;
+            if(seen.stream().anyMatch(x->ItemStack.isSameItemSameComponents(x,s)))continue;
+            seen.add(s.copy());
+            int per=pointsPerEmerald(s),price=Math.max(1,Math.min(64,(s.getDamageValue()+per-1)/per));
+            var cost=new ItemCost(s.getItemHolder(),1,net.minecraft.core.component.DataComponentPredicate.allOf(s.getComponents()));
+            var fixed=s.copyWithCount(1);fixed.setDamageValue(0);
+            out.add(new MerchantOffer(new ItemCost(Items.EMERALD,price),Optional.of(cost),fixed,0,1,0,0f));
+            if(out.size()>=12)break;
+        }
+        return out;
     }
 
     // ---------------------------------------------------------------- shrine enchanting
@@ -141,6 +145,8 @@ public final class ShrineShop {
             if(p.containerMenu!=p.inventoryMenu)return;
             var merchant=new ShrineMerchant(offers(p,chapter));
             merchant.setTradingPlayer(p);
+            var repairs=repairOffers(p);merchant.getOffers().addAll(0,repairs);
+            if(!repairs.isEmpty())bar(p,"Repair offers are at the top: emeralds + the damaged item");
             merchant.openTradingScreen(p,Component.literal("Shrine Trader - chapter "+chapter),1);
             Passthrough.LOG.info("DQJ shop: trader opened at shrine {} chapter {} offers {}",shrineId,chapter,merchant.getOffers().size());
         });
@@ -162,7 +168,7 @@ public final class ShrineShop {
         @Override public boolean stillValid(Player p){return customer==p;}
     }
     private static MerchantOffer offer(int price,ItemStack result,int maxUses){
-        return new MerchantOffer(new ItemCost(Items.EMERALD,Math.min(64,price)),Optional.empty(),result,0,maxUses,0,0f);
+        return new MerchantOffer(new ItemCost(Items.EMERALD,Math.max(1,Math.min(64,price))),Optional.empty(),result,0,maxUses,0,0f);
     }
     private static ItemStack potion(Item kind,net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion> p){return PotionContents.createItemStack(kind,p);}
     private static ItemStack book(ServerPlayer p,ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key,int level){
@@ -173,6 +179,8 @@ public final class ShrineShop {
     /** First item of a gun-mod loot table ("ammo/pistol_magazine", "guns/glock_17"), or empty if absent. */
     private static ItemStack gunLoot(ServerPlayer p,String path){
         try{
+            // Secret weapon tables are nested in this exact installed Modern Guns version.
+            if(path.startsWith("guns/")&&java.util.Set.of("m72_law","weed_burner","m2_flamethrower","xm42_flamethrower").contains(path.substring(5)))path="guns/secret_guns/"+path.substring(5);
             var key=ResourceKey.create(Registries.LOOT_TABLE,ResourceLocation.fromNamespaceAndPath("modern_guns",path));
             var table=p.server.reloadableRegistries().getLootTable(key);
             var items=table.getRandomItems(new LootParams.Builder(p.serverLevel()).create(LootContextParamSets.EMPTY));
@@ -180,97 +188,122 @@ public final class ShrineShop {
         }catch(RuntimeException e){return ItemStack.EMPTY;}
     }
     private static void add(MerchantOffers o,int price,ItemStack s,int maxUses){if(!s.isEmpty())o.add(offer(price,s,maxUses));}
+    /** Preview121 (user: ammo feels missing): Modern Guns' loot tables give ONE ammo item. Shell/bullet/launcher guns
+     *  load one item per shot (reload types 2 and 6, or a 1-round magazine), so one item per purchase was one shot. */
+    private static ItemStack ammo(ServerPlayer p,String path,int count){var s=gunLoot(p,path);if(!s.isEmpty())s.setCount(Math.min(s.getMaxStackSize(),count));return s;}
     private static void add(MerchantOffers o,int price,ItemStack s){add(o,price,s,16);}
     private static ItemStack n(Item item,int count){return new ItemStack(item,count);}
 
-    /** Offers by chapter. Items that only work on Wukong enemies after Phase D (slowness, weakness, knockback,
-     *  cobweb) are left out until then, so nobody buys a dud. No Mending: shrine repair is the repair path. */
-    /** Preview107 (user: add the missing mod weapons): every modern_guns gun except m202_flash (its model fails to
-     *  load in 1.21.4). Price by power tier, unlocking by chapter; one or two per visit. */
-    private static void guns(MerchantOffers o,ServerPlayer p,int ch){
-        String[][] tiers={
-            // chapter 1: pistols, SMGs, a double-barrel
-            {"1","luger_p08:3","glock_17:4","colt_python:5","smith_and_wesson_model_29:5","desert_eagle:6","mp5:6","thompson_machine_gun:6","beretta_486:5"},
-            // chapter 2: rifles, pump shotguns, a light flamethrower
-            {"2","p90:7","remington_870:8","spas_12:9","austeyr_ef88:9","ak47:10","m4_carbine:10","fn_scar:11","m1a:12","weed_burner:6","m79:10","gl06:10"},
-            // chapter 3: snipers, heavy weapons, launchers, flamethrowers
-            {"3","winchester_model_70:12","barrett_m82:16","m134_minigun:14","m72_law:14","milkor_mgl:15","rpg_7:18","m2_flamethrower:12","xm42_flamethrower:14"}};
-        for(var tier:tiers){
-            if(ch<Integer.parseInt(tier[0]))continue;
-            for(int i=1;i<tier.length;i++){var kv=tier[i].split(":");add(o,Integer.parseInt(kv[1]),gunLoot(p,"guns/"+kv[0]),2);}
+    /** Gun Core reloads by base item and custom-data tag, not by the display name. */
+    private static ItemStack taggedAmmo(String key,String name,ResourceLocation model,int count){
+        var s=n(Items.COMMAND_BLOCK,count);var tag=new net.minecraft.nbt.CompoundTag();tag.putByte(key,(byte)1);
+        s.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(tag));
+        s.set(net.minecraft.core.component.DataComponents.ITEM_NAME,Component.literal(name));
+        s.set(net.minecraft.core.component.DataComponents.ITEM_MODEL,model);return s;
+    }
+
+    /** Preview121 (user: some bullets seem not to be on sale): every ammo type is followed directly by the guns that use
+     *  it, and each ammo item lists those guns. m202_flash stays excluded (broken model). Reload facts (Gun Core): magazines
+     *  refill the whole magazine per item; shells, revolver bullets, grenade rounds and rockets load one round per item. */
+    private static final String[][] FIREARMS={
+        // ammo loot path or #tagged key, name, count per purchase, price, then gun:price
+        {"ammo/pistol_magazine","Pistol Magazine","8","1","luger_p08:3","glock_17:4","desert_eagle:6","mp5:6","thompson_machine_gun:6","p90:7"},
+        {"ammo/revolver_bullets","Revolver Bullets","32","1","smith_and_wesson_model_29:5","colt_python:6"},
+        {"ammo/shotgun_shell","Shotgun Shell","32","2","beretta_486:8","remington_870:12","spas_12:14"}, // Preview124: stronger, pricier
+        {"ammo/assault_rifle_magazine","Assault Rifle Magazine","6","2","austeyr_ef88:9","ak47:10","m4_carbine:10","fn_scar:11"},
+        {"ammo/sniper_rifle_magazine","Sniper Rifle Magazine","6","2","m1a:14","winchester_model_70:14","barrett_m82:20"},
+        {"ammo/explosive_rounds","Explosive Rounds","12","5","m79:16","gl06:16","milkor_mgl:24"},
+        {"#rocket","RPG Rocket","8","5","m72_law:20","rpg_7:26"},
+        {"#fuel_tank","Flamethrower Fuel","8","2","weed_burner:6","m2_flamethrower:12","xm42_flamethrower:14"},
+        {"#minigun_canister","Minigun Canister","6","2","m134_minigun:22"}}; // highest sustained damage
+    private static void firearms(MerchantOffers o,ServerPlayer p){
+        for(var row:FIREARMS){
+            int count=Integer.parseInt(row[2]),price=Integer.parseInt(row[3]);
+            var guns=new java.util.ArrayList<ItemStack>();var gunPrices=new java.util.ArrayList<Integer>();var names=new java.util.ArrayList<String>();
+            for(int i=4;i<row.length;i++){
+                var kv=row[i].split(":");var g=gunLoot(p,"guns/"+kv[0]);
+                if(!g.isEmpty()){guns.add(g);gunPrices.add(Integer.parseInt(kv[1]));names.add(g.getHoverName().getString());}
+            }
+            ItemStack ammo=switch(row[0]){
+                case "#rocket"->taggedAmmo("rocket",row[1],ResourceLocation.fromNamespaceAndPath("modern_guns","ammo/rocket"),count);
+                case "#fuel_tank"->taggedAmmo("fuel_tank",row[1],ResourceLocation.withDefaultNamespace("fire_charge"),count); // the mod's fuel model is missing
+                case "#minigun_canister"->taggedAmmo("minigun_canister",row[1],ResourceLocation.fromNamespaceAndPath("modern_guns","ammo/minigun_canister"),count);
+                default->ammo(p,row[0],count);
+            };
+            if(!ammo.isEmpty()&&!names.isEmpty()){
+                var lore=ammo.getOrDefault(net.minecraft.core.component.DataComponents.LORE,net.minecraft.world.item.component.ItemLore.EMPTY);
+                ammo.set(net.minecraft.core.component.DataComponents.LORE,lore.withLineAdded(Component.literal("For: "+String.join(", ",names)).withStyle(net.minecraft.ChatFormatting.GOLD)));
+                add(o,price,ammo,64);
+            }
+            for(int i=0;i<guns.size();i++)add(o,gunPrices.get(i),guns.get(i),2);
         }
     }
     static MerchantOffers offers(ServerPlayer p,int ch){
-        // Preview106 prices (user: generous; priced by usefulness/strength). Consumables restock every visit.
+        // Preview121 full audit (user: nothing extra, nothing missing). Sections in this order; prices from Preview106/119.
         var o=new MerchantOffers();int many=64;
-        // healing and buffs
-        add(o,2,potion(Items.POTION,Potions.HEALING),many);
-        add(o,1,n(Items.COOKED_BEEF,16),many);
-        add(o,2,potion(Items.POTION,Potions.SWIFTNESS),many);
-        add(o,1,potion(Items.POTION,Potions.NIGHT_VISION),many);
-        add(o,3,potion(Items.POTION,Potions.REGENERATION),many);
-        add(o,4,n(Items.GOLDEN_APPLE,1),many);
-        if(ch>=2){add(o,3,potion(Items.POTION,Potions.STRENGTH),many);add(o,3,potion(Items.POTION,Potions.FIRE_RESISTANCE),many);
-            add(o,4,potion(Items.POTION,Potions.STRONG_HEALING),many);}
-        if(ch>=3){add(o,5,potion(Items.POTION,Potions.TURTLE_MASTER),many);add(o,6,potion(Items.POTION,Potions.STRONG_STRENGTH),many);
-            add(o,16,n(Items.TOTEM_OF_UNDYING,1),4);}
-        // Potions & items D1 (user: enchanted golden apple, fairly expensive; full heal + resistance on eating)
-        add(o,32,n(Items.ENCHANTED_GOLDEN_APPLE,1),2);
-        add(o,2,potion(Items.POTION,Potions.SLOW_FALLING),many);
+        // 1. Healing and food
+        add(o,2,potion(Items.POTION,Potions.HEALING),many);add(o,4,potion(Items.POTION,Potions.STRONG_HEALING),many);
+        add(o,3,potion(Items.POTION,Potions.REGENERATION),many);add(o,2,n(Items.GOLDEN_APPLE,32),many); // Preview124 (user): used a lot - half a stack for 2
+        add(o,32,n(Items.ENCHANTED_GOLDEN_APPLE,1),2);add(o,20,n(Items.TOTEM_OF_UNDYING,1),4);
         add(o,1,n(Items.MILK_BUCKET,1),many);add(o,1,n(Items.HONEY_BOTTLE,2),many);
-        // throwables against enemies (the damage path works today)
-        add(o,3,potion(Items.SPLASH_POTION,Potions.POISON),many);
-        add(o,3,potion(Items.SPLASH_POTION,Potions.HARMING),many);
-        // D1: these now act on Wukong monsters (slowness = slower moves and attacks, weakness = weaker hits on you)
-        add(o,3,potion(Items.SPLASH_POTION,Potions.SLOWNESS),many);add(o,3,potion(Items.SPLASH_POTION,Potions.WEAKNESS),many);
-        add(o,2,n(Items.WIND_CHARGE,16),many);add(o,1,n(Items.SNOWBALL,16),many);add(o,2,n(Items.COBWEB,8),many);
-        if(ch>=2){add(o,5,potion(Items.LINGERING_POTION,Potions.POISON),many);add(o,5,potion(Items.LINGERING_POTION,Potions.SLOWNESS),many);
-            add(o,5,potion(Items.LINGERING_POTION,Potions.WEAKNESS),many);add(o,3,n(Items.POWDER_SNOW_BUCKET,1),many);
-            add(o,2,arrows(16,Potions.SLOWNESS),many);add(o,2,arrows(16,Potions.WEAKNESS),many);}
-        if(ch>=3)add(o,5,potion(Items.SPLASH_POTION,Potions.STRONG_HARMING),many);
-        // ammo and explosives
-        add(o,1,n(Items.ARROW,32),many);
-        add(o,1,gunLoot(p,"ammo/pistol_magazine"),many);
-        add(o,1,gunLoot(p,"ammo/shotgun_shell"),many);
-        add(o,1,gunLoot(p,"ammo/revolver_bullets"),many);
+        add(o,1,n(Items.COOKED_BEEF,16),many);add(o,1,n(Items.BREAD,16),many);add(o,2,n(Items.GOLDEN_CARROT,16),many);
+        // 2. Buff potions
+        add(o,3,potion(Items.POTION,Potions.STRENGTH),many);add(o,6,potion(Items.POTION,Potions.STRONG_STRENGTH),many);
+        add(o,2,potion(Items.POTION,Potions.SWIFTNESS),many);add(o,3,potion(Items.POTION,Potions.FIRE_RESISTANCE),many);
+        add(o,5,potion(Items.POTION,Potions.TURTLE_MASTER),many);add(o,2,potion(Items.POTION,Potions.SLOW_FALLING),many);
+        // 3. Melee weapons and tools, six quality tiers (wood -> netherite)
+        // Preview124 (user: stronger = pricier): prices follow EquipmentBalance damage (sword 6..15, axe 8..19, pickaxe 3..8).
+        String[] tiers={"wooden","stone","golden","iron","diamond","netherite"};
+        String[] kinds={"sword","axe","pickaxe"};int[][] cost={{1,2,3,5,9,14},{1,2,4,6,11,17},{1,1,2,3,6,10}};
+        for(int k=0;k<kinds.length;k++)for(int i=0;i<tiers.length;i++){
+            var item=net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(ResourceLocation.withDefaultNamespace(tiers[i]+"_"+kinds[k]));
+            add(o,cost[k][i],n(item,1),8);
+        }
+        add(o,20,n(Items.MACE,1),4);add(o,14,n(Items.TRIDENT,1),4);add(o,3,n(Items.SHIELD,1),8);
+        // 4. Armor, six quality tiers (leather -> netherite), plus flight
+        String[] armor={"leather","golden","chainmail","iron","diamond","netherite"};
+        int[][] prices={{1,2,2,1},{2,4,3,2},{3,5,4,3},{4,6,5,3},{10,16,14,10},{18,28,24,18}};
+        String[] slots={"helmet","chestplate","leggings","boots"};
+        for(int i=0;i<armor.length;i++)for(int j=0;j<slots.length;j++){
+            var item=net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(ResourceLocation.withDefaultNamespace(armor[i]+"_"+slots[j]));
+            add(o,prices[i][j],n(item,1),4);
+        }
+        add(o,16,n(Items.ELYTRA,1),2);add(o,3,n(Items.FIREWORK_ROCKET,64),many);
+        // 5. Bows and arrows
+        add(o,2,n(Items.BOW,1),8);add(o,3,n(Items.CROSSBOW,1),8);add(o,1,n(Items.ARROW,32),many);
+        add(o,2,arrows(16,Potions.SLOWNESS),many);add(o,2,arrows(16,Potions.WEAKNESS),many);
+        add(o,2,arrows(16,Potions.POISON),many);add(o,3,arrows(16,Potions.HARMING),many);
+        // 6. Firearms: each ammo, then the guns that use it
+        firearms(o,p);
+        // 7. Throwables and traps (all act on Wukong monsters)
         add(o,3,n(Items.TNT,8),many);
-        add(o,2,n(Items.FIREWORK_ROCKET,32),many);add(o,3,n(Items.FIREWORK_ROCKET,64),many);
-        add(o,6,n(Items.ELYTRA,1),2); // Preview107: always available, so a lost elytra can be replaced
-        add(o,2,arrows(16,Potions.POISON),many);
-        if(ch>=2){add(o,2,gunLoot(p,"ammo/assault_rifle_magazine"),many);add(o,2,gunLoot(p,"ammo/sniper_rifle_magazine"),many);}
-        if(ch>=2)add(o,3,gunLoot(p,"ammo/explosive_rounds"),many);
-        // weapons and armor, priced by strength
-        add(o,3,n(Items.IRON_SWORD,1),8);add(o,3,n(Items.IRON_AXE,1),8);add(o,2,n(Items.IRON_PICKAXE,1),8);
-        add(o,1,n(Items.SHIELD,1),8);add(o,2,n(Items.BOW,1),8);add(o,3,n(Items.CROSSBOW,1),8);
-        add(o,4,n(Items.IRON_HELMET,1),4);add(o,6,n(Items.IRON_CHESTPLATE,1),4);add(o,5,n(Items.IRON_LEGGINGS,1),4);add(o,3,n(Items.IRON_BOOTS,1),4);
-        if(ch>=2){add(o,8,n(Items.DIAMOND_PICKAXE,1),4);add(o,10,n(Items.DIAMOND_SWORD,1),4);add(o,8,n(Items.DIAMOND_AXE,1),4);
-}
-        if(ch>=3){add(o,10,n(Items.DIAMOND_HELMET,1),2);add(o,16,n(Items.DIAMOND_CHESTPLATE,1),2);add(o,14,n(Items.DIAMOND_LEGGINGS,1),2);
-            add(o,10,n(Items.DIAMOND_BOOTS,1),2);add(o,14,n(Items.TRIDENT,1),2);
-}
-        if(ch>=4){add(o,20,n(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,1),8);add(o,16,n(Items.NETHERITE_INGOT,1),8);}
-        guns(o,p,ch);
-        // enchanted books
-        add(o,2,book(p,Enchantments.UNBREAKING,1),8);add(o,4,book(p,Enchantments.SHARPNESS,2),4);
-        add(o,4,book(p,Enchantments.PROTECTION,2),4);add(o,4,book(p,Enchantments.POWER,2),4);
-        // Live112: books whose effect is adapted to Wukong enemies (Enchants.java)
-        add(o,3,book(p,Enchantments.SMITE,2),4);add(o,3,book(p,Enchantments.BANE_OF_ARTHROPODS,2),4);add(o,3,book(p,Enchantments.KNOCKBACK,1),4);
-        add(o,3,book(p,Enchantments.PUNCH,1),4);add(o,3,book(p,Enchantments.EFFICIENCY,2),4);add(o,5,book(p,Enchantments.LOOTING,1),4);
-        if(ch>=2){add(o,6,book(p,Enchantments.FIRE_ASPECT,1),4);add(o,6,book(p,Enchantments.UNBREAKING,3),4);add(o,5,book(p,Enchantments.FEATHER_FALLING,3),4);
-            add(o,6,book(p,Enchantments.FLAME,1),4);add(o,5,book(p,Enchantments.SMITE,3),4);add(o,5,book(p,Enchantments.SWEEPING_EDGE,2),4);
-            add(o,6,book(p,Enchantments.THORNS,1),4);add(o,8,book(p,Enchantments.LOOTING,2),4);add(o,5,book(p,Enchantments.EFFICIENCY,3),4);}
-        if(ch>=3){add(o,10,book(p,Enchantments.SHARPNESS,4),4);add(o,10,book(p,Enchantments.PROTECTION,4),4);add(o,8,book(p,Enchantments.POWER,4),4);
-            add(o,12,book(p,Enchantments.LOOTING,3),4);add(o,10,book(p,Enchantments.SMITE,5),4);add(o,10,book(p,Enchantments.EFFICIENCY,5),4);}
-        // allies (spawn eggs are Steve's allies; a few per visit)
+        add(o,3,potion(Items.SPLASH_POTION,Potions.HARMING),many);add(o,5,potion(Items.SPLASH_POTION,Potions.STRONG_HARMING),many);
+        add(o,3,potion(Items.SPLASH_POTION,Potions.POISON),many);add(o,3,potion(Items.SPLASH_POTION,Potions.SLOWNESS),many);
+        add(o,3,potion(Items.SPLASH_POTION,Potions.WEAKNESS),many);
+        add(o,4,potion(Items.LINGERING_POTION,Potions.HARMING),many);add(o,5,potion(Items.LINGERING_POTION,Potions.POISON),many);
+        add(o,5,potion(Items.LINGERING_POTION,Potions.SLOWNESS),many);add(o,5,potion(Items.LINGERING_POTION,Potions.WEAKNESS),many);
+        add(o,2,n(Items.WIND_CHARGE,16),many);add(o,1,n(Items.SNOWBALL,16),many);add(o,2,n(Items.COBWEB,8),many);
+        add(o,3,n(Items.POWDER_SNOW_BUCKET,1),many);add(o,2,n(Items.MAGMA_BLOCK,16),many);add(o,1,n(Items.CAMPFIRE,2),many);
+        add(o,2,n(Items.LAVA_BUCKET,1),8);add(o,1,n(Items.FLINT_AND_STEEL,1),8);
+        // capture: boats and minecarts hold small monsters for 8 s; the fishing rod pulls them
+        add(o,12,n(Items.OAK_BOAT,1),4);add(o,15,n(Items.MINECART,1),4);add(o,1,n(Items.RAIL,16),many);add(o,6,n(Items.FISHING_ROD,1),4); // Preview124: reusable capture tools
+        // 8. Enchanted books for free shrine enchanting: one per useful enchantment, at its top level
+        add(o,16,book(p,Enchantments.SHARPNESS,5),4);add(o,10,book(p,Enchantments.SMITE,5),4);add(o,8,book(p,Enchantments.BANE_OF_ARTHROPODS,5),4);
+        add(o,5,book(p,Enchantments.KNOCKBACK,2),4);add(o,8,book(p,Enchantments.FIRE_ASPECT,2),4);add(o,6,book(p,Enchantments.SWEEPING_EDGE,3),4);
+        add(o,12,book(p,Enchantments.LOOTING,3),4);add(o,8,book(p,Enchantments.UNBREAKING,3),4);add(o,8,book(p,Enchantments.EFFICIENCY,5),4);
+        add(o,14,book(p,Enchantments.POWER,5),4);add(o,5,book(p,Enchantments.PUNCH,2),4);add(o,8,book(p,Enchantments.FLAME,1),4);
+        add(o,10,book(p,Enchantments.INFINITY,1),4);add(o,6,book(p,Enchantments.QUICK_CHARGE,3),4);add(o,6,book(p,Enchantments.MULTISHOT,1),4);
+        add(o,6,book(p,Enchantments.PIERCING,4),4);add(o,6,book(p,Enchantments.LOYALTY,3),4);
+        add(o,14,book(p,Enchantments.PROTECTION,4),4);add(o,6,book(p,Enchantments.FEATHER_FALLING,4),4);add(o,8,book(p,Enchantments.THORNS,3),4);
+        // 9. Allies (spawn eggs fight for Steve) and leads
         add(o,4,n(Items.ZOMBIE_SPAWN_EGG,1),3);add(o,4,n(Items.SKELETON_SPAWN_EGG,1),3);add(o,3,n(Items.WOLF_SPAWN_EGG,1),3);
-        if(ch>=2)add(o,5,n(Items.CREEPER_SPAWN_EGG,1),3);
-        if(ch>=3)add(o,12,n(Items.IRON_GOLEM_SPAWN_EGG,1),1);
-        // building and utility (a full stack of blocks for one emerald)
-        add(o,1,n(Items.COBBLESTONE,64),many);add(o,1,n(Items.OAK_PLANKS,64),many);add(o,1,n(Items.STONE_BRICKS,64),many);
-        add(o,1,n(Items.GLASS,64),many);add(o,1,n(Items.DIRT,64),many);
-        add(o,1,n(Items.TORCH,32),many);add(o,1,n(Items.LADDER,32),many);add(o,1,n(Items.SCAFFOLDING,32),many);
-        add(o,2,n(Items.ENDER_PEARL,4),many);add(o,1,n(Items.WATER_BUCKET,1),8);add(o,2,n(Items.LAVA_BUCKET,1),8);
-        add(o,2,n(Items.MAGMA_BLOCK,16),many);add(o,1,n(Items.CAMPFIRE,2),many);add(o,2,n(Items.CHEST,4),many);
+        add(o,5,n(Items.CREEPER_SPAWN_EGG,1),3);add(o,12,n(Items.IRON_GOLEM_SPAWN_EGG,1),1);add(o,1,n(Items.LEAD,4),many);
+        // 10. Building and movement (a stack for one emerald)
+        add(o,1,n(Items.COBBLESTONE,64),many);add(o,1,n(Items.STONE_BRICKS,64),many);add(o,1,n(Items.OAK_PLANKS,64),many);
+        add(o,1,n(Items.DIRT,64),many);add(o,1,n(Items.GLASS,64),many);add(o,2,n(Items.OBSIDIAN,16),many);
+        add(o,1,n(Items.OAK_STAIRS,32),many);add(o,1,n(Items.OAK_SLAB,32),many);
+        add(o,1,n(Items.LADDER,32),many);add(o,1,n(Items.SCAFFOLDING,32),many);add(o,1,n(Items.TORCH,32),many);
+        add(o,2,n(Items.CHEST,4),many);add(o,1,n(Items.WATER_BUCKET,1),8);add(o,1,n(Items.BUCKET,1),8);add(o,3,n(Items.ENDER_PEARL,4),many);
         return o;
     }
 }
