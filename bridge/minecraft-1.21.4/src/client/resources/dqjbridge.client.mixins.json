@@ -33,7 +33,8 @@
     "EntityCollideInvoker",
     "HostProxyLerpMixin",
     "HostProxySnapMixin",
-    "NativePauseMixin"
+    "NativePauseMixin",
+    "HostProxyUseMixin"
   ],
   "mixins": [
     "HostPlayerSkinMixin"

@@ -4,7 +4,7 @@ English | [简体中文](README.zh-CN.md)
 
 Play Black Myth: Wukong with Minecraft movement, equipment and building. Wukong's maps, enemies and story remain; both games run together on one PC.
 
-**[Download v0.3.0 Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip)** · [What's new](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.3.0) · [Installation](docs/INSTALL.md) · [Upgrade](docs/UPGRADE.md)
+**[Download v0.4.0 Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.4.0/MCX-Wukong-v0.4.0-Players.zip)** · [What's new](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.4.0) · [Installation](docs/INSTALL.md) · [Upgrade](docs/UPGRADE.md)
 
 ## Features
 

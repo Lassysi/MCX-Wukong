@@ -15,6 +15,7 @@ public final class PassthroughClient implements ClientModInitializer {
         HostLink.launch();
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             HostState.refresh();
+            StuckWatchdog.tick(mc); // Preview127
             NativeBlocks.tick(mc);NativeBlocks.logUse(mc);
             dev.rehan.passthrough.Passthrough.useHeld=mc.screen==null&&mc.player!=null&&mc.options.keyUse.isDown();
             // Preview107: holding attack with a pickaxe swings at Wukong's destructible scenery (host counts swings by tier).

@@ -237,9 +237,13 @@ namespace DqjCombat
                 // player. Hold MC until the montage has finished (8 s cap).
                 if(travelSawLoading&&gameplay&&!teleporting&&rebirthPending){
                     if(rebirthSettleAt==0){rebirthSettleAt=now;Log.Write("life","rebirth teleport finished; waiting for the native get-up animation");}
-                    bool montage=false;try{var anim=player.Mesh.GetAnimInstance();montage=anim!=null&&anim.IsAnyMontagePlaying();}catch{}
-                    if(now-rebirthSettleAt<.5||(montage&&now-rebirthSettleAt<8))return;
-                    Log.Write("life","native get-up finished after "+F(now-rebirthSettleAt)+" s; montage="+montage);rebirthSettleAt=0;
+                    // Preview127 (user: in the gauntlet/rematch arenas a death respawns on the spot and the takeover is slow; Live126 01:29:11
+                    // and 01:17:06 both ran into the 8 s cap with a montage still playing): animations keep running under MC authority since
+                    // Preview78, so the get-up no longer needs to finish first; cap 4 s and name the montage.
+                    bool montage=false;string montageName="";
+                    try{var anim=player.Mesh.GetAnimInstance();montage=anim!=null&&anim.IsAnyMontagePlaying();if(montage){var active=anim.GetCurrentActiveMontage();montageName=active==null?"":active.GetName();}}catch{}
+                    if(now-rebirthSettleAt<.5||(montage&&now-rebirthSettleAt<4))return;
+                    Log.Write("life","native get-up finished after "+F(now-rebirthSettleAt)+" s; montage="+montage+(montageName.Length>0?" ("+montageName+")":""));rebirthSettleAt=0;
                 }
                 if(travelSawLoading&&gameplay&&!teleporting){travelPending=false;Log.Write("travel","native loading finished; reattach MC authority at destination");
                     // Rebirth: full HP and no lingering MC effects before MC health follows host on reattach.
@@ -267,15 +271,15 @@ namespace DqjCombat
                     prepareBlocked=false;Log.Write("bridge-ground","native player moved away from failed prepare; retry allowed");
                 }
                 halfHeight=player.CapsuleComponent.GetScaledCapsuleHalfHeight();var nativeFoot=player.GetActorLocation()-new FVector(0,0,halfHeight);
-                FHitResult initialFloor;
-                if(!TraceFloor(nativeFoot,250,400,out initialFloor)){
-                    // Preview125: never leave Wukong hanging in the air while a takeover waits for ground; let him fall to it.
-                    try{var mode=player.CharacterMovement.MovementMode;
-                        if(mode!=EMovementMode.MOVE_Falling&&mode!=EMovementMode.MOVE_Walking){player.CharacterMovement.SetMovementMode(EMovementMode.MOVE_Falling,0);Log.Write("bridge-ground","Wukong was held in the air ("+mode+") while waiting for ground; set to falling");}}catch{}
-                    if(now>=nextGroundWait){nextGroundWait=now+3;Log.Write("bridge-ground","no native support at spawn; takeover held at host position="+nativeFoot);}
+                // Preview126: Preview125's forced MOVE_Falling is gone (Live125: the native kept Wukong in MOVE_Flying anyway);
+                // the takeover looks for the floor Wukong really has, or the surface above a flying/sunk body.
+                string floorSource,floorDetail;double floorZ;
+                if(!FindSpawnFloor(nativeFoot,out floorZ,out floorSource,out floorDetail)){
+                    if(now>=nextGroundWait){nextGroundWait=now+3;Log.Write("bridge-ground","no native support at spawn; takeover held at host position="+nativeFoot+"; "+floorDetail);}
                     Publish(null,false);return;
                 }
-                nativeFoot.Z=(float)initialFloor.ImpactPoint.Z;
+                if(floorSource!="trace")Log.Write("bridge-ground","spawn floor from "+floorSource+" at Z="+F(floorZ)+" (foot Z="+F(nativeFoot.Z)+"); "+floorDetail);
+                nativeFoot.Z=(float)floorZ;
                 try{
                     if(worldCatalog==null)worldCatalog=new McWorldCatalog(System.IO.Path.Combine(Log.Dir,"world-anchors.json"),System.IO.Path.Combine(Log.Dir,"world-anchor-bootstrap.json"));
                     string level=UGameplayStatics.GetCurrentLevelName(NativeObjectLifetime.ActorWorld(player),true)+"|"+NativeObjectLifetime.ActorWorld(player).GetPathName();
@@ -288,6 +292,8 @@ namespace DqjCombat
                 groundEpoch=Guid.NewGuid().ToString("N");groundCommitSent=false;lastAccepted=null;
                 groundPreparation=new McGroundPreparation(groundEpoch,spawnPoint,now);
                 string support=GroundCells(spawnPoint.X,spawnPoint.Y,spawnPoint.Z);
+                // Preview126: a character/Pawn floor is invisible to the raster trace; give MC that one support cell under the spawn.
+                if(floorSource!="trace")support=SpawnFloorPolicy.WithColumn(support,spawnPoint.X,spawnPoint.Y,spawnPoint.Z);
                 // Only AIR/BARRIER proxy cells are writable by this MC operation.
                 // A stale wall raster must not obstruct the verified host spawn.
                 int sx=(int)Math.Floor(spawnPoint.X),sy=(int)Math.Floor(spawnPoint.Y+.001),sz=(int)Math.Floor(spawnPoint.Z);
@@ -322,6 +328,14 @@ namespace DqjCombat
             }
             if(!owning){Publish(null,false);return;}
             if(frame.Health<=0||mcDead){if(McDeath(now,frame,fresh))return;}
+            // Preview127 (user: stuck after a respawn in the gauntlet/rematch arena; Live126 01:29:19-01:29:41 Steve did not move until an
+            // Esc round trip re-ran the ground handshake): MC's watchdog reports a stall it could not explain; redo that handshake here.
+            string stuck=wire.TakeStuck();
+            if(stuck!=null&&fresh&&frame.Health>0&&now>=nextStuckHandshake){
+                nextStuckHandshake=now+10;
+                Log.Write("bridge-ground","MC reports Steve stuck ("+stuck+"); fresh ground handshake at the current position (what an Esc round trip did in Live126)");
+                Release();prepareBlocked=false;nextGroundWait=0;Publish(null,false);return;
+            }
             // Preview125 (user: flying high handed control to Black Myth and left Wukong stuck in the air; Live124 08:28:08 MC y 280.9):
             // a handover needs ground for the new takeover, so it only happens while there is native floor under Steve. In flight MC
             // keeps control at any height (MC has no flight ceiling; a region border only matters for blocks) until he lands.
@@ -339,6 +353,7 @@ namespace DqjCombat
             }
             if(now>=nextTerrainRequest){
                 var request=wire.TakeTerrainRequest();
+                if(request!=null&&request.Epoch!=groundEpoch&&++staleTerrainRequests<=20)Log.Write("bridge-ground","terrain request ignored: MC epoch="+request.Epoch+" host epoch="+groundEpoch);
                 if(request!=null&&request.Epoch==groundEpoch&&Math.Abs(request.X-frame.X)<12&&Math.Abs(request.Z-frame.Z)<12&&Math.Abs(request.Y-frame.Y)<8){
                     nextTerrainRequest=now+.15;
                     // Preview90: flight requests measure native ground up to 40 m below (walking: 6 m).
@@ -411,6 +426,7 @@ namespace DqjCombat
             Publish(frame,true);
             if(now>=nextLog){nextLog=now+30;Log.Write("bridge","MC frame="+frame.Number+" screen="+frame.Screen+" foot="+F(frame.X)+","+F(frame.Y)+","+F(frame.Z)+" yaw="+F(frame.Yaw)+" pitch="+F(frame.Pitch)+" age="+F(age)+" peerPongs="+wire.PongCount);}
         }
+        private double nextStuckHandshake;private int staleTerrainRequests;
         private double nextHandover,nextIdleHold,deadHiddenSince=-1,nextRespawnRequest;
         // Preview124 (Live123: after control went back to Black Myth, Steve kept falling in the MC world, died out of view,
         // and every later takeover waited for a living Steve): while Black Myth has control and no takeover is being
@@ -689,6 +705,55 @@ namespace DqjCombat
         {
             try{var foot=player.GetActorLocation()-new FVector(0,0,player.CapsuleComponent.GetScaledCapsuleHalfHeight());FHitResult hit;return TraceFloor(foot,250,400,out hit);}
             catch{return false;}
+        }
+        private static readonly List<EObjectTypeQuery> FloorObjects=new List<EObjectTypeQuery>{EObjectTypeQuery.ObjectTypeQuery1,EObjectTypeQuery.ObjectTypeQuery2};
+        // Preview126: spawn floor for a takeover. detail always describes the native movement state for the wait log.
+        private bool FindSpawnFloor(FVector foot,out double floorZ,out string source,out string detail)
+        {
+            floorZ=double.NaN;source="none";
+            var info=new StringBuilder();bool walking=false,falling=false;
+            try{
+                var move=player.CharacterMovement;var mode=move.MovementMode;var v=player.GetVelocity();
+                walking=mode==EMovementMode.MOVE_Walking||mode==EMovementMode.MOVE_NavWalking;falling=mode==EMovementMode.MOVE_Falling;
+                info.Append("mode=").Append(mode).Append(" custom=").Append(move.CustomMovementMode).Append(" velocity=").Append(F(v.X)).Append(',').Append(F(v.Y)).Append(',').Append(F(v.Z));
+                FHitResult hit;
+                if(TraceFloor(foot,250,400,out hit)){floorZ=hit.ImpactPoint.Z;source="trace";info.Append(" trace=").Append(F(floorZ)).Append(' ').Append(HitOwner(hit));detail=info.ToString();return true;}
+                info.Append(" trace=none");
+                var floor=move.CurrentFloor;
+                info.Append(" cmcFloor=").Append(floor.BlockingHit?"hit":"none");
+                if(floor.BlockingHit)info.Append(" walkable=").Append(floor.WalkableFloor).Append(" dist=").Append(F(floor.FloorDist)).Append(" z=").Append(F(floor.HitResult.ImpactPoint.Z)).Append(' ').Append(HitOwner(floor.HitResult));
+                if(SpawnFloorPolicy.AcceptCharacterFloor(walking,floor.BlockingHit,floor.WalkableFloor,floor.FloorDist)){floorZ=floor.HitResult.ImpactPoint.Z;source="character floor";detail=info.ToString();return true;}
+                var ignore=new List<AActor>{player};if(cameraActor!=null)ignore.Add(cameraActor);if(worldLink!=null)worldLink.IgnoreOwned(ignore);
+                if(USystemLibrary.LineTraceSingleForObjects(player,foot+new FVector(0,0,250),foot-new FVector(0,0,400),FloorObjects,true,ignore,EDrawDebugTrace.None,out hit,true,default(FLinearColor),default(FLinearColor),0)
+                    &&hit.ImpactNormal.Z>=SpawnFloorPolicy.MinWalkableNormalZ){
+                    floorZ=hit.ImpactPoint.Z;source="pawn-object floor";info.Append(" pawnFloor=").Append(F(floorZ)).Append(' ').Append(HitOwner(hit));detail=info.ToString();return true;
+                }
+                info.Append(" pawnFloor=none");
+                if(SpawnFloorPolicy.SearchAbove(walking,falling)){
+                    // Lowest walkable surface above the feet: each step traces down from a higher start and stops 20 cm above the feet.
+                    double height=2*halfHeight;
+                    foreach(float step in SpawnFloorPolicy.AboveSteps){
+                        if(!TraceSegment(foot+new FVector(0,0,step),foot+new FVector(0,0,20),ignore,out hit))continue;
+                        double z=hit.ImpactPoint.Z;FHitResult ceiling;
+                        var surface=new FVector(hit.ImpactPoint.X,hit.ImpactPoint.Y,hit.ImpactPoint.Z);
+                        bool roof=TraceSegment(surface+new FVector(0,0,5),surface+new FVector(0,0,(float)(height+SpawnFloorPolicy.HeadroomMarginCm+5)),ignore,out ceiling);
+                        bool ok=SpawnFloorPolicy.AcceptSurfaceAbove(foot.Z,z,hit.ImpactNormal.Z,roof,roof?ceiling.ImpactPoint.Z:double.NaN,height);
+                        info.Append(" above").Append((int)step).Append('=').Append(F(z)).Append(ok?"":"(rejected normal="+F(hit.ImpactNormal.Z)+" roof="+roof+")");
+                        if(ok){floorZ=z;source="surface above";info.Append(' ').Append(HitOwner(hit));detail=info.ToString();return true;}
+                    }
+                    info.Append(" above=none within 30 m");
+                }
+            }catch(Exception e){info.Append(" probe-error=").Append(e.GetType().Name).Append(": ").Append(e.Message);}
+            detail=info.ToString();return false;
+        }
+        private bool TraceSegment(FVector start,FVector end,List<AActor> ignore,out FHitResult hit)
+        {
+            if(USystemLibrary.LineTraceSingle(player,start,end,ETraceTypeQuery.TraceTypeQuery1,false,ignore,EDrawDebugTrace.None,out hit,true,default(FLinearColor),default(FLinearColor),0))return true;
+            return USystemLibrary.LineTraceSingle(player,start,end,ETraceTypeQuery.TraceTypeQuery1,true,ignore,EDrawDebugTrace.None,out hit,true,default(FLinearColor),default(FLinearColor),0);
+        }
+        private static string HitOwner(FHitResult hit)
+        {
+            try{var c=hit.Component.Get();var owner=c==null?null:c.GetOwner();return owner==null?"(world)":"("+owner.GetClass().GetName()+")";}catch{return "(?)";}
         }
         private bool TraceFloor(FVector at,float above,float below,out FHitResult hit)
         {

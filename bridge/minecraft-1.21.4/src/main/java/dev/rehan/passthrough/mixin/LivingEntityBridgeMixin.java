@@ -21,8 +21,12 @@ abstract class LivingEntityBridgeMixin {
         var self=(LivingEntity)(Object)this;
         if(dev.rehan.passthrough.MultipartTargets.isPart(self)){
             var root=dev.rehan.passthrough.MultipartTargets.root(self);
-            return root!=null&&root!=self&&root.hurtServer(level,source,amount);
+            if(root==null||root==self||dev.rehan.passthrough.MultipartTargets.duplicate(root,source,level.getGameTime()))return false;
+            return dev.rehan.passthrough.MultipartTargets.routed(()->root.hurtServer(level,source,amount));
         }
+        // Preview127: the root itself is also one target of the same swing (a routed part hit was already counted).
+        if(CombatBridge.isProxy(self)&&!dev.rehan.passthrough.MultipartTargets.routing()
+            &&dev.rehan.passthrough.MultipartTargets.duplicate(self,source,level.getGameTime()))return false;
         return original.call(level,source,amount);
     }
     @Inject(method="canBeAffected",at=@At("HEAD"),cancellable=true)

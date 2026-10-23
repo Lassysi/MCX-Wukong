@@ -65,6 +65,12 @@ public final class CombatBridge {
         return size==null?null:EntityDimensions.scalable(size[0],size[1]);
     }
     public static boolean isProxy(Entity entity){return knownProxyIds.contains(entity.getUUID());}
+    /** Preview126 (Live125 21:34: 40 of 59 right-clicks with TNT hit an invisible Boss hitbox): a use press aimed at a proxy
+     *  goes to the block behind it (or the air), exactly as if the proxy were not there. Attacks still target proxies. */
+    public static net.minecraft.world.phys.HitResult useTarget(net.minecraft.world.phys.HitResult hit,net.minecraft.world.entity.player.Player player){
+        if(!(hit instanceof net.minecraft.world.phys.EntityHitResult e)||!isProxy(e.getEntity())||player==null)return hit;
+        return player.pick(player.blockInteractionRange(),1f,false);
+    }
     public static String proxyId(Entity entity){return ids.get(entity.getUUID());}
     public static double[] position(UUID id){return positions.get(id);}
     public static boolean hasPositions(){return !positions.isEmpty();}
@@ -99,12 +105,27 @@ public final class CombatBridge {
             Passthrough.LOG.info("DQJ combat-diag hit target={} amount={} reason={} direct={} causing={} weapon={} hpBefore={} hpAfter={}",
                 entity instanceof ServerPlayer?"player":ids.getOrDefault(entity.getUUID(),"?"),delta,reason,type(source.getDirectEntity()),type(source.getEntity()),weapon,before,after);
         }
-        emit(entity,delta,reason,owner);
+        emit(entity,delta,reason,owner,!(entity instanceof ServerPlayer)&&heavyHit(source));
+    }
+    /** Preview126 (user: one combo staggers and knocks an enemy back on every hit; judge poise by the attack, not damage):
+     *  a heavy hit is a vanilla critical (falling, not sprinting), an axe or mace swing, a critical arrow or an explosion.
+     *  The host's poise meter decides whether any hit staggers; only heavy hits may pick the knockback reaction. */
+    static boolean heavyHit(DamageSource source){
+        if(source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION))return true;
+        var direct=source.getDirectEntity();
+        if(direct instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow)return arrow.isCritArrow();
+        if(source.getEntity() instanceof ServerPlayer p&&direct==p){
+            var item=p.getMainHandItem().getItem();
+            if(item instanceof net.minecraft.world.item.AxeItem||item instanceof net.minecraft.world.item.MaceItem)return true;
+            return p.fallDistance>0&&!p.onGround()&&!p.onClimbable()&&!p.isInWater()&&!p.isPassenger()&&!p.isSprinting();
+        }
+        return false;
     }
     private static void emit(LivingEntity entity,float amount,String reason){
         emit(entity,amount,reason,"");
     }
-    private static void emit(LivingEntity entity,float amount,String reason,String source){
+    private static void emit(LivingEntity entity,float amount,String reason,String source){emit(entity,amount,reason,source,false);}
+    private static void emit(LivingEntity entity,float amount,String reason,String source,boolean heavy){
         observed.put(entity.getUUID(),entity.getHealth());
         if(!Float.isFinite(amount)||Math.abs(amount)<.0001)return;
         String id=entity instanceof ServerPlayer?"player":ids.get(entity.getUUID());
@@ -114,6 +135,7 @@ public final class CombatBridge {
         out.addProperty("session",session);out.addProperty("seq",n);out.addProperty("id",id);
         out.addProperty("amount",amount);out.addProperty("reason",reason);
         out.addProperty("source",source);
+        if(heavy)out.addProperty("hk","heavy");
         Passthrough.events.accept(out.toString());
     }
     /** Server thread only: live proxies by host enemy id (ProxyFx). */
@@ -251,6 +273,9 @@ public final class CombatBridge {
                     mob.setPersistenceRequired();mob.noPhysics=true;mob.addTag("dqj.host_proxy");
                     mob.getAttribute(Attributes.ARMOR).setBaseValue(0);
                     mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1);
+                    // Preview126 (user: no block placing or fire next to a Boss): LivingEntity sets blocksBuilding, so a 10 m
+                    // hit-assist box refused every block inside it. Proxies are aiming aids, not bodies in the way.
+                    mob.blocksBuilding=false;
                     targets.put(id,mob);ids.put(mob.getUUID(),id);knownProxyIds.add(mob.getUUID());
                     server.overworld().addFreshEntity(mob);
                 }

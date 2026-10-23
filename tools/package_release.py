@@ -47,12 +47,9 @@ def main():
             dest=player/rel;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/rel,dest)
     doc_paths=['LICENSE','README.md','README.zh-CN.md','CHANGELOG.md','CHANGELOG.zh-CN.md','THIRD-PARTY-NOTICES.md','THIRD-PARTY-NOTICES.zh-CN.md']
     doc_paths += ['docs/'+name+lang+'.md' for name in ('INSTALL','FAQ','KNOWN-ISSUES','SKINS','USAGE','UPGRADE','BALANCE','SHOP','PERFORMANCE') for lang in ('','.zh-CN')]
-    doc_paths += ['docs/RELEASE-v0.3.0.md','validation.json']
+    doc_paths += ['docs/RELEASE-v'+VERSION+'.md','validation.json','docs/BUILD.md','docs/BUILD.zh-CN.md']
     for name in doc_paths:
         target=player/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,target)
-    # Source and player guides share the same bilingual layout. Build guides stay in source.
-    for name,line in [('README.md','- [Build instructions](docs/BUILD.md)\n'),('README.zh-CN.md','- [编译源码](docs/BUILD.zh-CN.md)\n')]:
-        write(player/name,(player/name).read_text(encoding='utf-8').replace(line,''))
     commit=json.loads((ROOT/'source-lock.json').read_text(encoding='utf-8'))['upstream']['commit']
     for name in ('THIRD-PARTY-NOTICES.md','THIRD-PARTY-NOTICES.zh-CN.md'):
         value=(player/name).read_text(encoding='utf-8').replace('pack/dependencies.lock.json','dependencies.lock.json')

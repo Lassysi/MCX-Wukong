@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.4.0 — 2026-10-23
+
+- Improved ground detection when MC control resumes after travel or respawn.
+- Added recovery for getting stuck after arena respawns; shortened the wait for the get-up animation.
+- Fixed one melee swing dealing repeated damage through a large boss's multiple hitboxes. Separate arrows still count independently.
+- Fixed boss hitboxes intercepting right-clicks and blocking nearby building.
+- Added soft / stone / hard block toughness, with matching stone and obsidian prices.
+- Reworked enemy stagger buildup and cooldowns to reduce repeated flinching.
+- Restored vanilla Infinity: ordinary arrows are preserved; tipped and spectral arrows are consumed.
+
+Public test release. [Known issues](docs/KNOWN-ISSUES.md) · [Upgrade](docs/UPGRADE.md)
+
 ## v0.3.0 — 2026-10-22
 
 ### Gameplay

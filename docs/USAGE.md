@@ -24,13 +24,15 @@ Weapons, tools and armor wear at the vanilla rate. Shields never break; when wor
 
 At food level 18+, after 60 seconds without damage, regeneration restores half a heart every four seconds. Enchanted golden apples heal fully, grant 16 absorption HP and a 120 s status guard with Resistance I and fire resistance. Re-eating refreshes rather than endlessly stacking gold hearts. Milk, expiry and death remove the guard. Milk/honey do not clear every native debuff.
 
-Infinity preserves arrows, including tipped arrows, but needs at least one arrow in inventory. A ranged main hand takes priority over the offhand shield. Ordinary MC mobs retain their normal damage rules.
+Infinity preserves only ordinary arrows, with at least one in inventory. Tipped and spectral arrows are consumed normally. A ranged main hand takes priority over the offhand shield. Ordinary MC mobs retain their normal damage rules. Native enemy staggers build up over several attacks; repeated staggers need more buildup and have a short immunity window. This does not reduce hit damage.
+
+A melee swing counts once against each native enemy even if it touches several boss hitboxes. Independent projectiles remain separate hits. After an arena respawn, a movement stall can trigger automatic recovery; its native handshake fallback still needs playtesting.
 
 ## Capture, building and travel
 
 An empty boat/minecart can capture an ordinary enemy roughly four blocks horizontally and two vertically from its hitbox. It stays until you break the vehicle or it dies; while bridged, only player damage breaks the vehicle. Release has a ten-second recapture cooldown. Enemies with native boss/chief bars cannot be captured or reeled in; see [known issues](KNOWN-ISSUES.md).
 
-Ordinary blocks need support underneath: side contact alone does not hold them up. Enemies break ordinary cover after about three hits. Pickaxes and explosives affect native destructible objects, retaining drops/events; they do not remove story gates. Adventure mode restricts normal building—use `/gamemode survival` to return to Survival.
+Ordinary blocks need support underneath: side contact alone does not hold them up. Enemy attacks damage blocks by material: soft blocks take 1 ordinary hit, stone 2, and hard blocks 3; bosses take 1, 1 and 2 hits respectively. Cracks show accumulated damage. See [balance](BALANCE.md) for examples and prices. Pickaxes and explosives affect native destructible objects, retaining drops/events; they do not remove story gates. Adventure mode restricts normal building—use `/gamemode survival` to return to Survival.
 
 Pearl landings do not cause self-damage while bridged, but landing/collision checks remain. Flight stays under MC control; grounded travel can switch coordinate regions without moving earlier builds. Native slides resume MC control after a supported landing.
 

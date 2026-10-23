@@ -27,9 +27,10 @@ namespace DqjCombat
         private static FieldInfo stiffLevel,fightBack;
         private static Type descType,dynamicType,eventType;
 
-        internal static void Try(string id,BGUCharacterCS victim,AActor attacker,FEffectInstReq request,FSkillDamageConfig unused,double amount,string reason)
+        internal static bool NoReaction(string reason){return reason!=null&&NoStiff.Contains(reason);}
+        internal static void Try(string id,BGUCharacterCS victim,AActor attacker,FEffectInstReq request,FSkillDamageConfig unused,double amount,string reason,bool heavy)
         {
-            if(reason!=null&&NoStiff.Contains(reason))return;
+            if(NoReaction(reason))return;
             object comp=BeAttackedComp(victim);
             if(comp==null){Log.Write("world-stiff","id="+id+" no native BeAttacked component");return;}
             Bind(comp.GetType());
@@ -37,7 +38,9 @@ namespace DqjCombat
             // the native reaction dispatcher as a real Wukong staff hit (Live58 probe IDs). Native
             // event selection then decides: normal stiff, super-armor (poise) hit / break, block,
             // immobilize/frozen break, or nothing. HP damage stays the MC value (applied before).
-            int effect=amount<4?LightEffect:amount<10?ComboEffect:HeavyEffect;
+            // Preview126: the host poise meter (StaggerPolicy) already decided that this attack staggers; damage no longer picks
+            // the reaction (Live125: every hit >= 10 damage used the heavy knockback effect). Heavy only for heavy attacks.
+            int effect=heavy?HeavyEffect:ComboEffect;
             var config=new FSkillDamageConfig{DmgReason=(EDamageReason)2,DamageCalcType=(EDamageCalcType)0,DmgReasonEffectID=effect,CameraShakeDA=""};
             float armorBefore=BGUFunctionLibraryCS.BGUGetFloatAttr(victim,(EBGUAttrFloat)160);
             object desc=Activator.CreateInstance(descType);
@@ -55,7 +58,7 @@ namespace DqjCombat
             // Damage value 0: HP was already settled by the MC path; lethal/life-saving events must not re-count it.
             var extra=new object[]{attacker,0f,dynamic,desc,config,request,Enum.ToObject(eventType,18)};
             Call(dispatch,comp,extra);
-            Log.Write("world-stiff","id="+id+" MC="+amount.ToString("0.##",CultureInfo.InvariantCulture)+" reason="+reason+" effect="+effect
+            Log.Write("world-stiff","id="+id+(heavy?" heavy":"")+" MC="+amount.ToString("0.##",CultureInfo.InvariantCulture)+" reason="+reason+" effect="+effect
                 +" stiffLevel="+stiffLevel.GetValue(extra[2])+" event="+extra[6]+" armor="+armorBefore.ToString("0.#",CultureInfo.InvariantCulture)
                 +"->"+BGUFunctionLibraryCS.BGUGetFloatAttr(victim,(EBGUAttrFloat)160).ToString("0.#",CultureInfo.InvariantCulture));
         }

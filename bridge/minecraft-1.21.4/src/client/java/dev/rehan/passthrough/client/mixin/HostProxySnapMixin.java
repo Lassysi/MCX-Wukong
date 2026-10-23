@@ -19,7 +19,7 @@ abstract class HostProxySnapMixin {
         for(var entity:level.entitiesForRendering()){
             if(entity.isPassenger())continue;
             double[] p=CombatBridge.position(entity.getUUID());
-            if(p!=null){entity.setPos(p[0],p[1],p[2]);entity.setOldPosAndRot();}
+            if(p!=null){entity.setPos(p[0],p[1],p[2]);entity.setOldPosAndRot();entity.blocksBuilding=false;} // Preview126: client copies too
         }
     }
 }

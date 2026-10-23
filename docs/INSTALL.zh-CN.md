@@ -6,9 +6,9 @@
 
 ## 1. 下载与导入
 
-1. 下载 [v0.3.0 Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip) 并解压，保留安装器、`.mrpack`、`payload` 和说明文件。Source.zip 不是玩家安装包。
+1. 下载 [v0.4.0 Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.4.0/MCX-Wukong-v0.4.0-Players.zip) 并解压，保留安装器、`.mrpack`、`payload` 和说明文件。Source.zip 不是玩家安装包。
 2. 按作者说明安装 [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664)，确认黑神话 `b1/Binaries/Win64` 下有 `version.dll` 和 `CSharpLoader/CSharpModBase.dll`。
-3. 用 [Prism Launcher](https://prismlauncher.org/) 导入 `MCX-Wukong-v0.3.0.mrpack`，由启动器下载八个指定模组并配置 Fabric，不要自行更新版本。
+3. 用 [Prism Launcher](https://prismlauncher.org/) 导入 `MCX-Wukong-v0.4.0.mrpack`，由启动器下载八个指定模组并配置 Fabric，不要自行更新版本。
 4. 登录 MC 账号，选择 Java 21，启动到主菜单一次后退出。在 Prism 打开该实例的 Minecraft 文件夹，里面应有 `mods`。
 
 ## 2. 安装联动

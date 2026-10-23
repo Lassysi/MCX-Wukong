@@ -1,6 +1,6 @@
-# 基础商店清单 — v0.3.0
+# 基础商店清单 — v0.4.0
 
-由公开构建的装备 GameTest 导出，共 170 项基础交易；动态维修项另加。名称采用 MC 英文显示名，枪械／弹药以模型标识区分。
+公开构建的装备测试导出，共 170 项基础交易；动态维修项另加。名称采用 MC 英文显示名，枪械与弹药以模型标识区分。
 
 | # | Item / model | Registry ID | Quantity | Emeralds |
 |---:|---|---|---:|---:|
@@ -159,14 +159,14 @@
 | 153 | Creeper Spawn Egg | `minecraft:creeper_spawn_egg` | 1 | 5 |
 | 154 | Iron Golem Spawn Egg | `minecraft:iron_golem_spawn_egg` | 1 | 12 |
 | 155 | Lead | `minecraft:lead` | 4 | 1 |
-| 156 | Cobblestone | `minecraft:cobblestone` | 64 | 1 |
-| 157 | Stone Bricks | `minecraft:stone_bricks` | 64 | 1 |
-| 158 | Oak Planks | `minecraft:oak_planks` | 64 | 1 |
-| 159 | Dirt | `minecraft:dirt` | 64 | 1 |
-| 160 | Glass | `minecraft:glass` | 64 | 1 |
-| 161 | Obsidian | `minecraft:obsidian` | 16 | 2 |
-| 162 | Oak Stairs | `minecraft:oak_stairs` | 32 | 1 |
-| 163 | Oak Slab | `minecraft:oak_slab` | 32 | 1 |
+| 156 | Dirt | `minecraft:dirt` | 64 | 1 |
+| 157 | Oak Planks | `minecraft:oak_planks` | 64 | 1 |
+| 158 | Glass | `minecraft:glass` | 64 | 1 |
+| 159 | Oak Stairs | `minecraft:oak_stairs` | 32 | 1 |
+| 160 | Oak Slab | `minecraft:oak_slab` | 32 | 1 |
+| 161 | Cobblestone | `minecraft:cobblestone` | 64 | 3 |
+| 162 | Stone Bricks | `minecraft:stone_bricks` | 64 | 3 |
+| 163 | Obsidian | `minecraft:obsidian` | 16 | 5 |
 | 164 | Ladder | `minecraft:ladder` | 32 | 1 |
 | 165 | Scaffolding | `minecraft:scaffolding` | 32 | 1 |
 | 166 | Torch | `minecraft:torch` | 32 | 1 |

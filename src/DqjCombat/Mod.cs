@@ -27,13 +27,13 @@ namespace DqjCombat
             get
             {
 #if S13 && S15
-                return "0.3.0";
+                return "0.4.0";
 #elif S13
-                return "0.3.0-S13";
+                return "0.4.0-S13";
 #elif S12
-                return "0.3.0-S12";
+                return "0.4.0-S12";
 #else
-                return "0.3.0-S11";
+                return "0.4.0-S11";
 #endif
             }
         }

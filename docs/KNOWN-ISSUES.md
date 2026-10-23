@@ -1,9 +1,10 @@
-# Known issues — v0.3.0
+# Known issues — v0.4.0
 
 English | [简体中文](KNOWN-ISSUES.zh-CN.md)
 
 This is a public test release; not every chapter, boss or fresh-install environment has been tested.
 
+- v0.4.0 ground recovery, arena-respawn recovery, multipart hit counting, right-clicks near bosses, block toughness, staggers and Infinity passed isolated checks; behavior in both games still needs playtesting. The watchdog request for a fresh ground handshake has not been tested end to end in native gameplay.
 - More playtesting is needed for chapter-3 slides, long/high flight, grounded region switches, monk capture, F8 story spells, low-health pearl landings and worn shields. Native EliteBar data is treated as a chief/boss bar; that mapping still needs confirmation.
 - Some cutscenes, transformations and scripted moves retain native control or appearance. Hold-E skipping only works in supported scenes. F8 does not bypass quest requirements.
 - Large-boss hit assistance may need adjustment for individual enemies. The native kill-zone filter does not prevent all environmental damage; ordinary attacks and MC fall/void/lava damage remain.

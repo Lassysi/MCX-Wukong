@@ -355,8 +355,17 @@ namespace DqjCombat
                         Log.Write("world-damage","enemy refused MC hit: id="+id+" class="+victim.GetClass().GetName()+" hp="+F(before)+"/"+F(max)+" damage="+F(hostDamage)+" (native immune state)");
                     }
                     // Preview58: the absolute-damage path carries no stiff; raise the native normal stiff.
-                    if(enemy&&!finishing&&Alive(victim)){
-                        try{NativeHitStun.Try(id,victim,player,request,default(FSkillDamageConfig),amount,(string)message["reason"]);}
+                    // Preview126: the poise meter (StaggerPolicy) decides whether this attack staggers at all, by hit count and time.
+                    string hitReason=(string)message["reason"];
+                    if(enemy&&!finishing&&Alive(victim)&&!NativeHitStun.NoReaction(hitReason)){
+                        try{
+                            bool heavy=message.Keys.Contains("hk")&&(string)message["hk"]=="heavy";
+                            double now=UGameplayStatics.GetRealTimeSeconds(player);
+                            var reaction=stagger.Hit(id,now,heavy,BottomBar(victim,max));
+                            if(reaction!=StaggerPolicy.Reaction.None)NativeHitStun.Try(id,victim,player,request,default(FSkillDamageConfig),amount,hitReason,reaction==StaggerPolicy.Reaction.Heavy);
+                            else heldReactions++;
+                            if(now>=nextPoiseLog){nextPoiseLog=now+10;Log.Write("world-poise","staggers="+stagger.Staggers+" heavy="+stagger.HeavyReactions+" held="+heldReactions+" merged="+stagger.Merged+" (poise by hit count and time, not damage)");}
+                        }
                         catch(Exception e){Log.Write("world-error","hit-stun: "+e.GetType().Name+": "+e.Message);}
                     }
                 }
@@ -534,10 +543,11 @@ namespace DqjCombat
         // Item 6a (user 2026-10-16): Wukong enemies break MC blocks in their way. An enemy in
         // battle standing next to an MC block and facing it lands one hit per 1.2 s; the third
         // hit on a block asks MC to break it. Native attack sweeps do not reach our block boxes.
-        private readonly Dictionary<string,int> blockHits=new Dictionary<string,int>();
+        // Preview126 (user: blocks too hard to break; tier them, a Boss breaks them at once): every hit goes to MC, which knows
+        // the block (BlockToughness: soft 1 hit, stone 2, obsidian-class 3; a bottom-health-bar Boss hit counts double).
         private readonly Dictionary<string,double> enemyNextHit=new Dictionary<string,double>();
+        private readonly StaggerPolicy stagger=new StaggerPolicy();private int heldReactions;private double nextPoiseLog;
         private double nextBlockScan;
-        private static readonly int HitsToBreak=3;
         private void EnemyBlockHits(double now)
         {
             if(now<nextBlockScan||blocks.Count==0||targets.Count==0)return;nextBlockScan=now+.2;
@@ -559,11 +569,9 @@ namespace DqjCombat
                 }
                 if(best==null)continue;
                 enemyNextHit[pair.Key]=now+1.2;
-                int hits;blockHits.TryGetValue(best,out hits);hits++;
-                if(hits<HitsToBreak){blockHits[best]=hits;Log.Write("enemy-break","enemy="+pair.Key+" hit block "+best+" ("+hits+"/"+HitsToBreak+")");continue;}
-                blockHits.Remove(best);
-                wire.Send("{\"t\":\"enemy_break\",\"p\":["+best+"]}");
-                Log.Write("enemy-break","enemy="+pair.Key+" broke block "+best);
+                bool boss=BottomBar(enemy,0);
+                wire.Send("{\"t\":\"enemy_block_hit\",\"p\":["+best+"],\"boss\":"+(boss?"true":"false")+"}");
+                Log.Write("enemy-break","enemy="+pair.Key+" hit block "+best+(boss?" (Boss)":""));
             }
         }
         // Preview86: selection outline of a Wukong-drawn block, drawn in the host frame (MC skips its own).

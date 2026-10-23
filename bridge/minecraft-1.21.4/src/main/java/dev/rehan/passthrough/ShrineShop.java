@@ -193,6 +193,15 @@ public final class ShrineShop {
     private static ItemStack ammo(ServerPlayer p,String path,int count){var s=gunLoot(p,path);if(!s.isEmpty())s.setCount(Math.min(s.getMaxStackSize(),count));return s;}
     private static void add(MerchantOffers o,int price,ItemStack s){add(o,price,s,16);}
     private static ItemStack n(Item item,int count){return new ItemStack(item,count);}
+    /** Preview126: building blocks say how many Wukong enemy hits they take (a Boss hit counts double). */
+    static ItemStack wall(ItemStack s){
+        if(!(s.getItem() instanceof net.minecraft.world.item.BlockItem b))return s;
+        var state=b.getBlock().defaultBlockState();int hits=BlockToughness.hitsToBreak(state,false),boss=BlockToughness.hitsToBreak(state,true);
+        String text="Holds "+hits+(hits==1?" enemy hit":" enemy hits")+", "+boss+(boss==1?" Boss hit":" Boss hits");
+        var lore=s.getOrDefault(net.minecraft.core.component.DataComponents.LORE,net.minecraft.world.item.component.ItemLore.EMPTY);
+        s.set(net.minecraft.core.component.DataComponents.LORE,lore.withLineAdded(Component.literal(text).withStyle(net.minecraft.ChatFormatting.GRAY)));
+        return s;
+    }
 
     /** Gun Core reloads by base item and custom-data tag, not by the display name. */
     private static ItemStack taggedAmmo(String key,String name,ResourceLocation model,int count){
@@ -298,10 +307,11 @@ public final class ShrineShop {
         // 9. Allies (spawn eggs fight for Steve) and leads
         add(o,4,n(Items.ZOMBIE_SPAWN_EGG,1),3);add(o,4,n(Items.SKELETON_SPAWN_EGG,1),3);add(o,3,n(Items.WOLF_SPAWN_EGG,1),3);
         add(o,5,n(Items.CREEPER_SPAWN_EGG,1),3);add(o,12,n(Items.IRON_GOLEM_SPAWN_EGG,1),1);add(o,1,n(Items.LEAD,4),many);
-        // 10. Building and movement (a stack for one emerald)
-        add(o,1,n(Items.COBBLESTONE,64),many);add(o,1,n(Items.STONE_BRICKS,64),many);add(o,1,n(Items.OAK_PLANKS,64),many);
-        add(o,1,n(Items.DIRT,64),many);add(o,1,n(Items.GLASS,64),many);add(o,2,n(Items.OBSIDIAN,16),many);
-        add(o,1,n(Items.OAK_STAIRS,32),many);add(o,1,n(Items.OAK_SLAB,32),many);
+        // 10. Building and movement. Preview126: priced by how many Wukong enemy hits a block takes (BlockToughness):
+        // soft blocks 64 for 1, stone-like 64 for 3, obsidian 16 for 5; the lore says how long each one holds.
+        add(o,1,wall(n(Items.DIRT,64)),many);add(o,1,wall(n(Items.OAK_PLANKS,64)),many);add(o,1,wall(n(Items.GLASS,64)),many);
+        add(o,1,wall(n(Items.OAK_STAIRS,32)),many);add(o,1,wall(n(Items.OAK_SLAB,32)),many);
+        add(o,3,wall(n(Items.COBBLESTONE,64)),many);add(o,3,wall(n(Items.STONE_BRICKS,64)),many);add(o,5,wall(n(Items.OBSIDIAN,16)),many);
         add(o,1,n(Items.LADDER,32),many);add(o,1,n(Items.SCAFFOLDING,32),many);add(o,1,n(Items.TORCH,32),many);
         add(o,2,n(Items.CHEST,4),many);add(o,1,n(Items.WATER_BUCKET,1),8);add(o,1,n(Items.BUCKET,1),8);add(o,3,n(Items.ENDER_PEARL,4),many);
         return o;

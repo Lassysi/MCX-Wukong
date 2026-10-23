@@ -38,6 +38,8 @@ namespace DqjCombat
         }
         private TerrainRequest terrainRequest;
         internal TerrainRequest TakeTerrainRequest(){return Interlocked.Exchange(ref terrainRequest,null);}
+        private string stuckRequest;
+        internal string TakeStuck(){return Interlocked.Exchange(ref stuckRequest,null);}
         private readonly ConcurrentQueue<string> outgoing = new ConcurrentQueue<string>();
         // Live67: CSharpLoader type-checks every mod type at startup; a LitJson-typed generic field
         // forced LitJson to load before the game had loaded it, so the whole mod failed to load.
@@ -128,6 +130,8 @@ namespace DqjCombat
                 for(int i=0;i<values.Length;i++)values[i]=Number(list[i]);
                 Interlocked.Exchange(ref allyGround,values);return;
             }
+            // Preview127: MC watchdog: movement keys held 2 s, Steve not moving, not against a wall, no MC-side trap found.
+            if(kind=="stuck"){Interlocked.Exchange(ref stuckRequest,data.Keys.Contains("why")?(string)data["why"]:"");return;}
             if(kind=="terrain_wait"){
                 var request=new TerrainRequest{Epoch=(string)data["epoch"],X=Number(data["x"]),Y=Number(data["y"]),Z=Number(data["z"]),Deep=data.Keys.Contains("deep")};
                 if(request.Epoch.Length==32&&Finite(request.X)&&Finite(request.Y)&&Finite(request.Z))Interlocked.Exchange(ref terrainRequest,request);

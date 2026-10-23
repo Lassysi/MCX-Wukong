@@ -1,6 +1,6 @@
 {
-  "release": "v0.3.0",
-  "hostVersion": "0.3.0",
+  "release": "v0.4.0",
+  "hostVersion": "0.4.0",
   "protocol": 16,
   "minecraft": "1.21.4",
   "fabricLoader": "0.19.5",
@@ -9,16 +9,16 @@
   "gradle": "9.7.1",
   "buildJdk": "25",
   "wukongSteamBuild": "21393610",
-  "hostBaselineSha256": "bc9a2c6aa9ef96023adc76a19f208688ae40f3320b9e43cd517da1ac530d67dc",
-  "mcCodeBaselineSha256": "dc34ddb0ee0f7650e8f7fbca3855264169a0a97fb83472fa0ed42008dfbacc68",
+  "hostBaselineSha256": "543e8716fa9552a8a459af690bc664a4b61868ca30d9728d6e8b4393f1f87c20",
+  "mcCodeBaselineSha256": "869c366a9a5d1d5448e3652bd42740053db01f792bb70cfb42bbf04f1726590b",
   "upstream": {
     "repository": "https://github.com/rehan-remade/universal-modder",
     "commit": "2c2201437ca676fb4e5f06a18fff6e8db99eef0f",
     "path": "examples/minecraft-gta5-passthrough/mc",
     "license": "MIT"
   },
-  "liveStatus": "Preview118-125 historical checks recorded; v0.3.0 clean install and native gameplay acceptance pending; not all chapters or bosses tested",
-  "developmentBaseline": "Preview125 final",
-  "minecraftModVersion": "0.3.0",
-  "githubBaselineCommit": "c7ede772e01283a59b7d96cb3766a76749f5b43d"
+  "liveStatus": "Preview127 offline checks and development installation recorded; v0.4.0 dual-game gameplay acceptance pending",
+  "developmentBaseline": "Preview127 final",
+  "minecraftModVersion": "0.4.0",
+  "githubBaselineCommit": "534f77634d372fb827c5e25851a8c5b705795289"
 }

@@ -6,9 +6,9 @@ Requires Windows x64, Black Myth Steam build **21393610**, Minecraft Java **1.21
 
 ## 1. Download and import
 
-1. Download [v0.3.0 Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip) and extract it. Keep setup, `.mrpack`, `payload` and the guides together. Source.zip is not an installer.
+1. Download [v0.4.0 Players.zip](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.4.0/MCX-Wukong-v0.4.0-Players.zip) and extract it. Keep setup, `.mrpack`, `payload` and the guides together. Source.zip is not an installer.
 2. Install [CSharpLoader 0.1.0](https://www.nexusmods.com/blackmythwukong/mods/664) following its author's instructions. Check for `version.dll` and `CSharpLoader/CSharpModBase.dll` under Black Myth's `b1/Binaries/Win64`.
-3. Import `MCX-Wukong-v0.3.0.mrpack` into [Prism Launcher](https://prismlauncher.org/). It downloads the eight pinned mods and configures Fabric; do not update them separately.
+3. Import `MCX-Wukong-v0.4.0.mrpack` into [Prism Launcher](https://prismlauncher.org/). It downloads the eight pinned mods and configures Fabric; do not update them separately.
 4. Sign in with your own account, select Java 21, reach the Minecraft main menu once, then exit. In Prism, open the instance's Minecraft folder; it should contain `mods`.
 
 ## 2. Run setup

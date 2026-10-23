@@ -143,6 +143,8 @@ public final class WorldBridge {
     }
     /** Item 6a (user 2026-10-16): a Wukong enemy hit this MC block 3 times; it breaks and drops
      *  like a player break (chest contents spill). Host proxies and barriers are never broken. */
+    /** Preview126: one Wukong enemy hit on an MC block; BlockToughness decides when it breaks. */
+    public static void enemyHit(int x,int y,int z,boolean boss){BlockToughness.enemyHit(server,x,y,z,boss);}
     public static void enemyBreak(int x,int y,int z){
         var s=server;if(s==null)return;
         s.execute(()->{

@@ -20,30 +20,29 @@ public final class GoldenAppleTests implements FabricGameTest {
         var m=new JsonObject();m.addProperty("session",session);m.addProperty("hp",hp);m.addProperty("ack",ack);m.add("entities",new com.google.gson.JsonArray());
         var apply=CombatBridge.class.getDeclaredMethod("apply",JsonObject.class);apply.setAccessible(true);apply.invoke(null,m);
     }
-    /** Preview120 (user: an Infinity bow still used up the arrows): any arrow type is spared, one arrow still required. */
+    /** Preview127 (user: special arrows with Infinity are too strong; only ordinary arrows): vanilla Infinity again, while bridged too. */
     @GameTest(template=EMPTY_STRUCTURE,timeoutTicks=40)
-    public void infinitySparesTippedArrows(GameTestHelper h){
+    public void infinityOnlySparesPlainArrows(GameTestHelper h){
         var level=h.getLevel();var p=h.makeMockServerPlayerInLevel();p.setGameMode(GameType.SURVIVAL);p.getAbilities().invulnerable=false;
         boolean wasActive=Passthrough.active;Passthrough.active=true;
         try{
             var bow=new ItemStack(Items.BOW);
             var infinity=level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).getOrThrow(net.minecraft.world.item.enchantment.Enchantments.INFINITY);
             bow.enchant(infinity,1);p.setItemSlot(EquipmentSlot.MAINHAND,bow);p.getInventory().clearContent();p.setItemSlot(EquipmentSlot.MAINHAND,bow);
-            var tipped=net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.TIPPED_ARROW,net.minecraft.world.item.alchemy.Potions.SLOWNESS);
-            p.getInventory().add(tipped);
-            int before=level.getEntitiesOfClass(net.minecraft.world.entity.projectile.AbstractArrow.class,p.getBoundingBox().inflate(64)).size();
+            p.getInventory().add(new ItemStack(Items.ARROW,1));
             bow.getItem().releaseUsing(bow,level,p,bow.getUseDuration(p)-25);
-            int after=level.getEntitiesOfClass(net.minecraft.world.entity.projectile.AbstractArrow.class,p.getBoundingBox().inflate(64)).size();
-            h.assertTrue(after==before+1,"Infinity bow fires with one tipped arrow");
-            h.assertTrue(p.getInventory().countItem(Items.TIPPED_ARROW)==1,"tipped arrow is not consumed");
+            h.assertTrue(p.getInventory().countItem(Items.ARROW)==1,"Infinity spares an ordinary arrow");
             p.getInventory().clearContent();p.setItemSlot(EquipmentSlot.MAINHAND,bow);
+            p.getInventory().add(net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.TIPPED_ARROW,net.minecraft.world.item.alchemy.Potions.SLOWNESS));
             bow.getItem().releaseUsing(bow,level,p,bow.getUseDuration(p)-25);
-            int none=level.getEntitiesOfClass(net.minecraft.world.entity.projectile.AbstractArrow.class,p.getBoundingBox().inflate(64)).size();
-            h.assertTrue(none==after,"with no arrow at all the Infinity bow does not fire (one arrow required)");
-            var plain=new ItemStack(Items.BOW);p.setItemSlot(EquipmentSlot.MAINHAND,plain);p.getInventory().add(new ItemStack(Items.ARROW,2));
+            h.assertTrue(p.getInventory().countItem(Items.TIPPED_ARROW)==0,"a tipped arrow is used up even with Infinity");
+            p.getInventory().add(new ItemStack(Items.SPECTRAL_ARROW,2));
+            bow.getItem().releaseUsing(bow,level,p,bow.getUseDuration(p)-25);
+            h.assertTrue(p.getInventory().countItem(Items.SPECTRAL_ARROW)==1,"a spectral arrow is used up even with Infinity");
+            var plain=new ItemStack(Items.BOW);p.getInventory().clearContent();p.setItemSlot(EquipmentSlot.MAINHAND,plain);p.getInventory().add(new ItemStack(Items.ARROW,2));
             plain.getItem().releaseUsing(plain,level,p,plain.getUseDuration(p)-25);
             h.assertTrue(p.getInventory().countItem(Items.ARROW)==1,"a bow without Infinity still uses arrows");
-            Passthrough.LOG.info("Preview120 infinity PASS: tipped arrow spared, one arrow required, plain bow consumes");
+            Passthrough.LOG.info("Preview127 infinity PASS: ordinary arrow spared, tipped and spectral arrows used up, plain bow consumes");
             h.succeed();
         }finally{Passthrough.active=wasActive;}
     }

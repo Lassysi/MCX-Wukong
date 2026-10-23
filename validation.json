@@ -1,18 +1,18 @@
 {
-  "release": "v0.3.0",
-  "date": "2026-10-22",
+  "release": "v0.4.0",
+  "date": "2026-10-23",
   "timezone": "America/Los_Angeles",
   "status": "public-test-release",
-  "developmentBaseline": "Preview125 final",
+  "developmentBaseline": "Preview127 final",
   "host": {
     "stage6Build": "passed",
-    "cecilRewriteBytes": 290816,
+    "cecilRewriteBytes": 297472,
     "assemblyResolveErrors": 0,
-    "sha256": "eaaf00af5bbd78a7fcf6143fadae977bbc6c1f90a7876a4a44a057771e33eb74"
+    "sha256": "42fdac3adbd8827a79e1b1a1f6b036fd3d724a39203c9d840b064e37081a008a"
   },
   "minecraft": {
     "gradleBuild": "passed",
-    "sha256": "6439dee172f5f6cf6eb5b8f5387ece4bb61cf0b55b4730386a51fa5448cc7be4",
+    "sha256": "571dbde30f174f7d54c707f364ee8fb6ad11c75c9bfe4e94024a6dc742285e1a",
     "gameTestGroups": {
       "equipment-shop": {
         "passed": 2,
@@ -25,15 +25,20 @@
         "passed": 3,
         "tests": [
           "goldenappletests.consumeandsyncrealitem",
-          "goldenappletests.infinitysparestippedarrows",
+          "goldenappletests.infinityonlysparesplainarrows",
           "multiparttargettests.dragongeometryandshareddamage"
         ]
       },
       "proxy-push": {
-        "passed": 2,
+        "passed": 7,
         "tests": [
+          "proxypushtests.bosshitboxesdonotblockbuildingoruse",
+          "proxypushtests.enemyhitsbreakblocksbytier",
           "proxypushtests.giantpartscannotmoveanidleplayer",
-          "proxypushtests.nativecontrolfreezessteve"
+          "proxypushtests.heavyhitsareattackkindsnotdamage",
+          "proxypushtests.nativecontrolfreezessteve",
+          "proxypushtests.stuckrecoveryclearsknowntraps",
+          "proxypushtests.oneswinghitsamultipartbossonce"
         ]
       },
       "capture-lease": {
@@ -43,24 +48,30 @@
         ]
       }
     },
-    "gameTestsPassed": 8
+    "gameTestsPassed": 13
   },
   "setup": {
     "frozenBuild": "passed",
-    "sha256": "c85819a7df1fac88f6138fb3c3b0df9fbc129cc3e693e62098a84fec59862723"
+    "sha256": "81cfc5a8892eef48cabf32a524bd67fb72aaa7884f2cd7397bb4084272c60f1a"
   },
   "offlineChecks": {
-    "csharpSuitesPassed": 19,
-    "installerTestsPassed": 14
+    "csharpSuitesPassed": 21,
+    "installerTestsPassed": 14,
+    "shopOffers": 170,
+    "staggerReplayEvents": 2928,
+    "staggerReplayNote": "Sanitized replay inputs retain original relative clock values and order; simulation only, not live gameplay."
   },
   "liveAcceptance": {
-    "public030CleanInstall": "not performed",
-    "public030DualGameGameplay": "not performed",
+    "public040CleanInstallGameplay": "not performed",
+    "public040DualGameGameplay": "not performed",
+    "arrivalGroundRecovery": "pending live verification",
+    "bossRightClickAndPlacement": "pending live verification",
+    "blockToughnessAndPrices": "pending live verification",
+    "staggerFeelAndBossCoverage": "pending live verification",
+    "vanillaInfinityArrows": "passed isolated test; pending live verification",
+    "stuckHandshakeEndToEnd": "pending live verification",
     "allChapterPlaythrough": "not completed",
-    "finalSlideFlightCapturePearl": "pending live verification",
-    "F8StorySpell": "pending live verification",
-    "allBosses": "not all tested",
-    "EliteBarClassification": "pending live confirmation"
+    "previousFlightCaptureF8Cases": "still pending broader live verification"
   },
-  "scope": "Fresh public-source build, loader rewrite and isolated fixture checks. Does not establish complete native gameplay or another-PC compatibility."
+  "scope": "Fresh public-source builds, loader rewrite, headless Minecraft GameTests and isolated policy/installer checks. No player game processes or saves were changed."
 }

@@ -4,7 +4,7 @@
 
 用 Minecraft 的移动、装备和建造玩法游玩《黑神话：悟空》。保留悟空的地图、敌人和剧情，两款游戏需在同一台电脑上同时运行。
 
-**[下载 v0.3.0 玩家包](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.3.0/MCX-Wukong-v0.3.0-Players.zip)** · [本次更新](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.3.0) · [安装](docs/INSTALL.zh-CN.md) · [旧版升级](docs/UPGRADE.zh-CN.md)
+**[下载 v0.4.0 玩家包](https://github.com/Lassysi/MCX-Wukong/releases/download/v0.4.0/MCX-Wukong-v0.4.0-Players.zip)** · [本次更新](https://github.com/Lassysi/MCX-Wukong/releases/tag/v0.4.0) · [安装](docs/INSTALL.zh-CN.md) · [旧版升级](docs/UPGRADE.zh-CN.md)
 
 ## 玩法
 
